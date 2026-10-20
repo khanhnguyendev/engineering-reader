@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  statuses: write
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -28,20 +29,36 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec puppeteer browsers install chrome-headless-shell
       - run: pnpm render-mermaid
-      # A push made with GITHUB_TOKEN does not retrigger workflows. That is
-      # acceptable: this same run continues to --check, test, validate and build
-      # after the commit, so the pushed state is verified by this run.
+      # A push made with GITHUB_TOKEN does not retrigger workflows, so the bot's
+      # commit would never get a `ci` check. Instead this same run continues to
+      # --check, test, validate and build after the commit, and the last step
+      # reports its result as a commit status with context `ci` on the pushed
+      # SHA. Branch protection accepts that status as the required check.
       - name: Commit rendered diagrams
+        id: commit
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
+          echo "pushed=false" >> "$GITHUB_OUTPUT"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add content/posts
           if ! git diff --cached --quiet; then
             git commit -m "chore(mermaid): render diagrams"
             git push
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
       - run: pnpm render-mermaid --check
       - run: pnpm test
       - run: pnpm validate
       - run: pnpm build
+      - name: Report status on pushed SHA
+        if: always() && steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh api repos/${{ github.repository }}/statuses/${{ steps.commit.outputs.sha }}
+          -f state=${{ job.status == 'success' && 'success' || 'failure' }}
+          -f context=ci
+          -f description="CI run ${{ github.run_id }} on rendered diagrams"
+          -f target_url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
