@@ -5,3 +5,4 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-21 M0/T2 vocab files and zod schemas — c4a501c
 - 2026-10-21 M0/T3 reading time, refs, url normalization — 44808b5
 - 2026-10-21 M0/T4 post loader + good-post fixture — a8655ce
+- 2026-10-21 M0/T5 validator rules + CLI — c134b63
