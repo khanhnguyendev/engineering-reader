@@ -27,6 +27,10 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: ${{ runner.os }}-puppeteer-25.14.0
       - run: pnpm exec puppeteer browsers install chrome-headless-shell
       - run: pnpm render-mermaid
       # A push made with GITHUB_TOKEN does not retrigger workflows, so the bot's
