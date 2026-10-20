@@ -1,7 +1,7 @@
 [
+  { "slug": "distributed-systems", "vi": "Hệ phân tán", "en": "Distributed systems" },
   { "slug": "data", "vi": "Dữ liệu", "en": "Data" },
+  { "slug": "realtime", "vi": "Thời gian thực", "en": "Realtime" },
   { "slug": "infra", "vi": "Hạ tầng", "en": "Infrastructure" },
-  { "slug": "reliability", "vi": "Độ tin cậy", "en": "Reliability" },
-  { "slug": "performance", "vi": "Hiệu năng", "en": "Performance" },
-  { "slug": "architecture", "vi": "Kiến trúc", "en": "Architecture" }
+  { "slug": "reliability", "vi": "Độ tin cậy", "en": "Reliability" }
 ]

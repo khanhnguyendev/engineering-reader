@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { LOCALES } from '@/lib/i18n';
 
-export const TOPICS = ['data', 'infra', 'reliability', 'performance', 'architecture'] as const;
-export const CASE_TYPES = ['migration', 'incident', 'scaling', 'redesign', 'tradeoff'] as const;
+export const TOPICS = ['distributed-systems', 'data', 'realtime', 'infra', 'reliability'] as const;
+export const CASE_TYPES = ['migration', 'incident', 'design-decision', 'scaling'] as const;
 
 const DateStr = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD');
 const Slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);

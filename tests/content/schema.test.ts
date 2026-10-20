@@ -37,7 +37,7 @@ describe('PostJsonSchema', () => {
     expect(PostJsonSchema.safeParse(base()).success).toBe(true);
   });
   it('rejects unknown topic', () => {
-    expect(PostJsonSchema.safeParse({ ...base(), topic: 'nope' }).success).toBe(false);
+    expect(PostJsonSchema.safeParse({ ...base(), topic: 'performance' }).success).toBe(false);
   });
   it('rejects 1 and 5 key numbers', () => {
     const k = base().keyNumbers;
