@@ -5,17 +5,43 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec puppeteer browsers install chrome-headless-shell
+      - run: pnpm render-mermaid
+      # A push made with GITHUB_TOKEN does not retrigger workflows. That is
+      # acceptable: this same run continues to --check, test, validate and build
+      # after the commit, so the pushed state is verified by this run.
+      - name: Commit rendered diagrams
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/posts
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(mermaid): render diagrams"
+            git push
+          fi
+      - run: pnpm render-mermaid --check
       - run: pnpm test
       - run: pnpm validate
       - run: pnpm build
