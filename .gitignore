@@ -1,0 +1,6 @@
+.superpowers/
+.impeccable/review/
+.impeccable/mocks/
+node_modules/
+.next/
+.env*
