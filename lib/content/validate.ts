@@ -15,6 +15,7 @@ export type Finding = {
 export type ValidateOpts = { today: string };
 
 const MAX_FILE = 300 * 1024;
+const IMAGE_EXT = /\.(png|jpe?g|webp|gif|svg|avif)$/i;
 const MAX_DIR = 2 * 1024 * 1024;
 const DEEP = { min: 6, max: 10 };
 const WHOLE = { min: 8, max: 12 };
@@ -130,7 +131,7 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
   for (const t of meta.tags) {
     if (!tagSlugs.has(t)) add('error', 'enum', `tag "${t}" is not in tags.json`, 'post.json');
   }
-  if (meta.series !== null && !(meta.series in vocab.series)) {
+  if (meta.series !== null && !Object.hasOwn(vocab.series, meta.series)) {
     add('error', 'enum', `series "${meta.series}" is not in series.json`, 'post.json');
   }
 
@@ -215,7 +216,7 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
     let total = 0;
     for (const f of listFiles(raw.dir)) {
       total += f.size;
-      if (f.size > MAX_FILE) {
+      if (IMAGE_EXT.test(f.rel) && f.size > MAX_FILE) {
         add('error', 'asset-size', `${f.rel} is ${Math.round(f.size / 1024)} KB, over the 300 KB limit`, f.rel);
       }
     }

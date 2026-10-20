@@ -13,7 +13,7 @@ export const SourceSchema = z.object({
   title: z.string().min(1),
   authors: z.array(z.string()),
   publishedAt: DateStr,
-  url: z.url({ protocol: /^https?$/ }),
+  url: z.url({ protocol: /^https$/ }),
   accessedAt: DateStr,
   locator: z.string().nullable(),
 });

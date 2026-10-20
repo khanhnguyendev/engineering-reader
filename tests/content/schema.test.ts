@@ -77,6 +77,11 @@ describe('strictness and url protocol', () => {
     expect(PostJsonSchema.safeParse({ ...base(), extra: 1 }).success).toBe(false);
     expect(LocaleFrontmatterSchema.safeParse({ ...fm(), extra: 1 }).success).toBe(false);
   });
+  it('rejects http source urls', () => {
+    const b = base();
+    b.sources[0].url = 'http://discord.com/x';
+    expect(PostJsonSchema.safeParse(b).success).toBe(false);
+  });
   it('rejects non-http source urls', () => {
     const b = base();
     b.sources[0].url = 'ftp://discord.com/x';

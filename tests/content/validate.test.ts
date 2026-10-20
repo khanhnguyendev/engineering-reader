@@ -68,14 +68,26 @@ describe('validatePost', () => {
     expect(rules(run(d))).toContain('locator');
   });
 
-  it('locator: still reported when other parts parse (paper)', () => {
+  it('locator: reported once alongside another schema error', () => {
     const d = fresh();
     editJson(d, (j) => {
-      j.sources[0].type = 'paper';
-      j.sources[0].url = 'https://arxiv.org/abs/1';
+      j.topic = 'performance';
+      j.sources[0].type = 'talk';
+      j.sources[0].url = 'https://www.youtube.com/watch?v=x';
     });
-    const f = run(d).find((x) => x.rule === 'locator');
-    expect(f?.level).toBe('error');
+    const fs = run(d);
+    expect(rules(fs)).toContain('enum');
+    expect(rules(fs)).toContain('locator');
+    expect(fs.filter((x) => x.rule === 'locator')).toHaveLength(1);
+  });
+
+  it('CRLF + BOM copy of good-post has zero errors', () => {
+    const d = fresh();
+    for (const f of ['vi.mdx', 'en.mdx', 'post.json']) {
+      const p = path.join(d, f);
+      writeFileSync(p, '\uFEFF' + readFileSync(p, 'utf8').replace(/\n/g, '\r\n'));
+    }
+    expect(errs(run(d))).toEqual([]);
   });
 
   it('summary-length: 161 code points', () => {
@@ -189,7 +201,7 @@ describe('validatePost', () => {
     });
     const f = run(d).find((x) => x.rule === 'reading-time');
     expect(f).toBeDefined();
-    expect(f!.message).toMatch(/\d/);
+    expect(f!.message).toContain('en deep layer is 2 min');
     expect(f!.file).toBe('en.mdx');
   });
 
