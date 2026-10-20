@@ -1,11 +1,11 @@
 ---
-title: "Discord moved trillions of messages from Cassandra to ScyllaDB"
+title: "Discord moved its message store from Cassandra to ScyllaDB"
 summary: "Discord swapped 177 Cassandra nodes for 72 ScyllaDB nodes and cut read p99 from 40–125 ms to 15 ms with a Rust data service and a faster migrator."
 tldr:
-  - "Discord's message store grew from 12 Cassandra nodes in 2017 to 177 by early 2022, and operating it became the main cost."
+  - "Discord's message store grew from 12 Cassandra nodes in 2017 to 177 by early 2022, and operating it became a major operational burden."
   - "Hot partitions and garbage-collection pauses pushed read p99 to 40–125 ms, so on-call engineers spent their time babysitting the cluster."
   - "A Rust data service in front of the database coalesces duplicate requests, which keeps a popular channel from hammering one partition."
-  - "The migration was estimated at 3 months, then finished in about 9 days after the migrator was rewritten in Rust."
+  - "The migration was estimated at 3 months, then finished in about 9 days after the team wrote their own migrator in Rust."
 keyNumberLabels:
   nodes: "Database nodes, Cassandra to ScyllaDB"
   latency: "Read latency at the 99th percentile"
@@ -31,7 +31,7 @@ By early 2022 the same cluster had 177 nodes [S1]. That number is the first thin
 
 You might expect that 177 machines would be faster than 12. For raw capacity that was true, but for the latency that users actually feel it was not. The post describes read latency at the 99th percentile swinging between 40 and 125 ms [S1], and inserts at the 99th percentile between 5 and 70 ms [S1]. The word to notice there is "swinging". A p99 is the experience of the unlucky one request in a hundred, and a range that wide means that the unlucky request was very unpredictable.
 
-Two mechanisms explain most of that unpredictability. The first is the hot partition. Messages are stored by channel, so every read for a busy channel lands on the same small set of nodes. When a large community has an active conversation, or when a popular announcement makes thousands of people open the same channel together, one partition receives a disproportionate share of the traffic. That node slows down, and because Cassandra needs several replicas to agree, the slowness spreads to everything that touches that partition. Adding more nodes does not help in this case, because the hot data still lives on the same few of them.
+Two mechanisms explain most of that unpredictability. The first is the hot partition. Messages are stored by channel, so every read for a busy channel lands on the same small set of nodes. When a large community has an active conversation, or when a popular announcement makes many people open the same channel together, one partition receives a disproportionate share of the traffic. That node slows down, and because Cassandra needs several replicas to agree, the slowness spreads to everything that touches that partition. Adding more nodes does not help in this case, because the hot data still lives on the same few of them.
 
 The second mechanism is the runtime. Cassandra runs on the JVM, and the JVM pauses to collect garbage. A pause that is short on average can still be long enough to turn into a visible latency spike at the tail. Under heavy compaction the problem gets worse, because the node is busy rewriting files while it is also trying to serve reads. The post is candid that the team ended up with a cluster that needed constant care: nodes had to be restarted, compactions had to be tuned, and engineers had to be paged to look at machines that were not truly broken, only unhappy [S1]. That kind of work is expensive in a way that never shows up on an invoice.
 
@@ -58,13 +58,13 @@ Notice what this does to the hot partition problem. The database is still the sa
 
 Choosing the destination is only half of a migration. The harder half is getting several years of data there without losing any of it, and without making the product unusable while it moves. The team's first estimate for copying the data was about 3 months [S1]. For a team that is paying for a struggling cluster every day, three months is a long time to wait, and a long time to carry the risk of two systems that must stay in step.
 
-The estimate changed because the team looked at the migrator itself. The first version of the tool was not fast enough, so they rewrote it in Rust, the same language they had chosen for the data service [S1]. The rewrite could sustain up to 3.2 million rows per second [S1]. At that speed the copy finished in about 9 days instead of 3 months [S1]. Nothing about the data had changed. The plan had not become cleverer. The tool had simply stopped being the bottleneck.
+The estimate changed because the team looked at the migrator itself. The first version of the tool was not fast enough, so they wrote their own migrator in Rust, the same language they had chosen for the data service [S1]. The new migrator could sustain up to 3.2 million rows per second [S1]. At that speed the copy finished in about 9 days instead of 3 months [S1]. Nothing about the data had changed. The plan had not become cleverer. The tool had simply stopped being the bottleneck.
 
-This is the lesson that small teams tend to skip. When we plan a migration we think about the schema, the rollout, the rollback and the monitoring. We rarely think about the throughput of the script that does the copying, because a script feels like an afterthought. But a script that runs for three months is a service, and it needs the same performance attention as everything else in the path. Spending a few days making the migrator fast saved the better part of a quarter.
+This is the lesson that small teams tend to skip. When we plan a migration we think about the schema, the rollout, the rollback and the monitoring. We rarely think about the throughput of the script that does the copying, because a script feels like an afterthought. But a script that runs for three months is a service, and it needs the same performance attention as everything else in the path. Making the migrator fast was cheap compared with what it saved.
 
 ## Cutover and the numbers afterwards
 
-With the data copied, the team still had to switch traffic. The cutover happened in May 2022 [S1]. The post describes it as an anticlimax in the best sense: the result of weeks of preparation was a day on which not much appeared to happen from the point of view of users.
+With the data copied, the team still had to switch traffic. The cutover happened in May 2022 [S1]. The post describes it as an anticlimax in the best sense: the result of the preparation was a day on which not much appeared to happen from the point of view of users.
 
 The numbers afterwards are the reason the story gets retold. The cluster went from 177 Cassandra nodes to 72 ScyllaDB nodes [S1]. Fewer than half the machines now carry the same data, which is a direct reduction in what the team has to patch, watch and pay for. Read latency at the 99th percentile dropped from the 40–125 ms range to 15 ms [S1], and insert latency at the 99th percentile settled at 5 ms [S1], compared with the earlier range of 5 to 70 ms. Notice that both improvements are about the tail, not the average. The average request was always fine. The point of the project was to make the bad ones less bad.
 

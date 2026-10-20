@@ -53,14 +53,23 @@ export function readRawPost(dir: string): RawPost {
     const file = `${locale}.mdx`;
     const full = path.join(dir, file);
     if (!existsSync(full)) continue;
-    const parsed = matter(normalizeText(readFileSync(full, 'utf8')));
-    const data = parsed.data as Record<string, unknown>;
-    locales[locale] = {
-      file,
-      frontmatter: data,
-      body: parsed.content,
-      draft: data.draft === true,
-    };
+    try {
+      const parsed = matter(normalizeText(readFileSync(full, 'utf8')));
+      const data = parsed.data as Record<string, unknown>;
+      locales[locale] = {
+        file,
+        frontmatter: data,
+        body: parsed.content,
+        draft: data.draft === true,
+      };
+    } catch (e) {
+      locales[locale] = {
+        file,
+        frontmatter: { __parseError: e instanceof Error ? e.message : String(e) },
+        body: '',
+        draft: false,
+      };
+    }
   }
   return { slug, dir, meta, locales };
 }

@@ -1,11 +1,11 @@
 ---
-title: "Discord chuyển hàng nghìn tỷ tin nhắn từ Cassandra sang ScyllaDB"
-summary: "Discord thay 177 node Cassandra bằng 72 node ScyllaDB, giảm p99 đọc từ 40–125 ms xuống 15 ms nhờ data service Rust và công cụ migrate viết lại."
+title: "Discord chuyển kho tin nhắn từ Cassandra sang ScyllaDB"
+summary: "Discord thay 177 node Cassandra bằng 72 node ScyllaDB, giảm p99 đọc từ 40–125 ms xuống 15 ms nhờ data service Rust và tool migrate tự viết."
 tldr:
-  - "Kho tin nhắn của Discord tăng từ 12 node Cassandra năm 2017 lên 177 node đầu năm 2022, và việc vận hành cụm này trở thành chi phí lớn nhất."
+  - "Kho tin nhắn của Discord tăng từ 12 node Cassandra năm 2017 lên 177 node đầu năm 2022, và việc vận hành cụm này trở thành gánh nặng vận hành lớn."
   - "Hot partition và các lần dừng do garbage collection đẩy p99 đọc lên 40–125 ms, khiến đội on-call phải ngồi chăm cụm thay vì làm việc khác."
   - "Một data service viết bằng Rust đặt trước database gộp các request trùng nhau, nên một kênh chat nổi tiếng không còn dồn tải vào một partition."
-  - "Việc migrate ước tính mất 3 tháng, nhưng xong trong khoảng 9 ngày sau khi công cụ migrate được viết lại bằng Rust."
+  - "Việc migrate ước tính mất 3 tháng, nhưng xong trong khoảng 9 ngày sau khi đội tự viết tool migrate bằng Rust."
 keyNumberLabels:
   nodes: "Số node database, Cassandra sang ScyllaDB"
   latency: "Độ trễ đọc ở phân vị 99"
@@ -31,7 +31,7 @@ Năm 2017, tin nhắn nằm trong một cụm Cassandra gồm 12 node [S1]. Cass
 
 Bạn có thể nghĩ 177 máy sẽ nhanh hơn 12 máy. Về dung lượng thô thì đúng, nhưng với độ trễ mà người dùng thật sự cảm nhận thì không. Bài viết mô tả độ trễ đọc ở phân vị 99 dao động giữa 40 và 125 ms [S1], còn độ trễ insert ở phân vị 99 dao động giữa 5 và 70 ms [S1]. Từ cần chú ý ở đây là "dao động". p99 là trải nghiệm của một request kém may mắn trong mỗi một trăm request, và một khoảng rộng như vậy nghĩa là request kém may mắn đó rất khó đoán.
 
-Hai cơ chế giải thích phần lớn sự khó đoán này. Cơ chế thứ nhất là hot partition. Tin nhắn được lưu theo kênh, nên mọi lượt đọc của một kênh đông người đều rơi vào cùng một nhóm nhỏ các node. Khi một cộng đồng lớn có cuộc trò chuyện sôi nổi, hoặc khi một thông báo nổi bật khiến hàng nghìn người cùng mở một kênh, một partition nhận phần tải lớn hơn hẳn các partition khác. Node đó chậm đi, và vì Cassandra cần nhiều replica đồng thuận, sự chậm lan sang mọi thứ chạm vào partition đó. Thêm node không giúp được trong trường hợp này, vì dữ liệu nóng vẫn nằm trên chính vài node đó.
+Hai cơ chế giải thích phần lớn sự khó đoán này. Cơ chế thứ nhất là hot partition. Tin nhắn được lưu theo kênh, nên mọi lượt đọc của một kênh đông người đều rơi vào cùng một nhóm nhỏ các node. Khi một cộng đồng lớn có cuộc trò chuyện sôi nổi, hoặc khi một thông báo nổi bật khiến rất nhiều người cùng mở một kênh, một partition nhận phần tải lớn hơn hẳn các partition khác. Node đó chậm đi, và vì Cassandra cần nhiều replica đồng thuận, sự chậm lan sang mọi thứ chạm vào partition đó. Thêm node không giúp được trong trường hợp này, vì dữ liệu nóng vẫn nằm trên chính vài node đó.
 
 Cơ chế thứ hai là runtime. Cassandra chạy trên JVM, và JVM thỉnh thoảng dừng lại để dọn rác. Một lần dừng ngắn theo trung bình vẫn có thể đủ dài để biến thành một đỉnh độ trễ ở phần đuôi. Bài viết khá thẳng thắn rằng đội đã có một cụm cần chăm sóc liên tục, và kỹ sư bị gọi dậy để nhìn những cái máy không thật sự hỏng, chỉ là không ổn [S1].
 
@@ -52,21 +52,19 @@ flowchart LR
     B -. gộp các lượt đọc trùng .-> B
 ```
 
-Hãy để ý điều này tác động thế nào lên bài toán hot partition. Database vẫn có hình dạng như cũ, kênh đông người vẫn là kênh đông người, nhưng lượng việc chạm tới partition nóng không còn tỷ lệ thuận với số người dùng tò mò. Service hấp thụ đợt bùng nổ. Đó là cách sửa rẻ hơn bất kỳ lượng phần cứng bổ sung nào, và nó hoạt động với bất kỳ database nào bạn chọn về sau.
-
 ## Đợt migrate lẽ ra mất nhiều tháng
 
 Chọn đích đến mới chỉ là một nửa của việc migrate. Nửa khó hơn là đưa dữ liệu tích lũy qua nhiều năm sang đó mà không mất gì, đồng thời không làm sản phẩm ngừng hoạt động trong lúc chuyển. Ước tính đầu tiên của đội cho việc sao chép dữ liệu là khoảng 3 tháng [S1]. Với một đội đang trả tiền mỗi ngày cho một cụm vật vã, ba tháng là rất lâu để chờ, và cũng là rất lâu để mang rủi ro của hai hệ thống phải luôn khớp nhau.
 
-Ước tính thay đổi vì đội nhìn vào chính công cụ migrate. Phiên bản đầu của công cụ chưa đủ nhanh, nên họ viết lại bằng Rust, cùng ngôn ngữ họ đã chọn cho data service [S1]. Bản viết lại duy trì được tới 3,2 triệu hàng mỗi giây [S1]. Ở tốc độ đó, việc sao chép xong trong khoảng 9 ngày thay vì 3 tháng [S1]. Dữ liệu không hề thay đổi. Kế hoạch không trở nên thông minh hơn. Công cụ chỉ đơn giản thôi là nút thắt cổ chai.
+Ước tính thay đổi vì đội nhìn vào chính công cụ migrate. Phiên bản đầu của công cụ chưa đủ nhanh, nên họ tự viết tool migrate bằng Rust, cùng ngôn ngữ họ đã chọn cho data service [S1]. Tool mới duy trì được tới 3,2 triệu hàng mỗi giây [S1]. Ở tốc độ đó, việc sao chép xong trong khoảng 9 ngày thay vì 3 tháng [S1]. Dữ liệu không hề thay đổi. Kế hoạch không trở nên thông minh hơn. Công cụ chỉ đơn giản thôi là nút thắt cổ chai.
 
-Đây là bài học mà các team nhỏ hay bỏ qua. Khi lên kế hoạch migrate, ta nghĩ đến schema, cách rollout, rollback và giám sát. Ta hiếm khi nghĩ đến thông lượng của đoạn script thực hiện việc sao chép, vì script nghe như chuyện phụ. Nhưng một script chạy suốt ba tháng thì chính là một service, và nó cần sự chú ý về hiệu năng như mọi thứ khác trên đường đi. Bỏ ra vài ngày làm cho công cụ migrate nhanh đã tiết kiệm được phần lớn một quý.
+Đây là bài học mà các team nhỏ hay bỏ qua. Khi lên kế hoạch migrate, ta nghĩ đến schema, cách rollout, rollback và giám sát. Ta hiếm khi nghĩ đến thông lượng của đoạn script thực hiện việc sao chép, vì script nghe như chuyện phụ. Nhưng một script chạy suốt ba tháng thì chính là một service, và nó cần sự chú ý về hiệu năng như mọi thứ khác trên đường đi. Làm cho công cụ migrate nhanh là việc rẻ so với những gì nó tiết kiệm được.
 
 ## Cutover và các con số sau đó
 
-Khi dữ liệu đã được sao chép xong, đội vẫn phải chuyển lưu lượng. Cutover diễn ra vào tháng 5 năm 2022 [S1]. Bài viết mô tả nó là một khoảnh khắc nhẹ nhàng theo nghĩa tốt nhất: kết quả của nhiều tuần chuẩn bị là một ngày mà dưới góc nhìn người dùng dường như chẳng có gì xảy ra.
+Khi dữ liệu đã được sao chép xong, đội vẫn phải chuyển lưu lượng. Cutover diễn ra vào tháng 5 năm 2022 [S1]. Bài viết mô tả nó là một khoảnh khắc nhẹ nhàng theo nghĩa tốt nhất: kết quả của công tác chuẩn bị là một ngày mà dưới góc nhìn người dùng dường như chẳng có gì xảy ra.
 
-Các con số sau đó là lý do câu chuyện này được kể lại nhiều lần. Cụm đi từ 177 node Cassandra xuống 72 node ScyllaDB [S1]. Chưa tới một nửa số máy giờ đây gánh cùng lượng dữ liệu, tức là giảm trực tiếp những gì đội phải vá, theo dõi và trả tiền. Độ trễ đọc ở phân vị 99 giảm từ khoảng 40–125 ms xuống 15 ms [S1], và độ trễ insert ở phân vị 99 ổn định ở 5 ms [S1], so với khoảng 5 đến 70 ms trước đó. Hãy để ý cả hai cải thiện đều nằm ở phần đuôi, không phải ở giá trị trung bình. Request trung bình vốn luôn ổn. Mục tiêu của dự án là làm cho những request xấu bớt xấu đi.
+Các con số sau đó là lý do câu chuyện này được kể lại nhiều lần. Cụm đi từ 177 node Cassandra xuống 72 node ScyllaDB [S1]. Chưa tới một nửa số máy giờ đây gánh cùng lượng dữ liệu, tức là giảm trực tiếp những gì đội phải vá, theo dõi và trả tiền. Độ trễ đọc ở phân vị 99 giảm từ khoảng 40–125 ms xuống 15 ms [S1], và độ trễ insert ở phân vị 99 ổn định ở 5 ms [S1], so với khoảng 5 đến 70 ms trước đó.
 
 ## Một team nhỏ có thể lấy gì từ đây
 

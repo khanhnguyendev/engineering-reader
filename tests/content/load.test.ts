@@ -86,6 +86,15 @@ describe('parsePost', () => {
     expect(issues.every((i) => i.file === 'vi.mdx')).toBe(true);
   });
 
+  it('reports malformed YAML frontmatter against the locale file', () => {
+    const dir = copyGood('badyaml');
+    writeFileSync(path.join(dir, 'vi.mdx'), '---\ntitle: [unclosed\n---\n\nbody\n');
+    const raw = readRawPost(dir);
+    const { post, issues } = parsePost(raw);
+    expect(post).toBeUndefined();
+    expect(issues[0].file).toBe('vi.mdx');
+  });
+
   it('keeps a draft locale in raw but excludes it from the record', () => {
     const dir = copyGood('draft');
     const f = path.join(dir, 'en.mdx');
@@ -109,6 +118,19 @@ describe('listPosts / listPostsBy / getPost', () => {
     expect(listPosts(root())).toHaveLength(1);
     expect(getPost(root(), 'good-post')?.slug).toBe('good-post');
     expect(getPost(root(), 'missing')).toBeUndefined();
+  });
+
+  it('sorts by publishedAt desc then slug asc', () => {
+    const sortRoot = path.join(tmp, 'sortroot');
+    const dates: Record<string, string> = { a: '2026-01-02', b: '2026-01-01', c: '2026-01-02' };
+    for (const [slug, date] of Object.entries(dates)) {
+      const dir = path.join(sortRoot, slug);
+      cpSync(GOOD, dir, { recursive: true });
+      const f = path.join(dir, 'post.json');
+      const meta = JSON.parse(readFileSync(f, 'utf8'));
+      writeFileSync(f, JSON.stringify({ ...meta, slug, publishedAt: date }));
+    }
+    expect(listPosts(sortRoot).map((p) => p.slug)).toEqual(['a', 'c', 'b']);
   });
 
   it('filters by company, topic, tag', () => {
