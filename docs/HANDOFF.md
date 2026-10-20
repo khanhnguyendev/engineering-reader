@@ -5,7 +5,7 @@ This is not a gate. The run stopped mid-M0 because the Claude session hit its us
 ## State
 - Branch `m0-m1/foundation`, draft PR #1 (https://github.com/khanhnguyendev/engineering-reader/pull/1), CI green on the last pushed commit.
 - Done and reviewed: Tasks 1–8 (scaffold, vocab + schemas, utils, loader, validator, Mermaid script, CI render-and-commit + PR template, Discord fixture post).
-- In flight when cut off: Task 9 (Cloudflare fixture) fix round 1 — an implementer subagent may have committed `content/posts/cloudflare-control-plane-outage-2023` fixes after this note; check `git log` on the branch. Its fix report is in `.superpowers/sdd/2026-10-21-m0-m1-foundation-and-post-page/task-9-report.md`.
+- Task 9 (Cloudflare fixture): fix round 1 committed as 5b4519c + b46b662 and pushed; its scoped re-review has NOT run yet. Next session: build the review package from base 4a6b753 and dispatch the re-review before Task 10.
 - Not started: Task 10 (Netflix talk fixture; verified numbers prepared at `.superpowers/sdd/.../task-10-verified-numbers.md`), M0 done-check, gate 1, then M1 (Tasks 11–16).
 - Ledger with every ruling: `.superpowers/sdd/2026-10-21-m0-m1-foundation-and-post-page/progress.md`. Decisions: `docs/decisions.md`. Run log: `docs/RUNLOG.md`.
 
