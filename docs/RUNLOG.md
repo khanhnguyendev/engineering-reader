@@ -10,3 +10,5 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-21 M0/T7 CI mermaid render-and-commit, PR template, repo-setup — f22382f (CI run 39479914867 green)
 - 2026-10-21 M0/T8 fixture post discord-cassandra-to-scylladb (5 fix rounds) — 4b182a3
 - 2026-10-21 M0/T9 fixture post cloudflare-control-plane-outage-2023 (2 fix rounds) — d256fb0
+- 2026-10-21 M0/T10 fixture post netflix-microservices-mastering-chaos (1 fix round) — 1c310cb
+- 2026-10-21 M0 done-when verified; gate 1 reached — https://github.com/khanhnguyendev/engineering-reader/pull/1
