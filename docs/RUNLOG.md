@@ -8,3 +8,4 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-21 M0/T5 validator rules + CLI — c134b63
 - 2026-10-21 M0/T6 mermaid render script — 0c5722d
 - 2026-10-21 M0/T7 CI mermaid render-and-commit, PR template, repo-setup — f22382f (CI run 39479914867 green)
+- 2026-10-21 M0/T8 fixture post discord-cassandra-to-scylladb (5 fix rounds) — 4b182a3
