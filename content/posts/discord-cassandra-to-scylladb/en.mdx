@@ -2,8 +2,8 @@
 title: "Discord moved its message store from Cassandra to ScyllaDB"
 summary: "Discord replaced 177 Cassandra nodes with 72 ScyllaDB nodes and cut read p99 from 40–125 ms to 15 ms, using a Rust data service and its own migrator."
 tldr:
-  - "Discord's message store went from 12 Cassandra nodes in 2017 to 177 by early 2022, and the on-call team was paged frequently because of it."
-  - "The bottleneck was hot partitions plus JVM GC pauses: read p99 swung between 40 and 125 ms, and maintenance jobs had to be cut back because they cost too much."
+  - "Discord's message store went from 12 nodes on Cassandra in 2017 to 177 by early 2022, and pages hit the on-call engineers often."
+  - "The bottleneck was hot partitions plus JVM GC pauses: read p99 swung between 40 and 125 ms, and routine maintenance was skipped because it had become expensive."
   - "They put a Rust data service in front of the database to coalesce duplicate reads (request coalescing), then moved to ScyllaDB."
   - "The Spark migrator was estimated at 3 months. Rewritten in Rust, the estimate dropped to 9 days. Cutover came in May 2022, leaving 72 nodes and a read p99 of 15 ms."
 keyNumberLabels:
@@ -15,7 +15,7 @@ smallTeam:
   - "If you are about to move data, measure the throughput of the copy script on a small slice before you announce a date. Your estimate is usually the tool's number, not the data's."
   - "Do not copy the data service if you have one database and one small application. What transfers is leaving a spot where rate limits and caching can go, not a separate service yet."
 lessons:
-  - "Discord did not count on ScyllaDB alone to fix things: hot partitions can form there too, so the team built a protective layer in front of the database."
+  - "A layer in front of the database was in the plan from the start; the team knew ScyllaDB can grow hot partitions too."
   - "What this case proves is narrow: ScyllaDB plus a coalescing layer worked for Discord's workload. It does not prove ScyllaDB beats Cassandra in general, and the post does not split the gain between the two."
 ---
 
@@ -35,17 +35,17 @@ Start with the baseline the team later measured against. On Cassandra, p99 for f
 
 The spread had more than one cause, and the causes made each other worse.
 
-The first is about where data lives. Cassandra stores each partition on several replicas, and Discord's partition key is a channel plus a bucket, a fixed window of time [S1 §Our Cassandra Troubles]. Channel traffic varies by orders of magnitude, from a few friends chatting to huge public communities [S1 §Our Cassandra Troubles]. A crowd opening one popular channel generates reads, and reads are the heavy path in Cassandra (the memtable plus possibly several SSTables on disk, against a write that only touches the commit log and the memtable) [S1 §Our Cassandra Troubles]. All of that cost lands on the few nodes holding the hot partition's replicas.
+The first is about where data lives. Cassandra stores each partition on several replicas, and Discord's partition key is a channel plus a bucket, a fixed window of time [S1 §Our Cassandra Troubles]. Channel traffic varies by orders of magnitude, from a few friends chatting to huge public communities [S1 §Our Cassandra Troubles]. A crowd opening one popular channel generates reads. Each of those reads may have to search several SSTables on disk on top of the memtable, so the crowd costs far more by reading than by posting, since a new message is only a commit-log append and a memtable write [S1 §Our Cassandra Troubles]. All of that cost lands on the few nodes holding the hot partition's replicas.
 
 The damage does not stay inside that channel. Discord uses quorum for reads and writes alike, so users in quiet channels end up waiting too, whenever their quorum includes one of the overloaded replicas [S1 §Our Cassandra Troubles]. That is the hot partition. Buying more nodes does not dilute it, because the hot key still maps to the same replicas.
 
-The second cause is housekeeping that never got enough room. Cassandra needs time to merge SSTables (compaction) and the JVM needs time to collect garbage; on this cluster, both had to steal that time from user traffic. Unmerged SSTables made each read slower, and catch-up compaction slowed things around the node doing it [S1 §Our Cassandra Troubles]. GC pauses produced spikes of their own. At worst a node needed a person: a manual reboot and careful watching, after its GC pauses had chained together for too long [S1 §Changing Our Architecture].
+The second cause is housekeeping that never got enough room. Cassandra needs time to merge SSTables (compaction) and the JVM needs time to collect garbage; on this cluster, both had to steal that time from user traffic. Catch-up compaction dragged on latency around whichever node ran it, and every SSTable still waiting to be merged was one more file a read had to check [S1 §Our Cassandra Troubles]. GC pauses produced spikes of their own. At worst a node needed a person: a manual reboot and careful watching, after its GC pauses had chained together for too long [S1 §Changing Our Architecture].
 
-The compaction workaround shows how much human effort this consumed. The team called it the "gossip dance", and it traded serving capacity for compaction time. Hinted handoff covered the writes a node missed while it sat offline compacting with no traffic, and engineers cycled through nodes this way until the backlog was gone [S1 §Our Cassandra Troubles]. None of that work improves the product. It only keeps the cluster where it was.
+The compaction workaround shows how much human effort this consumed. The team called it the "gossip dance", and it traded serving capacity for compaction time. Engineers rotated through the cluster, giving each node a quiet spell to compact while hinted handoff held on to the writes it missed, and stopped only when compaction had caught up [S1 §Our Cassandra Troubles]. None of that work improves the product. It only keeps the cluster where it was.
 
 ## Two changes, and why not one
 
-Discord never expected a fresh database by itself to end hot partitions, since ScyllaDB can develop them as well, so part of the fix had to live above the database [S1 §Changing Our Architecture].
+Part of the fix had to live above the database, because hot partitions come from the access pattern and ScyllaDB is not immune to them [S1 §Changing Our Architecture].
 
 That part is a layer of data services written in Rust. The API monolith calls them instead of calling the database directly. Their interface is thin on purpose: each gRPC endpoint maps more or less to one database query, and product rules are kept out of them entirely [S1 §Data Services Serving Data].
 
@@ -86,7 +86,7 @@ Correctness was checked by comparison: both databases answered a small sample of
 
 Fewer machines, tighter tails. The workload that needed 177 Cassandra nodes now runs on 72 ScyllaDB nodes [S1 §Several Months Later…]. Inserts settled at a flat p99 of 5 ms, down from 5–70 ms, and reads of old messages at 15 ms, down from 40–125 ms [S1 §Several Months Later…]. ScyllaDB took over as the messages database in May 2022 [S1 §Several Months Later…].
 
-The team leads with the operational change. Weekends are no longer lost to firefights, and nobody shuffles nodes to keep the cluster up; the post calls the result a quiet database [S1 §Several Months Later…]. Both latency gains are in the tail rather than the average, which fits the goal from the start: fewer bad requests and fewer bad nights, not a faster median.
+The team leads with the operational change. Nobody has to move nodes around to keep the cluster alive any more, and weekends stay free; the source's own word for the result is quiet [S1 §Several Months Later…]. Both latency gains are in the tail rather than the average, which fits the goal from the start: fewer bad requests and fewer bad nights, not a faster median.
 
 Read these figures with some caution. This is a first-party account: it shows that ScyllaDB plus a coalescing data service worked for this workload. It does not show that ScyllaDB beats Cassandra in general, because the post never separates the gain from the database from the gain from coalescing. Before copying any of it, work out which cause you actually have, runtime or access pattern.
 

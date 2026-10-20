@@ -2,8 +2,8 @@
 title: "Discord chuyển kho tin nhắn từ Cassandra sang ScyllaDB"
 summary: "Discord thay 177 node Cassandra bằng 72 node ScyllaDB, kéo p99 đọc từ 40–125 ms xuống 15 ms, với data service Rust và migrator tự viết."
 tldr:
-  - "Kho tin nhắn của Discord đi từ 12 node Cassandra năm 2017 lên 177 node đầu năm 2022, và đội on-call bị page thường xuyên vì nó."
-  - "Nút thắt là hot partition cộng với GC pause của JVM: p99 đọc dao động 40–125 ms, và nhiều thao tác bảo trì phải cắt bớt vì quá đắt."
+  - "Kho tin nhắn của Discord đi từ 12 node Cassandra năm 2017 lên 177 node đầu năm 2022, và page dội về đội on-call thường xuyên."
+  - "Nút thắt là hot partition cộng với GC pause của JVM: p99 đọc dao động 40–125 ms, và việc bảo trì định kỳ bị bỏ qua vì đã trở nên tốn kém."
   - "Họ đặt một data service viết bằng Rust trước database để gộp các lượt đọc trùng (request coalescing), rồi chuyển sang ScyllaDB."
   - "Migrator Spark ước tính 3 tháng. Viết lại bằng Rust thì ước tính còn 9 ngày. Cutover tháng 5 năm 2022, cụm còn 72 node, p99 đọc còn 15 ms."
 keyNumberLabels:
@@ -15,7 +15,7 @@ smallTeam:
   - "Nếu bạn sắp chuyển dữ liệu, hãy đo throughput của chính script chuyển trên một phần nhỏ dữ liệu trước khi báo ngày xong. Con số ước tính của bạn thường là con số của công cụ, không phải của dữ liệu."
   - "Đừng bắt chước data service nếu bạn chỉ có một database và một ứng dụng nhỏ. Cái bạn học được là chừa sẵn một chỗ để chèn rate limit và cache, chưa cần một service riêng."
 lessons:
-  - "Discord không trông chờ riêng ScyllaDB sẽ giải quyết mọi chuyện: hot partition vẫn có thể hình thành ở đó, nên đội dựng một lớp bảo vệ phía trước database."
+  - "Lớp chắn phía trước database đã nằm trong kế hoạch từ đầu; đội biết ScyllaDB cũng có thể sinh hot partition."
   - "Case này chứng minh một điều hẹp: ScyllaDB cộng một lớp coalescing đã hiệu quả với workload của Discord. Nó không chứng minh ScyllaDB nhanh hơn Cassandra nói chung, và bài viết không tách phần cải thiện giữa hai thứ."
 ---
 
@@ -35,17 +35,17 @@ Bắt đầu từ mốc mà đội sau này dùng để so sánh. Trên Cassandr
 
 Biên độ ấy có hơn một nguyên nhân, và các nguyên nhân làm nhau tệ thêm.
 
-Nguyên nhân đầu nằm ở chỗ dữ liệu được đặt ở đâu. Cassandra lưu mỗi partition trên nhiều replica, và partition key của Discord là kênh cộng một bucket, tức một khung thời gian cố định [S1 §Our Cassandra Troubles]. Traffic giữa các kênh chênh nhau nhiều bậc, từ nhóm vài người bạn đến các cộng đồng công khai khổng lồ [S1 §Our Cassandra Troubles]. Một đám đông mở cùng một kênh nóng tạo ra lượt đọc, mà đọc lại là đường nặng trong Cassandra (memtable cộng thêm có thể nhiều SSTable trên đĩa, trong khi ghi chỉ chạm tới commit log và memtable) [S1 §Our Cassandra Troubles]. Toàn bộ chi phí đó dồn lên vài node đang giữ replica của partition nóng.
+Nguyên nhân đầu nằm ở chỗ dữ liệu được đặt ở đâu. Cassandra lưu mỗi partition trên nhiều replica, và partition key của Discord là kênh cộng một bucket, tức một khung thời gian cố định [S1 §Our Cassandra Troubles]. Traffic giữa các kênh chênh nhau nhiều bậc, từ nhóm vài người bạn đến các cộng đồng công khai khổng lồ [S1 §Our Cassandra Troubles]. Một đám đông mở cùng một kênh nóng tạo ra lượt đọc. Mỗi lượt đọc như vậy có thể phải lục thêm nhiều SSTable trên đĩa ngoài memtable, nên đám đông tốn kém khi đọc hơn nhiều so với khi gửi, vì một tin nhắn mới chỉ là một lần nối vào commit log và một lần ghi vào memtable [S1 §Our Cassandra Troubles]. Toàn bộ chi phí đó dồn lên vài node đang giữ replica của partition nóng.
 
 Thiệt hại không dừng trong kênh đó. Discord dùng quorum cho cả đọc lẫn ghi, nên người dùng ở các kênh vắng cũng phải chờ theo, mỗi khi quorum của họ có một trong các replica đang quá tải [S1 §Our Cassandra Troubles]. Đó là hot partition. Mua thêm node không pha loãng được nó, vì key nóng vẫn rơi vào đúng những replica ấy.
 
-Nguyên nhân thứ hai là việc dọn dẹp không bao giờ có đủ chỗ. Cassandra cần thời gian để gộp SSTable (compaction), JVM cần thời gian để thu gom rác; trên cụm này, cả hai phải giành thời gian đó từ traffic người dùng. SSTable chưa gộp làm mỗi lượt đọc chậm hơn, còn compaction để đuổi kịp thì kéo chậm cả vùng xung quanh node đang chạy nó [S1 §Our Cassandra Troubles]. GC pause tạo thêm các đỉnh độ trễ riêng. Tệ nhất, một node cần đến con người: restart thủ công rồi canh chừng cẩn thận, sau khi các GC pause của nó nối đuôi nhau quá lâu [S1 §Changing Our Architecture].
+Nguyên nhân thứ hai là việc dọn dẹp không bao giờ có đủ chỗ. Cassandra cần thời gian để gộp SSTable (compaction), JVM cần thời gian để thu gom rác; trên cụm này, cả hai phải giành thời gian đó từ traffic người dùng. Compaction để đuổi kịp đẩy độ trễ lên quanh bất cứ node nào đang chạy nó, và mỗi SSTable còn chờ gộp là thêm một file mà lượt đọc phải kiểm tra [S1 §Our Cassandra Troubles]. GC pause tạo thêm các đỉnh độ trễ riêng. Tệ nhất, một node cần đến con người: restart thủ công rồi canh chừng cẩn thận, sau khi các GC pause của nó nối đuôi nhau quá lâu [S1 §Changing Our Architecture].
 
-Cách xoay xở với compaction cho thấy việc này ngốn bao nhiêu công sức người. Đội gọi nó là "gossip dance", và về bản chất nó đổi năng lực phục vụ lấy thời gian compact. Hinted handoff bù lại các ghi mà node bỏ lỡ trong lúc nó nằm ngoài, compact mà không nhận traffic, và kỹ sư cứ xoay vòng qua các node như thế đến khi hết backlog [S1 §Our Cassandra Troubles]. Không phần nào trong đó làm sản phẩm tốt lên. Nó chỉ giữ cụm đứng yên tại chỗ.
+Cách xoay xở với compaction cho thấy việc này ngốn bao nhiêu công sức người. Đội gọi nó là "gossip dance", và về bản chất nó đổi năng lực phục vụ lấy thời gian compact. Kỹ sư đi vòng qua cụm, cho từng node một khoảng lặng để compact trong khi hinted handoff giữ lại các ghi mà nó bỏ lỡ, và chỉ dừng khi compaction đã đuổi kịp [S1 §Our Cassandra Troubles]. Không phần nào trong đó làm sản phẩm tốt lên. Nó chỉ giữ cụm đứng yên tại chỗ.
 
 ## Hai thay đổi, và vì sao không chỉ một
 
-Discord chưa bao giờ kỳ vọng một database mới tự nó chấm dứt hot partition, vì ScyllaDB cũng có thể sinh ra chúng, nên một phần cách sửa phải nằm phía trên database [S1 §Changing Our Architecture].
+Một phần cách sửa phải nằm phía trên database, vì hot partition sinh ra từ access pattern và ScyllaDB cũng không miễn nhiễm với chúng [S1 §Changing Our Architecture].
 
 Phần đó là một lớp data service viết bằng Rust. API monolith gọi chúng thay vì gọi thẳng database. Giao diện của chúng cố ý mỏng: mỗi endpoint gRPC ứng với gần như đúng một query database, và quy tắc nghiệp vụ được giữ hoàn toàn bên ngoài [S1 §Data Services Serving Data].
 
@@ -86,7 +86,7 @@ Tính đúng đắn được kiểm bằng so sánh: cả hai database cùng tr�
 
 Ít máy hơn, đuôi gọn hơn. Khối việc từng cần 177 node Cassandra giờ chạy trên 72 node ScyllaDB [S1 §Several Months Later…]. Insert ổn định ở p99 5 ms, từ mức 5–70 ms, còn đọc tin nhắn cũ ở 15 ms, từ mức 40–125 ms [S1 §Several Months Later…]. ScyllaDB tiếp quản vai trò database tin nhắn vào tháng 5 năm 2022 [S1 §Several Months Later…].
 
-Đội mở đầu bằng thay đổi về vận hành. Cuối tuần không còn mất vào chữa cháy, cũng không ai phải xoay node để giữ cụm sống; bài viết gọi kết quả là một database yên ắng [S1 §Several Months Later…]. Cả hai cải thiện độ trễ đều nằm ở phần đuôi chứ không ở trung bình, khớp với mục tiêu từ đầu: ít request tệ hơn và ít đêm mất ngủ hơn, không phải median nhanh hơn.
+Đội mở đầu bằng thay đổi về vận hành. Không còn ai phải dời node qua lại để giữ cụm sống, và cuối tuần được để yên; từ mà chính nguồn dùng cho kết quả là quiet (yên ắng) [S1 §Several Months Later…]. Cả hai cải thiện độ trễ đều nằm ở phần đuôi chứ không ở trung bình, khớp với mục tiêu từ đầu: ít request tệ hơn và ít đêm mất ngủ hơn, không phải median nhanh hơn.
 
 Hãy đọc các con số này với chút thận trọng. Đây là lời kể của chính người trong cuộc: nó cho thấy tổ hợp ScyllaDB và data service có coalescing hiệu quả với workload này. Nó không cho thấy ScyllaDB thắng Cassandra nói chung, vì bài viết không tách phần cải thiện của database khỏi phần của coalescing. Trước khi bắt chước, hãy xác định mình có nguyên nhân nào, runtime hay access pattern.
 
