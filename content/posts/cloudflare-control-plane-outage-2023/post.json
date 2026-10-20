@@ -1,0 +1,31 @@
+{
+  "slug": "cloudflare-control-plane-outage-2023",
+  "company": "cloudflare",
+  "topic": "reliability",
+  "caseType": "incident",
+  "tags": ["data-center", "control-plane", "high-availability", "chaos-engineering"],
+  "series": null,
+  "publishedAt": "2026-10-21",
+  "updatedAt": null,
+  "sourcePublishedAt": "2023-11-04",
+  "featured": false,
+  "author": "ryan",
+  "reviewedBy": "ryan",
+  "keyNumbers": [
+    { "id": "duration", "value": "≈41 h", "ref": "S1" },
+    { "id": "ups", "value": "4 / 10 min", "ref": "S1" },
+    { "id": "share", "value": "≈10%", "ref": "S1" }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "type": "blog",
+      "title": "Post mortem on the Cloudflare Control Plane and Analytics Outage",
+      "authors": ["Matthew Prince"],
+      "publishedAt": "2023-11-04",
+      "url": "https://blog.cloudflare.com/post-mortem-on-cloudflare-control-plane-and-analytics-outage/",
+      "accessedAt": "2026-10-21",
+      "locator": null
+    }
+  ]
+}
