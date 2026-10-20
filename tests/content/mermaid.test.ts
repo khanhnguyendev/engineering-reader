@@ -74,11 +74,12 @@ describe('svg helpers', () => {
     expect(out).toContain('color-mix(in srgb, var(--ink) 100%, transparent)');
     expect(out).toContain('rgba(9,9,9,0.5)');
   });
-  it('postProcessSvg adds a missing id and replaces uppercase hex', () => {
+  it('postProcessSvg adds a missing id and leaves non-sentinel hex untouched', () => {
     const out = postProcessSvg('<svg width="1"><path fill="#030303"/></svg>', { id: 'a' });
     expect(out).toContain('<svg id="a" width="1">');
     const up = postProcessSvg('<svg id="a"><path fill="#0A0A0A"/><path fill="#020202"/></svg>', { id: 'a' });
     expect(up).toContain('var(--ink)');
+    expect(up).toContain('#0A0A0A');
   });
 });
 
@@ -87,6 +88,9 @@ describe('leftoverColors', () => {
     const svg = '<svg><path fill="#ABCDEF"/><path stroke="#abcdef" style="fill:rgb(1, 2, 3)"/><g fill="var(--ink)"/>&#123;</svg>';
     expect(leftoverColors(svg)).toEqual(['#ABCDEF', '#abcdef', 'rgb(1, 2, 3)']);
     expect(leftoverColors('<svg fill="var(--panel)"/>')).toEqual([]);
+  });
+  it('does not report marker ids', () => {
+    expect(leftoverColors('<path marker-end="url(#feed-vi-1_x)"/>')).toEqual([]);
   });
   it('ignores colours inside <style> and <filter>', () => {
     const svg =

@@ -85,7 +85,7 @@ export function postProcessSvg(svg: string, opts: { id: string }): string {
 /** Colours left in a processed SVG that are not sentinel variables. */
 export function leftoverColors(svg: string): string[] {
   const scanned = svg.replace(/<(style|filter)\b[\s\S]*?<\/\1>/gi, '');
-  const found = scanned.match(/(?<![&\w])#[0-9a-fA-F]{3,6}\b|\brgba?\([^)]*\)|\bhsla?\([^)]*\)/g) ?? [];
+  const found = scanned.match(/(?<![&\w])#[0-9a-fA-F]{3,6}(?![\w-])|\brgba?\([^)]*\)|\bhsla?\([^)]*\)/g) ?? [];
   return [...new Set(found)];
 }
 

@@ -61,4 +61,5 @@ try {
 } finally {
   rmSync(work, { recursive: true, force: true });
 }
-console.log(`✔ ${todo.length} rendered, ${plans.length - todo.length} fresh (${plans.length} total)`);
+if (process.exitCode) console.error('✖ stopped after mmdc failure');
+else console.log(`✔ ${todo.length} rendered, ${plans.length - todo.length} fresh (${plans.length} total)`);
