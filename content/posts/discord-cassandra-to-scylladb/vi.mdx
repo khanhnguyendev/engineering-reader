@@ -1,31 +1,31 @@
 ---
 title: "Discord chuyển kho tin nhắn từ Cassandra sang ScyllaDB"
-summary: "Discord thay 177 node Cassandra bằng 72 node ScyllaDB, kéo p99 đọc từ 40–125 ms xuống 15 ms, nhờ data service Rust và migrator tự viết."
+summary: "Discord thay 177 node Cassandra bằng 72 node ScyllaDB, kéo p99 đọc từ 40–125 ms xuống 15 ms, với data service Rust và migrator tự viết."
 tldr:
-  - "Kho tin nhắn của Discord đi từ 12 node Cassandra năm 2017 lên 177 node đầu năm 2022, và đội on-call bị gọi dậy liên tục vì nó."
+  - "Kho tin nhắn của Discord đi từ 12 node Cassandra năm 2017 lên 177 node đầu năm 2022, và đội on-call bị page thường xuyên vì nó."
   - "Nút thắt là hot partition cộng với GC pause của JVM: p99 đọc dao động 40–125 ms, và nhiều thao tác bảo trì phải cắt bớt vì quá đắt."
   - "Họ đặt một data service viết bằng Rust trước database để gộp các lượt đọc trùng (request coalescing), rồi chuyển sang ScyllaDB."
   - "Migrator Spark ước tính 3 tháng. Viết lại bằng Rust thì ước tính còn 9 ngày. Cutover tháng 5 năm 2022, cụm còn 72 node, p99 đọc còn 15 ms."
 keyNumberLabels:
   nodes: "Số node database, Cassandra sang ScyllaDB"
   latency: "Độ trễ đọc ở p99 khi lấy tin nhắn cũ"
-  migration: "Thời gian migrate sau khi viết lại bằng Rust (ước tính ban đầu với Spark: 3 tháng)"
+  migration: "Thời gian migrate ước tính sau khi viết lại bằng Rust (ước tính với Spark: 3 tháng)"
 smallTeam:
   - "Trước khi nghĩ đến database mới, hãy kiểm tra tuần này xem có bao nhiêu lượt đọc giống hệt nhau đang đập vào cùng một key cùng lúc. Gộp chúng lại rẻ hơn nhiều so với một đợt migrate."
   - "Nếu bạn sắp chuyển dữ liệu, hãy đo throughput của chính script chuyển trên một phần nhỏ dữ liệu trước khi báo ngày xong. Con số ước tính của bạn thường là con số của công cụ, không phải của dữ liệu."
-  - "Đừng bắt chước data service nếu bạn chỉ có một database và một ứng dụng nhỏ. Cái bạn học được là chừa sẵn một chỗ để chèn giới hạn tốc độ và cache, chưa cần một service riêng."
+  - "Đừng bắt chước data service nếu bạn chỉ có một database và một ứng dụng nhỏ. Cái bạn học được là chừa sẵn một chỗ để chèn rate limit và cache, chưa cần một service riêng."
 lessons:
-  - "Discord tự nhận đổi database không làm mọi thứ tốt lên như phép màu: hot partition vẫn có thể xảy ra trên ScyllaDB, nên họ sửa phía thượng nguồn trước khi chuyển."
-  - "Case này chứng minh một điều hẹp: với workload của họ, công cụ migrate chậm mới là nút thắt, không phải dữ liệu. Nó không chứng minh ScyllaDB nhanh hơn Cassandra nói chung."
+  - "Discord tự nhận đổi database không làm mọi thứ tốt lên như phép màu: hot partition vẫn có thể xảy ra trên ScyllaDB, nên họ dựng thêm lớp bảo vệ ở upstream."
+  - "Case này chứng minh một điều hẹp: ScyllaDB cộng một lớp coalescing đã hiệu quả với workload của Discord. Nó không chứng minh ScyllaDB nhanh hơn Cassandra nói chung, và bài viết không tách phần cải thiện giữa hai thứ."
 ---
 
 ## Nơi câu chuyện bắt đầu
 
-Discord lưu mọi tin nhắn trong một database nội bộ tên là cassandra-messages. Yêu cầu chức năng thì đơn giản: ghi tin nhắn mới, đọc lại lịch sử của một kênh thật nhanh khi ai đó cuộn lên. Yêu cầu phi chức năng mới là chỗ khó: không được downtime, độ trễ phải dự đoán được, và đội vận hành không được phình ra theo dung lượng dữ liệu [S1 §Our Cassandra Troubles].
+Discord lưu mọi tin nhắn trong một database nội bộ tên là cassandra-messages [S1 §Our Cassandra Troubles]. Đọc thành yêu cầu, nghĩa là như sau. Về chức năng: ghi tin nhắn mới, và đọc lại lịch sử một kênh thật nhanh khi ai đó cuộn lên. Về phi chức năng: không downtime, độ trễ dự đoán được, và khối lượng vận hành không tăng theo dữ liệu.
 
 Năm 2017 cụm này có 12 node Cassandra [S1 §Our Cassandra Troubles]. Đầu năm 2022 nó có 177 node và lưu hàng nghìn tỷ tin nhắn [S1 §Our Cassandra Troubles]. Đó là thang đo của bài toán: số máy tăng nhiều lần, và toil tăng theo. Bài blog gọi nó là một hệ thống nhiều toil: on-call bị page thường xuyên vì database, độ trễ khó đoán, và đội phải cắt bớt các thao tác bảo trì vì chúng đắt đến mức không dám chạy [S1 §Our Cassandra Troubles].
 
-Mục tiêu của đội không phải là "nhanh hơn" nói chung. Họ muốn một cụm mà chi phí vận hành không tăng cùng tốc độ tăng của dữ liệu. Hãy giữ mục tiêu đó trong đầu, vì nó giải thích vì sao họ làm hai việc chứ không chỉ một.
+Đọc thành mục tiêu, đội không muốn "nhanh hơn" nói chung. Họ muốn một cụm mà chi phí vận hành thôi tăng cùng tốc độ với dữ liệu. Mục tiêu đó giải thích vì sao họ làm hai việc chứ không chỉ một.
 
 ## Cái gì làm cụm Cassandra mệt
 
@@ -35,15 +35,15 @@ Nút thắt đầu tiên là hot partition. Trong Cassandra, đọc đắt hơn 
 
 Nút thắt thứ hai là bảo trì. Cụm hay bị tụt lại trong compaction, nghĩa là đọc đắt hơn và độ trễ lan thành dây chuyền khi một node cố compact [S1 §Our Cassandra Troubles]. Đội có hẳn một thao tác tên là "gossip dance": đưa node ra khỏi rotation để nó compact mà không nhận traffic, đưa lại để nhận hint từ hinted handoff, rồi lặp cho đến khi hết backlog [S1 §Our Cassandra Troubles]. Thêm vào đó là việc tinh chỉnh garbage collector và heap của JVM, vì GC pause gây ra các đỉnh độ trễ. Có những lần pause liên tiếp kéo dài đến mức một operator phải tự tay reboot và trông node đó cho tới khi nó khỏe lại [S1 §Changing Our Architecture].
 
-Kết quả đo được là p99 khi đọc tin nhắn cũ dao động giữa 40 và 125 ms, còn p99 khi insert dao động giữa 5 và 70 ms [S1 §Several Months Later…]. Một khoảng rộng như vậy nghĩa là người dùng kém may mắn gặp những lượt đọc rất khó đoán. Và đó chỉ là phần nhìn thấy được. Phần còn lại là con người: những kỹ sư bị gọi dậy để chăm các máy chưa hỏng nhưng không ổn.
+Nhìn từ bên ngoài, p99 khi đọc tin nhắn cũ dao động giữa 40 và 125 ms, còn p99 khi insert dao động giữa 5 và 70 ms [S1 §Several Months Later…]. Khoảng rộng như vậy nghĩa là những lượt đọc kém may mắn rất khó đoán. Đằng sau các con số đó, đội on-call bị page thường xuyên vì database [S1 §Our Cassandra Troubles].
 
 ## Hai thay đổi, và vì sao không chỉ một
 
-Đội đã có sẵn lý do để thử ScyllaDB. Trước đó họ để ý đến nó vì nó tương thích với Cassandra, viết bằng C++, hứa hẹn hiệu năng tốt hơn, repair nhanh hơn, cô lập workload tốt hơn nhờ kiến trúc shard-per-core, và không có garbage collector [S1 §Changing Our Architecture]. Họ thử nghiệm, thấy cải thiện, và quyết định chuyển tất cả database. Đến năm 2020, mọi database đều đã chuyển, trừ cassandra-messages [S1 §Changing Our Architecture].
+ScyllaDB nằm trong tầm ngắm của đội từ trước. Nó nói cùng giao thức với Cassandra, viết bằng C++ và không có garbage collector, đúng phần họ quan tâm nhất [S1 §Changing Our Architecture]. Sau khi thử nghiệm thấy cải thiện, họ quyết định chuyển mọi database, và đến năm 2020 chỉ còn cassandra-messages ở lại Cassandra [S1 §Changing Our Architecture].
 
 Lý do chưa chuyển nó cũng rõ: cụm quá lớn, cộng thêm việc họ muốn có kinh nghiệm chạy ScyllaDB trên production trước. Đội còn phát hiện reverse query của ScyllaDB chưa đủ nhanh cho nhu cầu của mình, và đội ScyllaDB đã ưu tiên cải thiện phần đó [S1 §Changing Our Architecture]. Đây là một cái giá đáng nhớ: chọn database mới nghĩa là bạn có thể phải chờ nhà cung cấp sửa thứ bạn cần.
 
-Nhưng điều quan trọng hơn là họ không tin rằng chỉ cần đặt một database mới vào là xong. Hot partition vẫn có thể xảy ra trên ScyllaDB, nên họ đầu tư vào các hệ thống thượng nguồn để che chắn database [S1 §Changing Our Architecture]. Kết quả là data service. Đó là các service trung gian nằm giữa API monolith và các cụm database, được viết bằng Rust, chứa khoảng một gRPC endpoint cho mỗi query và cố ý không có business logic [S1 §Data Services Serving Data].
+Quan trọng hơn, họ không kỳ vọng một database mới tự sửa được mọi thứ. ScyllaDB cũng có thể gặp hot partition, nên họ dựng lớp bảo vệ ở upstream [S1 §Changing Our Architecture]. Lớp đó là data service, một tầng Rust nằm giữa API monolith và các cụm database. Nó mỏng có chủ đích: khoảng một gRPC endpoint cho mỗi query và không có business logic [S1 §Data Services Serving Data].
 
 Tính năng chính của chúng là request coalescing. Nếu nhiều người đọc cùng một hàng cùng lúc, service chỉ query database một lần: người đầu tiên làm một worker task được tạo ra, các request sau đó tìm task ấy và đăng ký nhận kết quả, rồi task trả hàng cho tất cả [S1 §Data Services Serving Data]. Một thông báo @everyone trên server lớn khi đó không còn biến thành vô số lượt đọc giống hệt nhau đập vào một partition. Để coalescing hiệu quả, request còn được route bằng consistent hashing: với tin nhắn, routing key là channel ID, nên mọi request của cùng một kênh đến cùng một instance [S1 §Data Services Serving Data].
 
@@ -60,17 +60,17 @@ Cái giá của thiết kế này là thêm một service phải vận hành, v�
 
 Yêu cầu migrate khá thẳng: chuyển hàng nghìn tỷ tin nhắn mà không downtime, và phải nhanh, vì Cassandra vẫn đang khiến đội phải chữa cháy [S1 §A Very Big Migration]. Kế hoạch đầu tiên được thiết kế để có giá trị sớm: dùng cụm ScyllaDB mới cho dữ liệu mới theo một mốc thời gian, rồi chuyển dữ liệu lịch sử theo sau. Chính họ thừa nhận cách này thêm độ phức tạp [S1 §A Very Big Migration].
 
-Họ bắt đầu ghi kép dữ liệu mới vào cả Cassandra và ScyllaDB, đồng thời dựng Spark migrator của ScyllaDB. Công cụ này cần tinh chỉnh nhiều, và khi chạy được thì ước tính hoàn thành là ba tháng [S1 §A Very Big Migration]. Ba tháng là quá dài với một đội đang chữa cháy hằng tuần, và cũng là quá dài để mang rủi ro của hai hệ thống phải luôn khớp nhau.
+Họ bắt đầu dual-write dữ liệu mới vào cả Cassandra và ScyllaDB, đồng thời dựng Spark migrator của ScyllaDB. Công cụ này cần tinh chỉnh nhiều, và khi chạy được thì ước tính hoàn thành là ba tháng [S1 §A Very Big Migration]. Ba tháng là quá dài với một đội đang chữa cháy hằng tuần, và cũng là quá dài để mang rủi ro của hai hệ thống phải luôn khớp nhau.
 
-Đội ngồi lại và nhớ ra rằng họ đã có sẵn một thư viện database nhanh. Họ mở rộng data service library để migrate dữ liệu quy mô lớn: đọc các token range từ database, checkpoint cục bộ bằng SQLite, rồi đẩy thẳng vào ScyllaDB [S1 §A Very Big Migration]. Việc này xong trong một buổi chiều. Ước tính mới là chín ngày, và vì đã nhanh như vậy, họ bỏ luôn cách tiếp cận phức tạp theo mốc thời gian để chuyển mọi thứ một lần [S1 §A Very Big Migration]. Migrator chạy với tốc độ lên đến 3,2 triệu tin nhắn mỗi giây [S1 §A Very Big Migration].
+Rồi có người nhớ ra đội đã có sẵn một thư viện database nhanh cho data service. Họ mở rộng nó thành một migrator đọc các token range, lưu tiến độ bằng checkpoint SQLite cục bộ và ghi thẳng vào ScyllaDB [S1 §A Very Big Migration]. Việc này mất một buổi chiều. Ước tính mới là chín ngày, đủ nhanh để họ bỏ kế hoạch theo mốc thời gian và chuyển mọi thứ một lần [S1 §A Very Big Migration]. Ở đỉnh, nó copy tới 3,2 triệu hàng mỗi giây [S1 §A Very Big Migration].
 
-Có một chi tiết về lỗi mà bài học nào cũng nên giữ lại. Vài ngày sau, khi cả đội tụ lại xem tiến độ chạm 100%, nó kẹt ở một chút trước mốc đó. Migrator bị timeout khi đọc vài token range cuối, vì chúng chứa những dải tombstone khổng lồ chưa bao giờ được compact trong Cassandra. Họ compact range đó, và vài giây sau việc migrate xong [S1 §A Very Big Migration]. Phần nợ kỹ thuật mà bạn lờ đi suốt nhiều năm sẽ đòi lại đúng vào đoạn cuối.
+Lỗi đáng giữ lại: việc migrate kẹt ngay trước khi hoàn tất. Các token range cuối chứa tombstone tích tụ nhiều năm chưa được compact trên Cassandra, nên lượt đọc của migrator bị timeout cho đến khi đội compact chúng, sau đó nó xong trong vài giây [S1 §A Very Big Migration]. Nợ bảo trì bạn lờ đi nhiều năm sẽ đến hạn đúng vào đoạn cuối.
 
 Để kiểm chứng, đội tự động gửi một tỷ lệ nhỏ lượt đọc tới cả hai database và so sánh kết quả. Cụm mới chịu được toàn bộ traffic production trong khi Cassandra ngày càng hay gặp vấn đề về độ trễ. Rồi họ chuyển ScyllaDB thành database chính [S1 §A Very Big Migration].
 
 ## Sau cutover, và những gì con số chưa chứng minh
 
-Đội chuyển cơ sở dữ liệu tin nhắn vào tháng 5 năm 2022 [S1 §Several Months Later…]. Bài blog mô tả kết quả là một database yên lặng và ngoan: không còn những cuộc chữa cháy kéo dài cả cuối tuần, không còn phải xoay các node để giữ uptime. Cụm đi từ 177 node Cassandra xuống 72 node ScyllaDB [S1 §Several Months Later…]. P99 khi lấy tin nhắn cũ đi từ khoảng 40–125 ms xuống 15 ms, và p99 khi insert đi từ 5–70 ms xuống mức ổn định 5 ms [S1 §Several Months Later…]. Cả hai cải thiện đều nằm ở phần đuôi, không phải ở trung bình. Mục đích của dự án là làm cho những lượt đọc tệ bớt tệ.
+Đội chuyển database tin nhắn sang ScyllaDB vào tháng 5 năm 2022 [S1 §Several Months Later…]. Từ đó bài blog báo cáo một database yên lặng, không còn những cuộc chữa cháy kéo dài cả cuối tuần và không còn phải xoay node để giữ uptime. Cụm đi từ 177 node Cassandra xuống 72 node ScyllaDB [S1 §Several Months Later…]. P99 khi lấy tin nhắn cũ đi từ 40–125 ms xuống 15 ms, và p99 khi insert đi từ 5–70 ms xuống mức ổn định 5 ms [S1 §Several Months Later…]. Cả hai cải thiện nằm ở phần đuôi, không phải trung bình: dự án làm những lượt đọc tệ bớt tệ.
 
 Đây là bài kể của chính những người đã làm, nên hãy đọc nó đúng như vậy. Các con số cho thấy tổ hợp ScyllaDB, data service và một migrator nhanh đã hiệu quả với workload này. Chúng không chứng minh ScyllaDB nhanh hơn Cassandra nói chung. Bài viết cũng không tách riêng phần cải thiện nào đến từ database và phần nào đến từ coalescing. Hãy coi đây là một case, không phải một benchmark.
 
