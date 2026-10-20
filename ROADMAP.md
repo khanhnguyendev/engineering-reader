@@ -3,7 +3,7 @@ Spec: docs/superpowers/specs/2026-10-21-engineering-reader-design.md §10.
 
 | Milestone | Status | Done when |
 |---|---|---|
-| M0 Repo and contract | in progress | `pnpm build` fails on a bad post, passes on the three fixtures |
+| M0 Repo and contract | in progress ([PR #1](https://github.com/khanhnguyendev/engineering-reader/pull/1)) | `pnpm build` fails on a bad post, passes on the three fixtures |
 | M1 Read a post, deploy | planned | three posts live, Impeccable finish review ships |
 | M2 Wayfinding | planned | every IA route resolves in both locales |
 | M3 Discoverability | planned | rich-results and OG debugger correct for both locales |
