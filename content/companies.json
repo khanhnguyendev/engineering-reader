@@ -1,0 +1,5 @@
+[
+  { "slug": "discord", "name": "Discord", "blogUrl": "https://discord.com/blog", "feedUrl": "https://discord.com/blog/rss.xml", "brandColor": "#5865F2", "logo": "public/logos/discord.svg" },
+  { "slug": "cloudflare", "name": "Cloudflare", "blogUrl": "https://blog.cloudflare.com", "feedUrl": "https://blog.cloudflare.com/rss/", "brandColor": "#F38020", "logo": "public/logos/cloudflare.svg" },
+  { "slug": "netflix", "name": "Netflix", "blogUrl": "https://netflixtechblog.com", "feedUrl": "https://netflixtechblog.com/feed", "brandColor": "#E50914", "logo": "public/logos/netflix.svg" }
+]
