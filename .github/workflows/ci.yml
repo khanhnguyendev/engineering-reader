@@ -19,7 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref || github.ref_name }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -30,12 +31,12 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.cache/puppeteer
-          key: ${{ runner.os }}-puppeteer-25.14.0
+          key: ${{ runner.os }}-puppeteer-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm exec puppeteer browsers install chrome-headless-shell
       - run: pnpm render-mermaid
       # A push made with GITHUB_TOKEN does not retrigger workflows, so the bot's
       # commit would never get a `ci` check. Instead this same run continues to
-      # --check, test, validate and build after the commit, and the last step
+      # the committed-state check, test, validate and build after the commit, and the last step
       # reports its result as a commit status with context `ci` on the pushed
       # SHA. Branch protection accepts that status as the required check.
       - name: Commit rendered diagrams
@@ -45,14 +46,20 @@ jobs:
           echo "pushed=false" >> "$GITHUB_OUTPUT"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add content/posts
+          if [ -d content/posts ]; then git add -A -- content/posts; fi
           if ! git diff --cached --quiet; then
             git commit -m "chore(mermaid): render diagrams"
             git push
             echo "pushed=true" >> "$GITHUB_OUTPUT"
             echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
-      - run: pnpm render-mermaid --check
+      - name: Fail if rendered diagrams are not committed
+        run: |
+          if [ -n "$(git status --porcelain -- content/posts 2>/dev/null)" ]; then
+            git status --porcelain -- content/posts
+            echo "Diagrams stale: run pnpm render-mermaid and commit"
+            exit 1
+          fi
       - run: pnpm test
       - run: pnpm validate
       - run: pnpm build
