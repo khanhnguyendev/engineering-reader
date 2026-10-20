@@ -68,6 +68,12 @@ describe('svg helpers', () => {
     expect(out).toContain('id="p-vi-1"');
     expect(Object.keys(SENTINELS)).toHaveLength(5);
   });
+  it('postProcessSvg converts sentinel rgba() to color-mix', () => {
+    const out = postProcessSvg('<svg id="a"><style>.x{background-color:rgba(4, 4, 4, 0.5);color:rgba(2,2,2,1)}.y{c:rgba(9,9,9,0.5)}</style></svg>', { id: 'a' });
+    expect(out).toContain('color-mix(in srgb, var(--panel-2) 50%, transparent)');
+    expect(out).toContain('color-mix(in srgb, var(--ink) 100%, transparent)');
+    expect(out).toContain('rgba(9,9,9,0.5)');
+  });
   it('postProcessSvg adds a missing id and replaces uppercase hex', () => {
     const out = postProcessSvg('<svg width="1"><path fill="#030303"/></svg>', { id: 'a' });
     expect(out).toContain('<svg id="a" width="1">');
@@ -81,6 +87,11 @@ describe('leftoverColors', () => {
     const svg = '<svg><path fill="#ABCDEF"/><path stroke="#abcdef" style="fill:rgb(1, 2, 3)"/><g fill="var(--ink)"/>&#123;</svg>';
     expect(leftoverColors(svg)).toEqual(['#ABCDEF', '#abcdef', 'rgb(1, 2, 3)']);
     expect(leftoverColors('<svg fill="var(--panel)"/>')).toEqual([]);
+  });
+  it('ignores colours inside <style> and <filter>', () => {
+    const svg =
+      '<svg><style>.a{fill:#000;x:rgba(1,2,3,1)}</style><filter id="f"><feDropShadow flood-color="#000000"/></filter><path fill="#123456"/></svg>';
+    expect(leftoverColors(svg)).toEqual(['#123456']);
   });
 });
 

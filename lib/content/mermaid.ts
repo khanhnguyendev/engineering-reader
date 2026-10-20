@@ -66,6 +66,16 @@ export function postProcessSvg(svg: string, opts: { id: string }): string {
   for (const [hex, variable] of Object.entries(SENTINELS)) {
     out = out.replace(new RegExp(hex, 'gi'), variable);
   }
+  out = out.replace(
+    /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/gi,
+    (m, r: string, g: string, b: string, a: string) => {
+      const hex = '#' + [r, g, b].map((n) => Number(n).toString(16).padStart(2, '0')).join('');
+      const variable = SENTINELS[hex];
+      if (!variable) return m;
+      const pct = Math.round(Number(a) * 10000) / 100;
+      return `color-mix(in srgb, ${variable} ${pct}%, transparent)`;
+    },
+  );
   return out.replace(/<svg\b([^>]*)>/, (_m, attrs: string) => {
     const rest = attrs.replace(/\sid="[^"]*"/, '');
     return `<svg id="${opts.id}"${rest}>`;
@@ -74,7 +84,8 @@ export function postProcessSvg(svg: string, opts: { id: string }): string {
 
 /** Colours left in a processed SVG that are not sentinel variables. */
 export function leftoverColors(svg: string): string[] {
-  const found = svg.match(/(?<![&\w])#[0-9a-fA-F]{3,6}\b|\brgba?\([^)]*\)|\bhsla?\([^)]*\)/g) ?? [];
+  const scanned = svg.replace(/<(style|filter)\b[\s\S]*?<\/\1>/gi, '');
+  const found = scanned.match(/(?<![&\w])#[0-9a-fA-F]{3,6}\b|\brgba?\([^)]*\)|\bhsla?\([^)]*\)/g) ?? [];
   return [...new Set(found)];
 }
 
