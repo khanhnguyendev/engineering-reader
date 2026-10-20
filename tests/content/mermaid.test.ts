@@ -11,6 +11,7 @@ import {
   readSvgHash,
   postProcessSvg,
   planRenders,
+  leftoverColors,
 } from '@/lib/content/mermaid';
 
 const GOOD = path.resolve(import.meta.dirname, '../fixtures/posts/good-post');
@@ -26,6 +27,16 @@ describe('hashBlock', () => {
     expect(hashBlock('graph TD\nA-->B')).toBe(hashBlock('graph TD\nA-->B'));
     expect(hashBlock('graph TD\nA-->B')).toMatch(/^[0-9a-f]{12}$/);
     expect(hashBlock('graph TD\nA-->C')).not.toBe(hashBlock('graph TD\nA-->B'));
+  });
+  it('is bound to the sentinels', () => {
+    const before = hashBlock('x');
+    const orig = SENTINELS['#010101'];
+    SENTINELS['#010101'] = 'var(--other)';
+    try {
+      expect(hashBlock('x')).not.toBe(before);
+    } finally {
+      SENTINELS['#010101'] = orig;
+    }
   });
   it('is bound to the theme', () => {
     const before = hashBlock('x');
@@ -57,11 +68,19 @@ describe('svg helpers', () => {
     expect(out).toContain('id="p-vi-1"');
     expect(Object.keys(SENTINELS)).toHaveLength(5);
   });
-  it('postProcessSvg replaces case-insensitively and adds a missing id', () => {
+  it('postProcessSvg adds a missing id and replaces uppercase hex', () => {
     const out = postProcessSvg('<svg width="1"><path fill="#030303"/></svg>', { id: 'a' });
     expect(out).toContain('<svg id="a" width="1">');
     const up = postProcessSvg('<svg id="a"><path fill="#0A0A0A"/><path fill="#020202"/></svg>', { id: 'a' });
     expect(up).toContain('var(--ink)');
+  });
+});
+
+describe('leftoverColors', () => {
+  it('reports distinct non-sentinel colours only', () => {
+    const svg = '<svg><path fill="#ABCDEF"/><path stroke="#abcdef" style="fill:rgb(1, 2, 3)"/><g fill="var(--ink)"/>&#123;</svg>';
+    expect(leftoverColors(svg)).toEqual(['#ABCDEF', '#abcdef', 'rgb(1, 2, 3)']);
+    expect(leftoverColors('<svg fill="var(--panel)"/>')).toEqual([]);
   });
 });
 

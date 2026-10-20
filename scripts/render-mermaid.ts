@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSy
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { readRawPost } from '../lib/content/load';
-import { hashBlock, planRenders, postProcessSvg } from '../lib/content/mermaid';
+import { hashBlock, leftoverColors, planRenders, postProcessSvg } from '../lib/content/mermaid';
 
 const args = process.argv.slice(2);
 const check = args.includes('--check');
@@ -47,10 +47,14 @@ try {
       );
     } catch (e) {
       const err = e as { stdout?: string; stderr?: string };
-      console.error(`✖ mmdc failed for ${p.slug} ${p.file}\n${err.stdout ?? ''}${err.stderr ?? ''}`);
-      process.exit(1);
+      console.error(
+        `✖ mmdc failed for ${p.slug} ${p.file}: ${(e as Error).message}\n${err.stdout ?? ''}${err.stderr ?? ''}`,
+      );
+      process.exitCode = 1;
+      break;
     }
     const svg = postProcessSvg(readFileSync(outFile, 'utf8'), { id });
+    for (const c of leftoverColors(svg)) console.warn(`⚠ ${p.file}: non-sentinel colour ${c}`);
     writeFileSync(p.file, `<!-- mermaid:${hashBlock(p.src)} -->\n${svg}`);
     console.log(`rendered ${p.slug} ${p.file} (${p.status})`);
   }

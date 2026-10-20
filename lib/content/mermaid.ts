@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { LOCALES, type Locale } from '@/lib/i18n';
-import type { RawPost } from '@/lib/content/load';
+import { mermaidBlocksOf, type RawPost } from '@/lib/content/load';
 
 export const MERMAID_THEME = {
   theme: 'base',
@@ -14,6 +14,16 @@ export const MERMAID_THEME = {
     secondaryColor: '#040404',
     tertiaryColor: '#040404',
     background: '#050505',
+    secondaryBorderColor: '#030303',
+    tertiaryBorderColor: '#030303',
+    clusterBorder: '#030303',
+    noteBorderColor: '#030303',
+    arrowheadColor: '#030303',
+    secondaryTextColor: '#020202',
+    tertiaryTextColor: '#020202',
+    titleColor: '#020202',
+    noteTextColor: '#020202',
+    noteBkgColor: '#040404',
     fontFamily: 'Inter, Arial, sans-serif',
   },
 };
@@ -37,7 +47,7 @@ export type RenderPlan = {
 
 export function hashBlock(src: string): string {
   return createHash('sha256')
-    .update(src + JSON.stringify(MERMAID_THEME))
+    .update(src + JSON.stringify({ MERMAID_THEME, SENTINELS }))
     .digest('hex')
     .slice(0, 12);
 }
@@ -62,12 +72,18 @@ export function postProcessSvg(svg: string, opts: { id: string }): string {
   });
 }
 
+/** Colours left in a processed SVG that are not sentinel variables. */
+export function leftoverColors(svg: string): string[] {
+  const found = svg.match(/(?<![&\w])#[0-9a-fA-F]{3,6}\b|\brgba?\([^)]*\)|\bhsla?\([^)]*\)/g) ?? [];
+  return [...new Set(found)];
+}
+
 export function planRenders(raw: RawPost): RenderPlan[] {
   const plans: RenderPlan[] = [];
   for (const locale of LOCALES) {
     const rl = raw.locales[locale];
     if (!rl || rl.draft) continue;
-    const blocks = [...rl.body.matchAll(/```mermaid[^\n]*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
+    const blocks = mermaidBlocksOf(rl.body);
     blocks.forEach((src, index) => {
       const file = path.join(raw.dir, svgName(locale, index));
       let status: RenderStatus;

@@ -74,7 +74,7 @@ export function readRawPost(dir: string): RawPost {
   return { slug, dir, meta, locales };
 }
 
-function mermaidBlocksOf(body: string): string[] {
+export function mermaidBlocksOf(body: string): string[] {
   return [...body.matchAll(/```mermaid[^\n]*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
 }
 
