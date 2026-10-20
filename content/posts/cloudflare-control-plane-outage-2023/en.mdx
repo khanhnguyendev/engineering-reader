@@ -1,6 +1,6 @@
 ---
-title: "A power failure at one Oregon data center disrupted Cloudflare's control plane for 41 hours"
-summary: "One of three Oregon sites lost power, disrupting Cloudflare's dashboard and APIs for about 41 hours through dependencies no failover test had ever exposed."
+title: "A power failure at one Oregon data center disrupted Cloudflare's control plane for up to 41 hours"
+summary: "One of three Oregon sites lost power, disrupting Cloudflare's dashboard and APIs for up to 41 hours through dependencies no failover test had ever exposed."
 tldr:
   - "From 11:43 UTC on 2 November 2023, Cloudflare customers could not reliably change settings through the dashboard or API; most were back the same day, and the last services returned at 04:25 UTC on 4 November. Traffic through the edge network kept flowing."
   - "The control plane ran active-active across three data centers near Hillsboro, Oregon, built to lose any one of them. One of them, PDX-04, lost utility power, generators and then its UPS, which lasted about 4 minutes against a 10-minute design."
@@ -67,7 +67,7 @@ The surprise came from the services everyone counted as the safe ones. Code in t
 
 This is the bottleneck of the whole case, and it is not hardware. It is an undeclared dependency on one facility.
 
-The one test never run was the whole building: PDX-04 switched off in full [S1 §Designing for Data Center Level Failure]. Every other combination had been tried, each of the other Oregon sites alone and together, plus the redundant slice inside PDX-04. The tests matched the design, not the reality. A dependency that only exists between the redundant part and the non-redundant part of the same building survives every one of those tests.
+The one test never run was the whole building: PDX-04 switched off in full [S1 §Designing for Data Center Level Failure]. What had been tried: each of the other Oregon sites alone and together, plus the redundant slice inside PDX-04. The tests matched the design, not the reality. A dependency that only exists between the redundant part and the non-redundant part of the same building survives every one of those tests.
 
 There was a process gap behind the technical one. Teams could ship a new product to general availability without first moving its backend onto the high-availability cluster; the intention was to migrate later, and nothing enforced it [S1 §Designing for Data Center Level Failure]. The result was protection that varied product by product, which is hard to see from any single team's view.
 
@@ -85,7 +85,7 @@ Newer products fared worst. Their disaster recovery procedures had never been fu
 
 Then came a judgment call worth studying. By the time the operator confirmed clean power, the team had been on the emergency all day. The CEO sent most people to rest and started the move back the next morning, accepting a later recovery in exchange for fewer tired mistakes [S1 §Some Products and Features Delayed Restart]. That is a real trade-off with both sides visible: hours of extra degradation for customers against the risk of turning one outage into two.
 
-Rebuild order was dictated by dependencies: configuration management first, by hand, then everything else, partly in parallel [S1 §Some Products and Features Delayed Restart]. Nothing less than a full bootstrap was safe, because repeated power cycles had left server state unknown [S1 §Some Products and Features Delayed Restart].
+Rebuild order was dictated by dependencies: configuration management first, by hand, then everything else, partly in parallel [S1 §Some Products and Features Delayed Restart]. Nothing less than a full bootstrap was safe, because the servers had probably been power-cycled several times, leaving their state unknown [S1 §Some Products and Features Delayed Restart].
 
 What it cost, once it was over: most analytics survived because they are also stored in Europe, but datasets without an EU copy have permanent gaps, and customers using log push lost logs from most of the event [S1 §Some Products and Features Delayed Restart]. Keeping logging off the high-availability cluster had assumed delay. In this failure, part of it became loss.
 

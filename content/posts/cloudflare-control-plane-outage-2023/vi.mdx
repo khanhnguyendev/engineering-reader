@@ -1,6 +1,6 @@
 ---
-title: "Một data center ở Oregon mất điện, control plane của Cloudflare chập chờn 41 giờ"
-summary: "Một trong ba site ở Oregon mất điện, dashboard và API của Cloudflare gián đoạn khoảng 41 giờ vì những phụ thuộc chưa bài test failover nào phát hiện."
+title: "Một data center ở Oregon mất điện, control plane của Cloudflare chập chờn đến 41 giờ"
+summary: "Một trong ba site ở Oregon mất điện, dashboard và API của Cloudflare gián đoạn đến 41 giờ vì những phụ thuộc chưa bài test failover nào phát hiện."
 tldr:
   - "Từ 11:43 UTC ngày 2/11/2023, khách hàng Cloudflare không đổi cấu hình ổn định được qua dashboard hay API; đa số dùng lại được trong ngày, service cuối cùng trở lại lúc 04:25 UTC ngày 4/11. Traffic qua mạng edge vẫn chạy."
   - "Control plane chạy active-active trên ba data center gần Hillsboro, Oregon, thiết kế để mất một site vẫn sống. Site PDX-04 mất điện lưới, mất generator, rồi UPS chỉ trụ khoảng 4 phút thay vì 10 phút như thiết kế."
@@ -67,7 +67,7 @@ Bất ngờ đến từ chính những service tưởng an toàn nhất. Code tr
 
 Đây là nút thắt của cả case: không phải phần cứng, mà là một phụ thuộc không khai báo vào một cơ sở duy nhất.
 
-Bài test duy nhất chưa từng chạy là tắt nguyên tòa PDX-04 [S1 §Designing for Data Center Level Failure]. Mọi tổ hợp khác đều đã thử: từng site Oregon khác, các site đó cùng lúc, và phần high availability bên trong PDX-04. Test khớp với bản thiết kế, không khớp với thực tế. Một phụ thuộc chỉ tồn tại giữa phần dự phòng và phần không dự phòng của cùng một tòa nhà sẽ lọt qua mọi bài test ấy.
+Bài test duy nhất chưa từng chạy là tắt nguyên tòa PDX-04 [S1 §Designing for Data Center Level Failure]. Những gì đã thử: từng site Oregon khác, các site đó cùng lúc, và phần high availability bên trong PDX-04. Test khớp với bản thiết kế, không khớp với thực tế. Một phụ thuộc chỉ tồn tại giữa phần dự phòng và phần không dự phòng của cùng một tòa nhà sẽ lọt qua mọi bài test ấy.
 
 Team có thể đưa sản phẩm mới lên general availability mà chưa chuyển backend sang cụm high availability; ý định là chuyển sau, nhưng không gì bắt buộc [S1 §Designing for Data Center Level Failure]. Mức bảo vệ vì thế khác nhau theo sản phẩm, khó thấy nếu chỉ nhìn từ một team.
 
@@ -85,7 +85,7 @@ Sản phẩm mới chịu thiệt nhất: quy trình disaster recovery của ch�
 
 Rồi đến một quyết định đáng học. Lúc điện được xác nhận sạch, team đã chạy sự cố cả ngày. CEO cho phần lớn mọi người đi nghỉ và để sáng hôm sau mới chuyển về, chấp nhận khôi phục muộn hơn để đổi lấy ít sai sót do mệt [S1 §Some Products and Features Delayed Restart]. Trade-off thấy rõ hai phía: khách chịu suy giảm thêm nhiều giờ, đổi lấy ít nguy cơ biến một sự cố thành hai.
 
-Thứ tự dựng lại do phụ thuộc quyết định: quản lý cấu hình trước, làm tay, rồi mọi thứ khác, một phần chạy song song [S1 §Some Products and Features Delayed Restart]. Chỉ bootstrap toàn bộ mới an toàn, vì bật tắt nguồn nhiều lần đã khiến trạng thái server không ai biết [S1 §Some Products and Features Delayed Restart].
+Thứ tự dựng lại do phụ thuộc quyết định: quản lý cấu hình trước, làm tay, rồi mọi thứ khác, một phần chạy song song [S1 §Some Products and Features Delayed Restart]. Chỉ bootstrap toàn bộ mới an toàn, vì server có lẽ đã bị bật tắt nguồn nhiều lần nên trạng thái không ai biết [S1 §Some Products and Features Delayed Restart].
 
 Cái giá sau cùng: phần lớn analytics còn nguyên nhờ có bản lưu ở châu Âu, nhưng dataset không có bản sao EU thì thủng vĩnh viễn, và khách dùng log push mất log của gần trọn sự cố [S1 §Some Products and Features Delayed Restart]. Để logging ngoài cụm high availability là giả định log chỉ chậm; lần này một phần thành mất.
 
