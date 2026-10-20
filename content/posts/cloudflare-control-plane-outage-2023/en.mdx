@@ -63,7 +63,7 @@ None of this is exotic. Each step is a known failure mode with a known mitigatio
 
 Losing PDX-04 was a scenario Cloudflare had planned for. Its expectation was specific: analytics would go offline, logs would pile up on edge servers and arrive late, and a few low-priority services that never joined the high-availability cluster would stay down until rebuilt somewhere else [S1 §Designing for Data Center Level Failure]. The surviving sites would carry the cluster, and for the most part they did [S1 §Designing for Data Center Level Failure].
 
-The surprise came from services that were supposed to be the safe ones. Code in the redundant cluster called Kafka and ClickHouse, the systems behind log processing and analytics, and those two had no copy outside PDX-04 [S1 §Designing for Data Center Level Failure]. When the building went dark, the "highly available" services failed along with the things they needed. S1 treats the coupling itself as the error, not the power loss [S1 §Designing for Data Center Level Failure].
+The surprise came from the services everyone counted as the safe ones. Code in the redundant cluster called Kafka and ClickHouse, the systems behind log processing and analytics, and those two had no copy outside PDX-04 [S1 §Designing for Data Center Level Failure]. When the building went dark, the "highly available" services failed along with the things they needed. S1 treats the coupling itself as the error, not the power loss [S1 §Designing for Data Center Level Failure].
 
 This is the bottleneck of the whole case, and it is not hardware. It is an undeclared dependency on one facility.
 
