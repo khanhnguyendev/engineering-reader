@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { PostJsonSchema, LocaleFrontmatterSchema } from '@/lib/content/schema';
+import { loadVocab } from '@/lib/content/vocab';
 
 const base = () => ({
   slug: 'discord-cassandra-to-scylladb',
@@ -68,5 +69,26 @@ describe('LocaleFrontmatterSchema', () => {
     const { keyNumberLabels: _k, ...rest } = fm();
     void _k;
     expect(LocaleFrontmatterSchema.safeParse(rest).success).toBe(false);
+  });
+});
+
+describe('strictness and url protocol', () => {
+  it('rejects unknown keys in post.json and locale frontmatter', () => {
+    expect(PostJsonSchema.safeParse({ ...base(), extra: 1 }).success).toBe(false);
+    expect(LocaleFrontmatterSchema.safeParse({ ...fm(), extra: 1 }).success).toBe(false);
+  });
+  it('rejects non-http source urls', () => {
+    const b = base();
+    b.sources[0].url = 'ftp://discord.com/x';
+    expect(PostJsonSchema.safeParse(b).success).toBe(false);
+  });
+});
+
+describe('loadVocab', () => {
+  it('loads the committed vocab with five topics', () => {
+    const v = loadVocab();
+    expect(v.topics.map((t) => t.slug).sort()).toEqual(
+      ['data', 'distributed-systems', 'infra', 'realtime', 'reliability'],
+    );
   });
 });

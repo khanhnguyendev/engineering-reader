@@ -13,7 +13,7 @@ export const SourceSchema = z.object({
   title: z.string().min(1),
   authors: z.array(z.string()),
   publishedAt: DateStr,
-  url: z.string().url(),
+  url: z.url({ protocol: /^https?$/ }),
   accessedAt: DateStr,
   locator: z.string().nullable(),
 });
@@ -25,7 +25,7 @@ export const KeyNumberSchema = z.object({
 });
 
 export const PostJsonSchema = z
-  .object({
+  .strictObject({
     slug: Slug,
     company: z.string().min(1),
     topic: z.enum(TOPICS),
@@ -55,7 +55,7 @@ export const PostJsonSchema = z
 
 const codePoints = (s: string) => Array.from(s.normalize('NFC')).length;
 
-export const LocaleFrontmatterSchema = z.object({
+export const LocaleFrontmatterSchema = z.strictObject({
   title: z.string().min(1),
   summary: z.string().refine((s) => codePoints(s) <= 160, 'summary must be at most 160 code points'),
   tldr: z.array(z.string().min(1)).min(3).max(5),
