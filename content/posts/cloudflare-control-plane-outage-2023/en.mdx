@@ -1,8 +1,8 @@
 ---
 title: "A power failure at one Oregon data center disrupted Cloudflare's control plane for 41 hours"
-summary: "One of three Oregon sites lost power, and Cloudflare's dashboard and APIs were disrupted for about 41 hours through dependencies no test had ever removed."
+summary: "One of three Oregon sites lost power, disrupting Cloudflare's dashboard and APIs for about 41 hours through dependencies no failover test had ever exposed."
 tldr:
-  - "From 11:43 UTC on 2 November 2023 to 04:25 UTC on 4 November, Cloudflare customers could not reliably change settings through the dashboard or API. Traffic through the edge network kept flowing."
+  - "From 11:43 UTC on 2 November 2023, Cloudflare customers could not reliably change settings through the dashboard or API; most were back the same day, and the last services returned at 04:25 UTC on 4 November. Traffic through the edge network kept flowing."
   - "The control plane ran active-active across three data centers near Hillsboro, Oregon, built to lose any one of them. One of them, PDX-04, lost utility power, generators and then its UPS, which lasted about 4 minutes against a 10-minute design."
   - "The bottleneck was hidden dependencies: services on the high-availability cluster called Kafka and ClickHouse, which ran only in PDX-04. Failover tests had never removed that whole building."
   - "Most of the control plane came back the same day from disaster recovery sites in Europe. Full recovery needed a cold rebuild of PDX-04, and log push data from most of the outage was lost."
@@ -13,19 +13,19 @@ keyNumberLabels:
 smallTeam:
   - "You do not have a second data center, and you do not need one to learn from this. List the single things your own control plane stands on: the one admin box, the one CI runner, the one DNS or registrar account, the one person with the cloud root credentials. Each is a PDX-04."
   - "This week, pick one item from that list and remove it for an hour on purpose: revoke the CI runner, log in from a fresh machine without the usual password manager, ask someone else to deploy. Write down what blocked you. That is your chaos test, at your size."
-  - "Keep a recovery path that does not depend on the thing that broke: DNS credentials stored outside the account they protect, a deploy you can run from a laptop, a written order for bringing services back. Cloudflare had to rebuild its configuration servers before anything else could start."
-  - "Do not copy the active-active setup or a European DR site. What transfers is the rule they adopted afterwards: nothing goes to production until you have written down, and once tested, how it comes back."
+  - "Keep a recovery path that does not depend on the thing that broke: DNS credentials stored outside the account they protect, a deploy you can run from a laptop, a written order for bringing services back. Your config or bootstrap host is the first thing you will need and the last thing you will think to back up."
+  - "Do not copy the active-active setup or a European DR site. What transfers is the rule they committed to afterwards: nothing goes to production until you have written down, and once tested, how it comes back."
 ---
 
 ## The design that was meant to absorb this
 
-For close to two days, Cloudflare customers could not count on changing anything. The dashboard and the public API, which together make up what Cloudflare calls its control plane, failed or worked only in patches, and the analytics side (logs and reports) went with them [S1]. The trouble began at 11:43 UTC on 2 November 2023 and was fully resolved at 04:25 UTC on 4 November, roughly 41 hours [S1] [S1 §Some Products and Features Delayed Restart].
+For most of a day, and for some products close to two days, Cloudflare customers could not count on changing anything. The dashboard and the public API, which together make up what Cloudflare calls its control plane, failed or worked only in patches, and the analytics side (logs and reports) went with them [S1]. The trouble began at 11:43 UTC on 2 November 2023 and was fully resolved at 04:25 UTC on 4 November, roughly 41 hours [S1] [S1 §Some Products and Features Delayed Restart].
 
 The part that kept working matters as much. The edge network that carries customer traffic and enforces security rules stayed up the whole time; what customers lost was the ability to manage it [S1]. Keep that split in mind, because it explains both why the outage was survivable and why it still hurt.
 
 As a brief for a design review, the requirements are easy to state. Functionally, customers must be able to read and change their configuration, and their logs must reach them. Non-functionally, the system must keep doing that if any one facility disappears, without losing data.
 
-Cloudflare's answer was geography plus redundancy. The control plane and analytics lived mostly in three data centers near Hillsboro, Oregon [S1 §Intended Design]. Each had its own utility feeds and its own network links. They were far enough apart that one flood or fire should not reach all of them, and close enough to run as an active-active cluster that keeps data in sync continuously, so any one of them could drop out while the others carried on [S1 §Intended Design].
+Cloudflare's answer was geography plus redundancy. The control plane and analytics lived mostly in three data centers near Hillsboro, Oregon [S1 §Intended Design]. Running them active-active, with data kept in sync all the time so the others carry on when any one drops out, puts a ceiling on distance; disaster isolation puts a floor under it. The sites sat between the two: near enough for continuous sync, far enough apart that one flood or fire should not reach all of them, each with its own utility feeds and network links [S1 §Intended Design].
 
 The plan had two known gaps, both chosen. Some services, mostly belonging to newer products, were still waiting to move onto that high-availability cluster [S1 §Intended Design]. And logging was left out on purpose. Logs already wait in queues at the edge before travelling to the core, so if the core logging site went dark, the reasoning went, analytics would simply arrive late, and late was acceptable [S1 §Intended Design].
 
@@ -33,7 +33,7 @@ The CEO, who signed the post, writes that the company believed this design cover
 
 ## One building, every power source gone
 
-Cloudflare found out its data center had failed when its own routers there stopped answering, not from the operator [S1 §Attempting to Restore Power]. By then the facility had been in trouble for hours.
+Cloudflare found out its data center had failed when its own routers there stopped answering, not from the operator [S1 §Attempting to Restore Power].
 
 The building was PDX-04, the biggest of the three Oregon sites, run by Flexential. Cloudflare used about 10% of its capacity [S1 §Flexential Data Center Power Failure]. What it kept there is the important part: its biggest analytics cluster, a big share of the high-availability machines, and, by default, every service that had not yet joined the high-availability cluster [S1 §Flexential Data Center Power Failure]. So PDX-04 was one of three peers for some workloads and the only home for others.
 
@@ -44,12 +44,12 @@ flowchart TD
     A[Utility feed lost during maintenance] --> B[Generators started alongside the remaining feed]
     B --> C[Ground fault at a transformer]
     C --> D[Protection trips: utility and generators both offline]
-    D --> E[UPS batteries fail after about 4 of 10 minutes]
+    D --> E[UPS lasts about 4 minutes, designed for 10]
     E --> F[PDX-04 dark: services pinned there go down]
     F --> G[High-availability services that depend on them fail too]
 ```
 
-First the local utility, doing unplanned maintenance, knocked out one of the building's utility feeds. Flexential started its generators and ran them alongside the one live utility feed left, a combination Cloudflare calls unusual and has had no clear explanation for [S1 §Flexential Data Center Power Failure]. Nobody told Cloudflare the site was now on generators, and none of its monitoring could tell where the power came from. Had it known, it says, it would have watched the site closely and moved dependent control-plane services out while the facility was degraded [S1 §Flexential Data Center Power Failure].
+First the local utility, doing unplanned maintenance, knocked out one of the building's utility feeds. Flexential started its generators and ran them alongside the one live utility feed left, a combination Cloudflare calls unusual and has had no clear explanation for [S1 §Flexential Data Center Power Failure]. Flexential never mentioned the switch to generators. That silence cost the one window in which control-plane services could have been moved off the site; Cloudflare's monitoring watched servers, not where their power came from [S1 §Flexential Data Center Power Failure].
 
 Next, a ground fault hit a utility transformer at the site. The protection systems did their job and cut power, and in doing so took the generators offline as well, leaving the building with no utility and no generators at once [S1 §Informed Speculation On What Happened Next].
 
@@ -63,11 +63,11 @@ None of this is exotic. Each step is a known failure mode with a known mitigatio
 
 Losing PDX-04 was a scenario Cloudflare had planned for. Its expectation was specific: analytics would go offline, logs would pile up on edge servers and arrive late, and a few low-priority services that never joined the high-availability cluster would stay down until rebuilt somewhere else [S1 §Designing for Data Center Level Failure]. The surviving sites would carry the cluster, and for the most part they did [S1 §Designing for Data Center Level Failure].
 
-The surprise was a group of services that sat on the high-availability cluster but leaned on something that did not. Kafka and ClickHouse, the systems behind log processing and analytics, ran only in PDX-04, while services in the redundant cluster called them [S1 §Designing for Data Center Level Failure]. When the building went dark, the "highly available" services failed along with the things they needed. S1 is blunt that these links should have been looser, should have degraded gracefully, and should have been caught [S1 §Designing for Data Center Level Failure].
+The surprise came from services that were supposed to be the safe ones. Code in the redundant cluster called Kafka and ClickHouse, the systems behind log processing and analytics, and those two had no copy outside PDX-04 [S1 §Designing for Data Center Level Failure]. When the building went dark, the "highly available" services failed along with the things they needed. S1 treats the coupling itself as the error, not the power loss [S1 §Designing for Data Center Level Failure].
 
 This is the bottleneck of the whole case, and it is not hardware. It is an undeclared dependency on one facility.
 
-Why did testing miss it? Because the tests matched the design, not the reality. Cloudflare had switched off each of the other Oregon sites, and those sites together, and had also switched off the redundant slice inside PDX-04. It never once took the whole PDX-04 building out [S1 §Designing for Data Center Level Failure]. A dependency that only exists between the redundant part and the non-redundant part of the same building survives every one of those tests.
+The one test never run was the whole building: PDX-04 switched off in full [S1 §Designing for Data Center Level Failure]. Every other combination had been tried, each of the other Oregon sites alone and together, plus the redundant slice inside PDX-04. The tests matched the design, not the reality. A dependency that only exists between the redundant part and the non-redundant part of the same building survives every one of those tests.
 
 There was a process gap behind the technical one. Teams could ship a new product to general availability without first moving its backend onto the high-availability cluster; the intention was to migrate later, and nothing enforced it [S1 §Designing for Data Center Level Failure]. The result was protection that varied product by product, which is hard to see from any single team's view.
 
@@ -85,7 +85,7 @@ Newer products fared worst. Their disaster recovery procedures had never been fu
 
 Then came a judgment call worth studying. By the time the operator confirmed clean power, the team had been on the emergency all day. The CEO sent most people to rest and started the move back the next morning, accepting a later recovery in exchange for fewer tired mistakes [S1 §Some Products and Features Delayed Restart]. That is a real trade-off with both sides visible: hours of extra degradation for customers against the risk of turning one outage into two.
 
-Recovery itself was a cold start. The servers had probably been power-cycled several times, so their state could not be trusted, and the only safe path was to bootstrap the whole facility [S1 §Some Products and Features Delayed Restart]. That started with the configuration management servers, rebuilt by hand, because nothing else could be rebuilt without them. Server rebuilds then ran in parallel, but dependencies between services forced some to come up in order [S1 §Some Products and Features Delayed Restart].
+Rebuild order was dictated by dependencies: configuration management first, by hand, then everything else, partly in parallel [S1 §Some Products and Features Delayed Restart]. Nothing less than a full bootstrap was safe, because repeated power cycles had left server state unknown [S1 §Some Products and Features Delayed Restart].
 
 What it cost, once it was over: most analytics survived because they are also stored in Europe, but datasets without an EU copy have permanent gaps, and customers using log push lost logs from most of the event [S1 §Some Products and Features Delayed Restart]. Keeping logging off the high-availability cluster had assumed delay. In this failure, part of it became loss.
 
