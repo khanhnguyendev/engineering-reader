@@ -3,7 +3,7 @@ title: "Discord chuyển kho tin nhắn từ Cassandra sang ScyllaDB"
 summary: "Discord thay 177 node Cassandra bằng 72 node ScyllaDB, kéo p99 đọc từ 40–125 ms xuống 15 ms, với data service Rust và migrator tự viết."
 tldr:
   - "Kho tin nhắn của Discord đi từ 12 node Cassandra năm 2017 lên 177 node đầu năm 2022, và page dội về đội on-call thường xuyên."
-  - "Nút thắt là hot partition cộng với GC pause của JVM: p99 đọc dao động 40–125 ms, và việc bảo trì định kỳ bị bỏ qua vì đã trở nên tốn kém."
+  - "Nút thắt là hot partition cộng với GC pause của JVM: p99 đọc dao động 40–125 ms, và một số việc bảo trì định kỳ đã bị bỏ vì quá tốn kém."
   - "Họ đặt một data service viết bằng Rust trước database để gộp các lượt đọc trùng (request coalescing), rồi chuyển sang ScyllaDB."
   - "Migrator Spark ước tính 3 tháng. Viết lại bằng Rust thì ước tính còn 9 ngày. Cutover tháng 5 năm 2022, cụm còn 72 node, p99 đọc còn 15 ms."
 keyNumberLabels:
@@ -15,7 +15,7 @@ smallTeam:
   - "Nếu bạn sắp chuyển dữ liệu, hãy đo throughput của chính script chuyển trên một phần nhỏ dữ liệu trước khi báo ngày xong. Con số ước tính của bạn thường là con số của công cụ, không phải của dữ liệu."
   - "Đừng bắt chước data service nếu bạn chỉ có một database và một ứng dụng nhỏ. Cái bạn học được là chừa sẵn một chỗ để chèn rate limit và cache, chưa cần một service riêng."
 lessons:
-  - "Lớp chắn phía trước database đã nằm trong kế hoạch từ đầu; đội biết ScyllaDB cũng có thể sinh hot partition."
+  - "Lớp chắn phía trước database là một phần của kế hoạch; đội biết ScyllaDB cũng có thể sinh hot partition."
   - "Case này chứng minh một điều hẹp: ScyllaDB cộng một lớp coalescing đã hiệu quả với workload của Discord. Nó không chứng minh ScyllaDB nhanh hơn Cassandra nói chung, và bài viết không tách phần cải thiện giữa hai thứ."
 ---
 

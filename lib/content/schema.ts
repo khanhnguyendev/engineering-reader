@@ -8,7 +8,7 @@ const DateStr = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD');
 const Slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 
 export const SourceSchema = z.object({
-  id: z.string().min(1),
+  id: z.string().regex(/^S\d+$/, 'source id must look like S1, S2, ...'),
   type: z.enum(['blog', 'talk', 'paper']),
   title: z.string().min(1),
   authors: z.array(z.string()),
@@ -42,6 +42,17 @@ export const PostJsonSchema = z
     sources: z.array(SourceSchema).min(1),
   })
   .superRefine((post, ctx) => {
+    const dupes = (key: 'keyNumbers' | 'sources', ids: string[]) => {
+      const seen = new Set<string>();
+      ids.forEach((id, i) => {
+        if (seen.has(id)) {
+          ctx.addIssue({ code: 'custom', path: [key, i, 'id'], message: `duplicate id "${id}"` });
+        }
+        seen.add(id);
+      });
+    };
+    dupes('keyNumbers', post.keyNumbers.map((k) => k.id));
+    dupes('sources', post.sources.map((s) => s.id));
     post.sources.forEach((s, i) => {
       if ((s.type === 'talk' || s.type === 'paper') && !s.locator) {
         ctx.addIssue({

@@ -43,13 +43,32 @@ describe('home (vi)', () => {
     expect(html).toContain('<h1');
     expect(html).toContain('id="content"');
     expect(html).toContain('href="#content"');
-    expect(html).toContain('Các case kỹ thuật thật, đọc trong tám phút.');
+    expect(html).toContain('Bài học từ hệ thống lớn, cho team nhỏ');
+    expect(html).toContain('aria-label="Chuyển sang tiếng Anh (EN)"');
   });
 
   it('renders the en home', async () => {
     const html = await render(FIXTURE_ROOT, 'en');
     expect(html).toContain('href="/en/posts/good-post"');
     expect(html).toContain('min read');
+    expect(html).toContain('Lessons from big systems, for small teams');
+  });
+
+  it('exports metadata with title, tagline description and alternates', async () => {
+    vi.resetModules();
+    const { generateMetadata } = await import('@/app/[locale]/page');
+    const vi_ = await generateMetadata({ params: Promise.resolve({ locale: 'vi' }) });
+    expect(vi_.title).toBe('Hệ thống lớn');
+    expect(vi_.description).toBe('Bài học từ hệ thống lớn, cho team nhỏ');
+    expect(vi_.alternates).toEqual({
+      canonical: '/vi',
+      languages: { vi: '/vi', en: '/en', 'x-default': '/vi' },
+    });
+    expect(vi_.openGraph).toEqual({ locale: 'vi' });
+    const en = await generateMetadata({ params: Promise.resolve({ locale: 'en' }) });
+    expect(en.title).toBe('Hệ thống lớn');
+    expect(en.description).toBe('Lessons from big systems, for small teams');
+    expect(en.alternates?.canonical).toBe('/en');
   });
 
   describe('ordering', () => {

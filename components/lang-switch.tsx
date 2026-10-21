@@ -22,7 +22,7 @@ export function LangSwitch({
     </span>
   );
   const link = (
-    <Link href={href} hrefLang={other} aria-label={switchLabel} className="text-muted hover:text-ink">
+    <Link href={href} hrefLang={other} aria-label={`${switchLabel} (${other.toUpperCase()})`} className="text-muted hover:text-ink">
       {other.toUpperCase()}
     </Link>
   );

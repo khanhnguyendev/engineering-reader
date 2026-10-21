@@ -54,6 +54,35 @@ describe('PostJsonSchema', () => {
       expect(r.error.issues.some((i) => i.path.join('.') === 'sources.0.locator')).toBe(true);
     }
   });
+  it('requires source ids shaped S<n>', () => {
+    for (const id of ['S1', 'S12']) {
+      const b = base();
+      b.sources[0].id = id;
+      b.keyNumbers.forEach((k) => (k.ref = id));
+      expect(PostJsonSchema.safeParse(b).success).toBe(true);
+    }
+    for (const id of ['s1', 'S', 'source-1', 'S1a']) {
+      const b = base();
+      b.sources[0].id = id;
+      const r = PostJsonSchema.safeParse(b);
+      expect(r.success).toBe(false);
+      if (!r.success) expect(r.error.issues.some((i) => i.path.join('.') === 'sources.0.id')).toBe(true);
+    }
+  });
+  it('flags duplicate keyNumbers ids and duplicate source ids', () => {
+    const b = base();
+    b.keyNumbers[2].id = 'nodes';
+    b.sources.push({ ...b.sources[0] });
+    const r = PostJsonSchema.safeParse(b);
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      const paths = r.error.issues.map((i) => i.path.join('.'));
+      expect(paths).toContain('keyNumbers.2.id');
+      expect(paths).toContain('sources.1.id');
+      expect(paths).not.toContain('keyNumbers.0.id');
+      expect(paths).not.toContain('sources.0.id');
+    }
+  });
 });
 
 describe('LocaleFrontmatterSchema', () => {

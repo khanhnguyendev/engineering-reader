@@ -20,7 +20,6 @@ Items the reviewers parked for you (one phrase each):
 - Discord lessons line 18: "in the plan from the start" adds a timing claim the source does not make.
 - Netflix line 82 (both locales): "repeat reads inside one request never leave the process" claims more than the talk; use "reuse the first result [S1 @32:44]". Lines 32 and 90 tell the 2012 ELB story twice; trim line 90 if you like.
 - All posts: check the qualitative mechanics against the sources once; every number is referenced, but prose claims were judged by reviewers from memory of the sources.
-- Mermaid diagrams render with mermaid's "neo" look (drop shadow, gradient stroke); a follow-up before the M1 finish review switches to `look: classic`. No action needed from you.
 
 If you edit a Mermaid block, run `pnpm render-mermaid` and commit the SVGs (CI would do it for you on push, but local is faster). Commit your edits on `m0-m1/foundation`.
 

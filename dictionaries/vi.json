@@ -1,7 +1,7 @@
 {
   "site": {
     "name": "Hệ thống lớn",
-    "tagline": "Các case kỹ thuật thật, đọc trong tám phút."
+    "tagline": "Bài học từ hệ thống lớn, cho team nhỏ"
   },
   "nav": {
     "companies": "Công ty",
@@ -11,7 +11,6 @@
     "skip": "Bỏ qua đến nội dung"
   },
   "post": {
-    "label": "BÀI VIẾT",
     "byline": "Biên tập: Ryan",
     "readMinutes": "{n} phút đọc",
     "keyNumbers": "Con số chính",

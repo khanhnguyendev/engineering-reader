@@ -3,7 +3,7 @@ title: "Discord moved its message store from Cassandra to ScyllaDB"
 summary: "Discord replaced 177 Cassandra nodes with 72 ScyllaDB nodes and cut read p99 from 40–125 ms to 15 ms, using a Rust data service and its own migrator."
 tldr:
   - "Discord's message store went from 12 nodes on Cassandra in 2017 to 177 by early 2022, and pages hit the on-call engineers often."
-  - "The bottleneck was hot partitions plus JVM GC pauses: read p99 swung between 40 and 125 ms, and routine maintenance was skipped because it had become expensive."
+  - "The bottleneck was hot partitions plus JVM GC pauses: read p99 swung between 40 and 125 ms, and some routine maintenance was dropped because it had grown too costly."
   - "They put a Rust data service in front of the database to coalesce duplicate reads (request coalescing), then moved to ScyllaDB."
   - "The Spark migrator was estimated at 3 months. Rewritten in Rust, the estimate dropped to 9 days. Cutover came in May 2022, leaving 72 nodes and a read p99 of 15 ms."
 keyNumberLabels:
@@ -15,7 +15,7 @@ smallTeam:
   - "If you are about to move data, measure the throughput of the copy script on a small slice before you announce a date. Your estimate is usually the tool's number, not the data's."
   - "Do not copy the data service if you have one database and one small application. What transfers is leaving a spot where rate limits and caching can go, not a separate service yet."
 lessons:
-  - "A layer in front of the database was in the plan from the start; the team knew ScyllaDB can grow hot partitions too."
+  - "A layer in front of the database was part of the plan, because the team knew ScyllaDB can grow hot partitions too."
   - "What this case proves is narrow: ScyllaDB plus a coalescing layer worked for Discord's workload. It does not prove ScyllaDB beats Cassandra in general, and the post does not split the gain between the two."
 ---
 

@@ -23,6 +23,9 @@ describe('reading time', () => {
     const text = '---\ntitle: x\n---\none two\n```ts\nconst a = 1;\n```\nthree';
     expect(countWords(text)).toBe(3);
   });
+  it('ignores source ref tokens', () => {
+    expect(countWords('one [S1] two [S2 @32:44]. three [S12 p.7], four')).toBe(4);
+  });
 });
 
 describe('extractRefs', () => {

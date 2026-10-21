@@ -2,7 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export function proxy(req: NextRequest) {
   if (req.nextUrl.pathname === "/") {
-    return NextResponse.redirect(new URL("/vi", req.url), 308);
+    const u = req.nextUrl.clone();
+    u.pathname = "/vi";
+    return NextResponse.redirect(u, 308);
   }
   return NextResponse.next();
 }

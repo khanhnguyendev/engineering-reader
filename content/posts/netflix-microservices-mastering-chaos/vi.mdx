@@ -79,7 +79,7 @@ flowchart TD
 
 Xét từng lần miss, fallback có lý: cache không có giá trị thì đọc từ nguồn. Rắc rối là cùng quy tắc ấy vẫn áp dụng khi cả lớp cache không dùng được, dồn cho service và database mức tải mà chỉ EVCache gánh nổi [S1 @32:19]. Cách đúng trong tình huống đó là fail fast [S1 @32:32]. Thay vào đó, dưới tải quá mức EVCache sập, và kéo theo toàn bộ subscriber service [S1 @32:36].
 
-Các bản sửa nằm ở phía gọi. Tách traffic batch khỏi traffic thời gian thực. Cache theo phạm vi request nghĩa là các lần đọc lặp trong cùng request không rời khỏi process [S1 @32:44]. Và, như một kế hoạch chưa làm, cấp cho thiết bị token mã hóa đủ thông tin về thành viên để giữ dịch vụ cơ bản khi subscriber service im lặng [S1 @33:03]. Sau đó dùng FIT kiểm tra kết quả dưới tải [S1 @33:27].
+Các bản sửa nằm ở phía gọi. Tách traffic batch khỏi traffic thời gian thực. Cache theo phạm vi request nghĩa là các lần đọc lặp trong cùng một request dùng lại kết quả lần đầu [S1 @32:44]. Và, như một kế hoạch chưa làm, cấp cho thiết bị token mã hóa đủ thông tin về thành viên để giữ dịch vụ cơ bản khi subscriber service im lặng [S1 @33:03]. Sau đó dùng FIT kiểm tra kết quả dưới tải [S1 @33:27].
 
 Quy tắc chung: fallback đúng cho một lần miss có thể sai khi mọi lần đều miss. Hãy tính fallback theo sức chịu thật của đích nó trỏ tới.
 

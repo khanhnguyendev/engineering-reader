@@ -227,6 +227,36 @@ describe('validatePost', () => {
     const w = run(d).find((x) => x.rule === 'lessons-omitted');
     expect(w?.level).toBe('warn');
   });
+
+  it('schema: slug must match the folder name', () => {
+    const dir = path.join(tmp, `p${n++}`, 'other-folder');
+    cpSync(GOOD, dir, { recursive: true });
+    const f = errs(run(dir)).filter((x) => x.rule === 'schema');
+    expect(f).toHaveLength(1);
+    expect(f[0].message).toContain('does not match folder name "other-folder"');
+    expect(errs(run(fresh()))).toEqual([]);
+  });
+
+  it('svg-unsafe: script, event handler and javascript: URL are rejected', () => {
+    const svg = (inner: string) =>
+      `<svg xmlns="http://www.w3.org/2000/svg"><foreignObject><div>label, only = fine</div></foreignObject>${inner}</svg>`;
+    let d = fresh();
+    mkdirSync(path.join(d, 'diagrams'), { recursive: true });
+    writeFileSync(path.join(d, 'diagrams', 'ok.svg'), svg('<rect width="1" height="1"/>'));
+    expect(rules(run(d))).not.toContain('svg-unsafe');
+    for (const bad of [
+      '<script>alert(1)</script>',
+      '<rect onload="alert(1)"/>',
+      '<rect ONCLICK = "x()"/>',
+      '<a href="javascript:alert(1)"><text>x</text></a>',
+    ]) {
+      d = fresh();
+      writeFileSync(path.join(d, 'bad.svg'), svg(bad));
+      const f = errs(run(d)).filter((x) => x.rule === 'svg-unsafe');
+      expect(f, bad).toHaveLength(1);
+      expect(f[0].file).toBe('bad.svg');
+    }
+  });
 });
 
 describe('zodIssuesToFindings', () => {

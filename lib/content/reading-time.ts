@@ -5,7 +5,8 @@ export const WPM: Record<Locale, number> = { vi: 200, en: 230 };
 export function countWords(text: string): number {
   const stripped = text
     .replace(/^﻿?---\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/, '')
-    .replace(/```[\s\S]*?```/g, ' ');
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/[ \t]*\[S\d+[^\]]*\]/g, '');
   return stripped.split(/\s+/).filter(Boolean).length;
 }
 

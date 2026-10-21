@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { LOCALES } from '@/lib/i18n';
 import { parsePost, readRawPost, type RawPost, type ZodIssueWithFile } from '@/lib/content/load';
@@ -19,6 +19,11 @@ const IMAGE_EXT = /\.(png|jpe?g|webp|gif|svg|avif)$/i;
 const MAX_DIR = 2 * 1024 * 1024;
 const DEEP = { min: 6, max: 10 };
 const WHOLE = { min: 8, max: 12 };
+const SVG_UNSAFE: [RegExp, string][] = [
+  [/<script/i, '<script>'],
+  [/<[^>]*\son[a-z]+\s*=/i, 'an event-handler attribute'],
+  [/javascript:/i, 'a javascript: URL'],
+];
 const ENUM_KEYS = new Set(['topic', 'caseType', 'tags', 'company', 'series']);
 
 export function zodIssuesToFindings(
@@ -123,6 +128,12 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
 
   const meta = post.meta;
 
+  // schema: slug must equal folder name
+  const folder = path.basename(raw.dir);
+  if (meta.slug !== folder) {
+    add('error', 'schema', `slug "${meta.slug}" does not match folder name "${folder}"`, 'post.json');
+  }
+
   // enum (vocab membership)
   if (!vocab.companies.some((c) => c.slug === meta.company)) {
     add('error', 'enum', `company "${meta.company}" is not in companies.json`, 'post.json');
@@ -211,14 +222,21 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
     add('error', 'mermaid-count', `mermaid block counts differ across locales: ${JSON.stringify(mermaid)}`);
   }
 
-  // asset-size
+  // asset-size, svg-unsafe
   if (existsSync(raw.dir)) {
     let total = 0;
-    for (const f of listFiles(raw.dir)) {
+    const files = listFiles(raw.dir);
+    for (const f of files) {
       total += f.size;
       if (IMAGE_EXT.test(f.rel) && f.size > MAX_FILE) {
         add('error', 'asset-size', `${f.rel} is ${Math.round(f.size / 1024)} KB, over the 300 KB limit`, f.rel);
       }
+    }
+    for (const f of files) {
+      if (!/\.svg$/i.test(f.rel)) continue;
+      const svg = readFileSync(path.join(raw.dir, f.rel), 'utf8');
+      const hits = SVG_UNSAFE.filter(([re]) => re.test(svg)).map(([, what]) => what);
+      if (hits.length > 0) add('error', 'svg-unsafe', `${f.rel} contains ${hits.join(', ')}`, f.rel);
     }
     if (total > MAX_DIR) {
       add('error', 'asset-size', `post folder is ${(total / 1024 / 1024).toFixed(2)} MB, over the 2 MB limit`);

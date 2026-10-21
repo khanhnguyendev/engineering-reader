@@ -79,7 +79,7 @@ flowchart TD
 
 Taken one miss at a time, the fallback was reasonable: no cached value, so read from the source. The trouble came when the same rule applied while the entire cache layer was unavailable, sending the service and its database a load that only EVCache had ever been able to carry [S1 @32:19]. The right move in that situation is to fail fast [S1 @32:32]. Instead, under the excess load EVCache went down and took the whole subscriber service down with it [S1 @32:36].
 
-The fixes go into the callers. Keep batch work away from the systems that serve live requests. Request-scoped caching means repeat reads inside one request never leave the process [S1 @32:44]. And, as a plan Netflix had not yet built, give devices an encrypted token carrying enough about the member to keep basic service running when the subscriber service cannot be reached [S1 @33:03]. Then test the result with FIT under load [S1 @33:27].
+The fixes go into the callers. Keep batch work away from the systems that serve live requests. Request-scoped caching means repeat reads inside one request reuse the first result [S1 @32:44]. And, as a plan Netflix had not yet built, give devices an encrypted token carrying enough about the member to keep basic service running when the subscriber service cannot be reached [S1 @33:03]. Then test the result with FIT under load [S1 @33:27].
 
 The general rule from this section: a fallback that is right for one miss can be wrong for all misses at once. Size every fallback against what its target can actually carry.
 
