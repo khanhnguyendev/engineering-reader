@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { listPosts } from '@/lib/content/load';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 vi.mock('server-only', () => ({}));
@@ -30,11 +31,11 @@ describe('home (vi)', () => {
     const html = await render(FIXTURE_ROOT);
     expect(html).toContain('href="/vi/posts/good-post"');
     expect(html).toContain(GOOD_TITLE);
-    expect(html).toContain('Discord');
-    expect(html).toContain(meta.keyNumbers[0].value);
+    expect(html).toMatch(/class="mono-label[^"]*">Discord</);
+    expect(html).toMatch(/class="font-mono[^"]*">177 → 72</);
     expect(html).toContain('Số node database, Cassandra sang ScyllaDB');
-    expect(html).toMatch(/\d+ phút/);
-    expect(html).toContain('font-mono');
+    const n = listPosts('tests/fixtures/posts')[0].locales.vi!.readingTime.whole;
+    expect(html).toContain(`${n} phút đọc`);
   });
 
   it('has the tagline, the skip-link target and the skip link', async () => {
@@ -42,7 +43,13 @@ describe('home (vi)', () => {
     expect(html).toContain('<h1');
     expect(html).toContain('id="content"');
     expect(html).toContain('href="#content"');
-    expect(html).toMatch(/<p[^>]*text-ink-2[^>]*>[^<]+<\/p>/);
+    expect(html).toContain('Các case kỹ thuật thật, đọc trong tám phút.');
+  });
+
+  it('renders the en home', async () => {
+    const html = await render(FIXTURE_ROOT, 'en');
+    expect(html).toContain('href="/en/posts/good-post"');
+    expect(html).toContain('min read');
   });
 
   describe('ordering', () => {
@@ -51,15 +58,15 @@ describe('home (vi)', () => {
 
     it('puts the newest publishedAt first', async () => {
       cpSync(FIXTURE, path.join(tmp, 'good-post'), { recursive: true });
-      cpSync(FIXTURE, path.join(tmp, 'older-post'), { recursive: true });
-      const pj = path.join(tmp, 'older-post', 'post.json');
+      cpSync(FIXTURE, path.join(tmp, 'a-older-post'), { recursive: true });
+      const pj = path.join(tmp, 'a-older-post', 'post.json');
       writeFileSync(
         pj,
-        JSON.stringify({ ...meta, slug: 'older-post', publishedAt: '2026-01-01' }),
+        JSON.stringify({ ...meta, slug: 'a-older-post', publishedAt: '2026-01-01' }),
       );
       const html = await render(tmp);
       const newer = html.indexOf('/vi/posts/good-post');
-      const older = html.indexOf('/vi/posts/older-post');
+      const older = html.indexOf('/vi/posts/a-older-post');
       expect(newer).toBeGreaterThanOrEqual(0);
       expect(older).toBeGreaterThan(newer);
     });
