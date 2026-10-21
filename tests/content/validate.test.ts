@@ -59,6 +59,16 @@ describe('validatePost', () => {
     expect(rules(run(d))).toContain('enum');
   });
 
+  it('enum: post slug missing from its series slugs', () => {
+    const d = fresh();
+    editJson(d, (j) => (j.series = 's'));
+    const v = { ...vocab, series: { s: { slugs: ['other'], vi: 'S', en: 'S' } } };
+    const fs = validatePost(readRawPost(d), v, { today: TODAY });
+    expect(errs(fs).filter((f) => f.rule === 'enum' && /not listed in series/.test(f.message))).toHaveLength(1);
+    const ok = { ...vocab, series: { s: { slugs: ['good-post'], vi: 'S', en: 'S' } } };
+    expect(errs(validatePost(readRawPost(d), ok, { today: TODAY }))).toEqual([]);
+  });
+
   it('locator: talk without locator', () => {
     const d = fresh();
     editJson(d, (j) => {

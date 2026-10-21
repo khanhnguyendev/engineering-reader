@@ -9,7 +9,9 @@ import {
   listPostsBy,
   getPost,
   hasLocale,
+  _resetListPostsCache,
 } from '@/lib/content/load';
+import { loadVocab, _resetVocabCache } from '@/lib/content/vocab';
 
 const FIXTURES = path.resolve(import.meta.dirname, '../fixtures/posts');
 const GOOD = path.join(FIXTURES, 'good-post');
@@ -145,5 +147,38 @@ describe('listPosts / listPostsBy / getPost', () => {
     cpSync(GOOD, path.join(bad, 'bad-post'), { recursive: true });
     writeFileSync(path.join(bad, 'bad-post', 'post.json'), '{ nope');
     expect(() => listPosts(bad)).toThrow(/bad-post\/post\.json/);
+  });
+});
+
+describe('memoization', () => {
+  it('listPosts is memoized per root until reset, and frozen', () => {
+    const r = path.join(tmp, 'memo');
+    cpSync(GOOD, path.join(r, 'good-post'), { recursive: true });
+    _resetListPostsCache();
+    const first = listPosts(r);
+    expect(listPosts(r)).toBe(first);
+    expect(Object.isFrozen(first)).toBe(true);
+    const dir = path.join(r, 'second-post');
+    cpSync(GOOD, dir, { recursive: true });
+    const f = path.join(dir, 'post.json');
+    writeFileSync(f, JSON.stringify({ ...JSON.parse(readFileSync(f, 'utf8')), slug: 'second-post' }));
+    expect(listPosts(r)).toHaveLength(1);
+    _resetListPostsCache();
+    expect(listPosts(r)).toHaveLength(2);
+  });
+
+  it('loadVocab is memoized per root until reset', () => {
+    const r = path.join(tmp, 'memo-vocab');
+    cpSync(path.resolve(import.meta.dirname, '../../content'), r, {
+      recursive: true,
+      filter: (src) => !src.includes(`${path.sep}posts`),
+    });
+    _resetVocabCache();
+    const first = loadVocab(r);
+    expect(loadVocab(r)).toBe(first);
+    writeFileSync(path.join(r, 'series.json'), JSON.stringify({ s: { slugs: ['a'], vi: 'x', en: 'y' } }));
+    expect(loadVocab(r)).toBe(first);
+    _resetVocabCache();
+    expect(Object.keys(loadVocab(r).series)).toEqual(['s']);
   });
 });

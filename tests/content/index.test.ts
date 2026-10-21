@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import path from 'node:path';
 import { listPosts, type PostRecord } from '@/lib/content/load';
-import { loadVocab, type Vocab } from '@/lib/content/vocab';
+import type { Vocab } from '@/lib/content/vocab';
 import { RedirectsSchema } from '@/lib/content/schema';
 import {
   companiesWithCounts,
@@ -13,7 +13,7 @@ import {
 } from '@/lib/content/index';
 
 const FIXTURES = path.resolve(import.meta.dirname, '../fixtures/posts');
-const [base] = listPosts(FIXTURES).filter((p) => p.slug === 'good-post');
+const base = listPosts(FIXTURES).find((p) => p.slug === 'good-post')!;
 
 function mk(
   slug: string,
@@ -36,9 +36,16 @@ function mk(
   };
 }
 
+const entry = (slug: string) => ({ slug, vi: slug, en: slug });
+const company = (slug: string) => ({
+  slug, name: slug, blogUrl: 'https://example.com', feedUrl: null, brandColor: '#000000', logo: 'x',
+});
 const vocab: Vocab = {
-  ...loadVocab('content'),
+  companies: ['discord', 'cloudflare', 'netflix'].map(company),
+  topics: ['distributed-systems', 'data', 'infra'].map(entry),
+  tags: ['rust', 'cassandra', 'alpha'].map(entry),
   series: { s: { slugs: ['a', 'b', 'c'], vi: 'Chuỗi', en: 'Series' } },
+  sourceHosts: [],
 };
 
 describe('counts', () => {
@@ -70,6 +77,10 @@ describe('seriesNav', () => {
     expect(seriesNav(mk('a'), vocab, [mk('a')], 'vi')).toEqual({ index: -1, total: 0 });
     const p = mk('a', { series: 'nope' });
     expect(seriesNav(p, vocab, [p], 'vi')).toEqual({ index: -1, total: 0 });
+  });
+  it('returns index -1 when the post is not in series.slugs', () => {
+    const x = mk('x', { series: 's' });
+    expect(seriesNav(x, vocab, [x, mk('a', { series: 's' })], 'vi')).toEqual({ index: -1, total: 0 });
   });
   it('single post series', () => {
     const a = mk('a', { series: 's' });
@@ -127,6 +138,9 @@ describe('featuredPosts', () => {
   const d = mk('d', { publishedAt: '2026-04-01', locales: ['vi'] });
   it('uses featured order, ignoring missing slugs, then fills newest', () => {
     expect(featuredPosts([a, b, c, d], ['a', 'zzz'], 'en', 3).map((p) => p.slug)).toEqual(['a', 'c', 'b']);
+  });
+  it('dedupes a duplicated featured slug', () => {
+    expect(featuredPosts([a, b, c], ['a', 'a'], 'en', 3).map((p) => p.slug)).toEqual(['a', 'c', 'b']);
   });
   it('falls back to newest when none featured; honors locale', () => {
     expect(featuredPosts([a, b, c, d], [], 'vi', 2).map((p) => p.slug)).toEqual(['d', 'c']);

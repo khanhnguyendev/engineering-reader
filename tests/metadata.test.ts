@@ -20,4 +20,17 @@ describe('buildMetadata', () => {
     expect(m.alternates?.languages).toMatchObject({ vi: '/vi', 'x-default': '/vi' });
     expect(m.openGraph).toMatchObject({ locale: 'en_GB', url: '/en', type: 'article' });
   });
+
+  it("normalises '/' to the home path", () => {
+    const m = buildMetadata({ locale: 'vi', path: '/', title: 'T', description: 'D' });
+    expect(m.alternates?.canonical).toBe('/vi');
+    expect(m.openGraph).toMatchObject({ url: '/vi' });
+  });
+
+  it('filters languages by locales and drops x-default without vi', () => {
+    const m = buildMetadata({ locale: 'en', path: '/x', title: 'T', description: 'D', locales: ['en'] });
+    expect(m.alternates?.languages).toEqual({ en: '/en/x' });
+    const both = buildMetadata({ locale: 'vi', path: '/x', title: 'T', description: 'D', locales: ['vi'] });
+    expect(both.alternates?.languages).toEqual({ vi: '/vi/x', 'x-default': '/vi/x' });
+  });
 });

@@ -125,16 +125,16 @@ export function parsePost(raw: RawPost): { post?: PostRecord; issues: ZodIssueWi
   return { post: { slug: raw.slug, dir: raw.dir, meta: metaResult.data, locales }, issues };
 }
 
-const listPostsCache = new Map<string, PostRecord[]>();
+const listPostsCache = new Map<string, readonly PostRecord[]>();
 
 export function _resetListPostsCache(): void {
   listPostsCache.clear();
 }
 
-export function listPosts(root: string = CONTENT_ROOT): PostRecord[] {
+export function listPosts(root: string = CONTENT_ROOT): readonly PostRecord[] {
   const cached = listPostsCache.get(root);
   if (cached) return cached;
-  const posts = loadPosts(root);
+  const posts = Object.freeze(loadPosts(root));
   listPostsCache.set(root, posts);
   return posts;
 }

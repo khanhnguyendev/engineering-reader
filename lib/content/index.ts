@@ -3,7 +3,7 @@ import { hasLocale, type PostRecord } from '@/lib/content/load';
 import type { Company, Series, Tag, Topic } from '@/lib/content/schema';
 import type { Vocab } from '@/lib/content/vocab';
 
-function countBy(posts: PostRecord[], locale: Locale, pick: (p: PostRecord) => string[]) {
+function countBy(posts: readonly PostRecord[], locale: Locale, pick: (p: PostRecord) => string[]) {
   const counts = new Map<string, number>();
   for (const p of posts) {
     if (!hasLocale(p, locale)) continue;
@@ -13,7 +13,7 @@ function countBy(posts: PostRecord[], locale: Locale, pick: (p: PostRecord) => s
 }
 
 export function companiesWithCounts(
-  posts: PostRecord[],
+  posts: readonly PostRecord[],
   vocab: Vocab,
   locale: Locale,
 ): Array<{ company: Company; count: number }> {
@@ -22,7 +22,7 @@ export function companiesWithCounts(
 }
 
 export function topicsWithCounts(
-  posts: PostRecord[],
+  posts: readonly PostRecord[],
   vocab: Vocab,
   locale: Locale,
 ): Array<{ topic: Topic; count: number }> {
@@ -31,7 +31,7 @@ export function topicsWithCounts(
 }
 
 export function tagsWithCounts(
-  posts: PostRecord[],
+  posts: readonly PostRecord[],
   vocab: Vocab,
   locale: Locale,
 ): Array<{ tag: Tag; count: number }> {
@@ -44,7 +44,7 @@ export function tagsWithCounts(
 export function seriesNav(
   post: PostRecord,
   vocab: Vocab,
-  posts: PostRecord[],
+  posts: readonly PostRecord[],
   locale: Locale,
 ): {
   series?: Series & { key: string };
@@ -56,6 +56,7 @@ export function seriesNav(
   const key = post.meta.series;
   if (key === null || !Object.hasOwn(vocab.series, key)) return { index: -1, total: 0 };
   const series = vocab.series[key];
+  if (!series.slugs.includes(post.slug)) return { index: -1, total: 0 };
   const bySlug = new Map(posts.map((p) => [p.slug, p]));
   const ordered = series.slugs
     .map((s) => bySlug.get(s))
@@ -75,7 +76,7 @@ const newestFirst = (a: PostRecord, b: PostRecord) =>
 
 export function relatedPosts(
   post: PostRecord,
-  posts: PostRecord[],
+  posts: readonly PostRecord[],
   locale: Locale,
   n = 3,
 ): PostRecord[] {
@@ -90,7 +91,7 @@ export function relatedPosts(
 }
 
 export function featuredPosts(
-  posts: PostRecord[],
+  posts: readonly PostRecord[],
   featured: string[],
   locale: Locale,
   n = 3,

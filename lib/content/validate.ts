@@ -144,6 +144,8 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
   }
   if (meta.series !== null && !Object.hasOwn(vocab.series, meta.series)) {
     add('error', 'enum', `series "${meta.series}" is not in series.json`, 'post.json');
+  } else if (meta.series !== null && !vocab.series[meta.series].slugs.includes(meta.slug)) {
+    add('error', 'enum', `slug "${meta.slug}" is not listed in series "${meta.series}" in series.json`, 'post.json');
   }
 
   // labels
