@@ -23,6 +23,7 @@
   --accent: #6ee7b7;
   --accent-ink: #04070a;
   --radius: 10px;
+  color-scheme: dark;
 }
 
 :root[data-theme="light"] {
@@ -37,6 +38,7 @@
   --panel-2: rgba(17, 24, 39, 0.05);
   --accent: #0f7a5a;
   --accent-ink: #ffffff;
+  color-scheme: light;
 }
 
 /* No-JS fallback: follow the OS when the inline script has not set data-theme. */
@@ -53,6 +55,7 @@
     --panel-2: rgba(17, 24, 39, 0.05);
     --accent: #0f7a5a;
     --accent-ink: #ffffff;
+    color-scheme: light;
   }
 }
 
@@ -72,57 +75,61 @@
   --radius-panel: var(--radius);
 }
 
-body {
-  background-color: var(--ground);
-  background-image:
-    linear-gradient(to right, var(--grid) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
-  background-size: 40px 40px;
-  color: var(--ink);
-  font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: 17px;
-  line-height: 1.65;
-}
-
-@media (min-width: 64rem) {
+@layer base {
   body {
-    font-size: 18px;
-    line-height: 1.7;
+    background-color: var(--ground);
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    color: var(--ink);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+  }
+
+  @media (min-width: 64rem) {
+    body {
+      font-size: 18px;
+      line-height: 1.7;
+    }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 }
 
-h1,
-h2,
-h3,
-h4 {
-  font-family: var(--font-sans), system-ui, sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
+@layer components {
+  .mono-label {
+    font-family: var(--font-jetbrains), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
 
-.mono-label {
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+  }
 
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius);
-}
+  .hairline {
+    border-top: 1px solid var(--hairline);
+  }
 
-.hairline {
-  border-top: 1px solid var(--hairline);
-}
-
-/* The only accent border in the system. */
-.callout {
-  background: var(--panel);
-  border: 1px solid var(--hairline);
-  border-left: 3px solid var(--accent);
-  border-radius: var(--radius);
+  /* The only accent border in the system. */
+  .callout {
+    background: var(--panel);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+  }
 }
 
 /* Code theme switch for rehype-pretty-code (dual themes). */

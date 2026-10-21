@@ -14,10 +14,11 @@ function run({
   vi.stubGlobal("matchMedia", (q: string) => ({
     matches: q === "(prefers-color-scheme: dark)" ? osDark : false,
   }));
-  vi.stubGlobal("localStorage", {
-    getItem: () => {
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    get() {
       if (throws) throw new Error("denied");
-      return stored ?? null;
+      return { getItem: () => stored ?? null };
     },
   });
   delete document.documentElement.dataset.theme;
@@ -25,11 +26,19 @@ function run({
   return document.documentElement.dataset.theme;
 }
 
-afterEach(() => vi.unstubAllGlobals());
+const originalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  if (originalStorage) Object.defineProperty(globalThis, "localStorage", originalStorage);
+});
 
 describe("themeScript", () => {
   it("stored light wins over OS dark", () => {
     expect(run({ stored: "light", osDark: true })).toBe("light");
+  });
+  it("stored dark wins over OS light", () => {
+    expect(run({ stored: "dark", osDark: false })).toBe("dark");
   });
   it("nothing stored follows OS dark", () => {
     expect(run({ osDark: true })).toBe("dark");

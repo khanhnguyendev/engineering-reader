@@ -32,10 +32,11 @@ export function ThemeToggle({ ariaLabel }: { ariaLabel: string }) {
     <button
       type="button"
       onClick={toggle}
-      aria-label={ariaLabel}
+      aria-pressed={theme === "light"}
       className="mono-label rounded-panel border border-hairline-strong px-3 py-2 text-ink"
     >
-      <span suppressHydrationWarning>{theme === "light" ? "LIGHT" : "DARK"}</span>
+      <span className="sr-only">{ariaLabel}</span>
+      <span aria-hidden="true">{theme === "light" ? "LIGHT" : "DARK"}</span>
     </button>
   );
 }
