@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { parsePost, readRawPost } from '@/lib/content/load';
 import { hashBlock, svgName } from '@/lib/content/mermaid';
 import { compilePostBody } from '@/lib/mdx/compile';
+import { slugify } from '@/lib/mdx/rehype-sections';
 
 const FIXTURE = path.resolve(import.meta.dirname, '../fixtures/posts/good-post');
 let tmp: string;
@@ -28,7 +29,7 @@ function load() {
 describe('compilePostBody', () => {
   it('renders refs as anchors', async () => {
     const { content } = await compilePostBody(load(), 'vi');
-    expect(renderToStaticMarkup(content)).toContain('href="#S1"');
+    expect(renderToStaticMarkup(content)).toContain('<a href="#S1" class="ref">[S1]</a>');
   });
 
   it('falls back to a code block when no SVG exists', async () => {
@@ -73,5 +74,76 @@ describe('compilePostBody', () => {
     post.locales.vi!.body += '\n\n```ts\nconst a: number = 1;\n```\n';
     const { content } = await compilePostBody(post, 'vi');
     expect(renderToStaticMarkup(content)).toContain('data-rehype-pretty-code-figure');
+  });
+
+  it('does not style unlabelled fences as inline code', async () => {
+    const post = load();
+    post.locales.vi!.body += '\n\n```\nplain fence\n```\n';
+    const { content } = await compilePostBody(post, 'vi');
+    const html = renderToStaticMarkup(content);
+    const pre = html.slice(html.indexOf('plain fence') - 400, html.indexOf('plain fence') + 50);
+    expect(pre).toContain('<pre');
+    expect(pre).not.toContain('rounded-sm');
+    expect(pre).not.toContain('font-mono');
+  });
+
+  it('keeps refs inside inline code literal and renders locators', async () => {
+    const raw = readRawPost(dir);
+    const meta = raw.meta as { sources: Array<Record<string, unknown>> };
+    meta.sources.push({ ...meta.sources[0], id: 'S2' });
+    writeFileSync(path.join(dir, 'post.json'), JSON.stringify(meta));
+    const post = load();
+    post.locales.vi!.body += '\n\nXem `[S1]` và [S2 §3]\n';
+    const { content } = await compilePostBody(post, 'vi');
+    const html = renderToStaticMarkup(content);
+    expect(html).toMatch(/<code[^>]*>\[S1\]<\/code>/);
+    expect(html).toContain('class="ref">[S2 §3]</a>');
+  });
+
+  it('leaves content before the first h2 unwrapped', async () => {
+    const post = load();
+    post.locales.vi!.body = 'Đoạn mở đầu.\n\n' + post.locales.vi!.body;
+    const { content } = await compilePostBody(post, 'vi');
+    const html = renderToStaticMarkup(content);
+    expect(html.indexOf('Đoạn mở đầu.')).toBeLessThan(html.indexOf('<section'));
+  });
+
+  it('marks external links', async () => {
+    const post = load();
+    post.locales.vi!.body += '\n\n[ext](https://example.com) [in](/vi)\n';
+    const { content } = await compilePostBody(post, 'vi');
+    const html = renderToStaticMarkup(content);
+    expect(html).toMatch(/<a [^>]*href="https:\/\/example.com"[^>]*>/);
+    expect(html).toMatch(/rel="noopener noreferrer"/);
+    expect(html).toMatch(/target="_blank"/);
+    expect(html).not.toMatch(/<a [^>]*href="\/vi"[^>]*target/);
+  });
+
+  it('indexes mermaid fences consistently with mermaidBlocksOf', async () => {
+    const post = load();
+    post.locales.vi!.body += '\n\n~~~mermaid\ngraph TD; X-->Y\n~~~\n';
+    expect(post.locales.vi!.mermaidBlocks).toHaveLength(1);
+    const { content } = await compilePostBody(post, 'vi');
+    const html = renderToStaticMarkup(content);
+    expect(html.match(/diagram-fallback/g)).toHaveLength(1);
+  });
+
+  it('keeps ref text in headings', async () => {
+    const post = load();
+    post.locales.vi!.body += '\n\n## Có ref [S1]\n\nx\n';
+    const { headings } = await compilePostBody(post, 'vi');
+    expect(headings.at(-1)!.text).toBe('Có ref [S1]');
+  });
+});
+
+describe('slugify', () => {
+  it('transliterates Vietnamese', () => {
+    expect(slugify('Đợt migrate')).toBe('dot-migrate');
+  });
+  it('dedupes duplicate h2s', async () => {
+    const { post } = parsePost(readRawPost(dir));
+    post!.locales.vi!.body = '## X\n\na\n\n## X\n\nb\n';
+    const { headings } = await compilePostBody(post!, 'vi');
+    expect(headings.map((h) => h.id)).toEqual(['x', 'x-2']);
   });
 });

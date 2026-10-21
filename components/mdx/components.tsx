@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react';
 
 export function A({ href, children, ...rest }: ComponentProps<'a'>) {
-  const external = typeof href === 'string' && /^https?:\/\//i.test(href);
+  const external = typeof href === 'string' && /^(https?:)?\/\//i.test(href);
   return (
     <a
       href={href}

@@ -75,7 +75,7 @@ export function readRawPost(dir: string): RawPost {
 }
 
 export function mermaidBlocksOf(body: string): string[] {
-  return [...body.matchAll(/```mermaid[^\n]*\n([\s\S]*?)```/g)].map((m) => m[1].trim());
+  return [...body.matchAll(/^```mermaid[^\n]*\n([\s\S]*?)^```/gm)].map((m) => m[1].trim());
 }
 
 function words(...parts: (string | string[] | undefined)[]): number {

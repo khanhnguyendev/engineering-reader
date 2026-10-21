@@ -2,6 +2,8 @@ type Node = {
   type: string;
   tagName?: string;
   value?: string;
+  name?: string;
+  attributes?: Array<{ name?: string; value?: unknown }>;
   properties?: Record<string, unknown>;
   children?: Node[];
 };
@@ -20,6 +22,10 @@ export function slugify(text: string): string {
 
 function textOf(node: Node): string {
   if (node.type === 'text') return node.value ?? '';
+  if (node.type === 'mdxJsxTextElement' && node.name === 'Ref') {
+    const id = node.attributes?.find((a) => a.name === 'id')?.value;
+    return typeof id === 'string' ? `[${id}]` : '';
+  }
   return (node.children ?? []).map(textOf).join('');
 }
 

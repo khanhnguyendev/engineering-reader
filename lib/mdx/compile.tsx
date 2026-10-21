@@ -31,7 +31,7 @@ export async function compilePostBody(
         rehypePlugins: [
           [
             rehypePrettyCode,
-            { theme: { light: 'github-light', dark: 'github-dark-dimmed' }, keepBackground: false },
+            { theme: { light: 'github-light', dark: 'github-dark-dimmed' }, keepBackground: false, defaultLang: { block: 'plaintext' } },
           ],
           [rehypeSections, { headings }],
         ],
