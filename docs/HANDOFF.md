@@ -13,7 +13,7 @@ Date: 2026-10-21. Branch `m0-m1/foundation`, draft PR #1: https://github.com/kha
 - M0 done-check verified: the validator rejects a copy with a bad key-number ref; `pnpm build` passes on the three posts.
 
 ## What you must do now (hand edit, not checklist review)
-Edit the three posts by hand in both locales. The validator will tell you if you break a rule (`pnpm validate`). Watch the lengths: Vietnamese deep layers sit at the 10-minute ceiling (Discord 1951 words, Cloudflare 1926, Netflix 1847 of 2000), so additions in vi must be paid for with cuts. Reading times: `pnpm exec tsx -e "import {readRawPost,parsePost} from './lib/content/load'; for (const s of ['discord-cassandra-to-scylladb','cloudflare-control-plane-outage-2023','netflix-microservices-mastering-chaos']) { const p=parsePost(readRawPost('content/posts/'+s)); console.log(s, JSON.stringify(Object.fromEntries(Object.entries(p.post!.locales).map(([l,d])=>[l,d.readingTime])))) }"`.
+Edit the three posts by hand in both locales. The validator will tell you if you break a rule (`pnpm validate`). Watch the lengths: Vietnamese deep layers sit near the 9–10-minute ceiling (about 1730–1790 words of 2000 now that reference tokens are not counted), so additions in vi must be paid for with cuts. Reading times: `pnpm exec tsx -e "import {readRawPost,parsePost} from './lib/content/load'; for (const s of ['discord-cassandra-to-scylladb','cloudflare-control-plane-outage-2023','netflix-microservices-mastering-chaos']) { const p=parsePost(readRawPost('content/posts/'+s)); console.log(s, JSON.stringify(Object.fromEntries(Object.entries(p.post!.locales).map(([l,d])=>[l,d.readingTime])))) }"`.
 
 Items the reviewers parked (the three one-phrase fixes below were applied in the final-review fix wave on 2026-10-22; listed for your awareness):
 - Discord tldr line 6: "skipped"/"bị bỏ qua" overstates the source's "cut down on" → "some routine maintenance was dropped" / "một số việc bảo trì định kỳ đã bị bỏ".
@@ -24,4 +24,4 @@ Items the reviewers parked (the three one-phrase fixes below were applied in the
 If you edit a Mermaid block, run `pnpm render-mermaid` and commit the SVGs (CI would do it for you on push, but local is faster). Commit your edits on `m0-m1/foundation`.
 
 ## Status
-Gate 1 was skipped on Ryan's instruction (2026-10-21, see docs/decisions.md). The run continued into M1 with the drafted fixtures. The parked items above remain for whenever Ryan edits.
+Gate 1 was skipped on Ryan's instruction (2026-10-21, see docs/decisions.md). The run continued into M1 with the drafted fixtures. The three one-phrase fixes were applied on 2026-10-22; the remaining notes are for Ryan's own pass.
