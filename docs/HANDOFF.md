@@ -1,27 +1,14 @@
-# HANDOFF: gate 1 (M0 fixtures drafted)
+# HANDOFF (unplanned stop: session usage limit, 2026-10-22)
 
-Date: 2026-10-21. Branch `m0-m1/foundation`, draft PR #1: https://github.com/khanhnguyendev/engineering-reader/pull/1 (CI green on every push).
+Not a gate. The run stopped mid-M2 because the Claude session hit its usage limit.
 
-## What shipped since the start (M0)
-- Next.js 16 scaffold, pnpm, vitest, ESLint; CI job `ci` (install, Chrome headless shell, Mermaid render-and-commit, committed-state check, test, validate, build) with a status posted on bot-pushed SHAs so branch protection stays real.
-- Content contract: zod schemas (`lib/content/schema.ts`), vocab files (`content/*.json`), loader (`lib/content/load.ts`), validator with 15 rules as `prebuild` and CLI (`pnpm validate`), Mermaid render script with hash-based freshness and CSS-variable theming (`pnpm render-mermaid`).
-- PR template with the spec §4 review checklist; repo, labels, milestones, branch protection; `docs/decisions.md`, `docs/RUNLOG.md`, `ROADMAP.md`.
-- Three real fixture posts, both locales, validator-clean, each reviewed by an independent reviewer with fix rounds:
-  - `content/posts/discord-cassandra-to-scylladb` (migration, data, Mermaid) — 5 fix rounds on paraphrase.
-  - `content/posts/cloudflare-control-plane-outage-2023` (incident, reliability, Lessons omitted deliberately: the source lists its own under "Lessons and Remediation") — 2 fix rounds.
-  - `content/posts/netflix-microservices-mastering-chaos` (design-decision, reliability, talk source with `@mm:ss` locators) — 1 fix round.
-- M0 done-check verified: the validator rejects a copy with a bad key-number ref; `pnpm build` passes on the three posts.
+## State
+- `main`: M0+M1 merged (PR #1). Production: https://engineering-reader.vercel.app (three posts live, verified).
+- Branch `m2/wayfinding`, draft PR #2 (https://github.com/khanhnguyendev/engineering-reader/pull/2), CI green at 58d0b75.
+- M2 done and reviewed: Task 1 (helpers, memoized loaders, metadata builder), Task 2 (list UI components, dictionary keys, featured.json), Tasks 3–5 (home per IA, companies index + pages, topics + tags).
+- M2 left: Task 6 (series pages, prev/next, related on the post page), Task 7 (about page from MDX), Task 8 (redirects module, root localized 404, header aria-current), Task 9 (done-check, Impeccable finish review on home/companies/topics, DESIGN.md update, merge, production verify).
+- Carried minors for Task 6's dispatch are listed in `docs/runs/2026-10-22-m2-ledger.md` (last entries). Plan: `docs/superpowers/plans/2026-10-22-m2-wayfinding.md` (revision 2). Rulings: `docs/decisions.md`.
+- Nice-to-have for you: Vercel Web Analytics is enabled; the Vercel GitHub integration is attached (previews on push, production on merge).
 
-## What you must do now (hand edit, not checklist review)
-Edit the three posts by hand in both locales. The validator will tell you if you break a rule (`pnpm validate`). Watch the lengths: Vietnamese deep layers sit near the 9–10-minute ceiling (about 1730–1790 words of 2000 now that reference tokens are not counted), so additions in vi must be paid for with cuts. Reading times: `pnpm exec tsx -e "import {readRawPost,parsePost} from './lib/content/load'; for (const s of ['discord-cassandra-to-scylladb','cloudflare-control-plane-outage-2023','netflix-microservices-mastering-chaos']) { const p=parsePost(readRawPost('content/posts/'+s)); console.log(s, JSON.stringify(Object.fromEntries(Object.entries(p.post!.locales).map(([l,d])=>[l,d.readingTime])))) }"`.
-
-Items the reviewers parked (the three one-phrase fixes below were applied in the final-review fix wave on 2026-10-22; listed for your awareness):
-- Discord tldr line 6: "skipped"/"bị bỏ qua" overstates the source's "cut down on" → "some routine maintenance was dropped" / "một số việc bảo trì định kỳ đã bị bỏ".
-- Discord lessons line 18: "in the plan from the start" adds a timing claim the source does not make.
-- Netflix line 82 (both locales): "repeat reads inside one request never leave the process" claims more than the talk; use "reuse the first result [S1 @32:44]". Lines 32 and 90 tell the 2012 ELB story twice; trim line 90 if you like.
-- All posts: check the qualitative mechanics against the sources once; every number is referenced, but prose claims were judged by reviewers from memory of the sources.
-
-If you edit a Mermaid block, run `pnpm render-mermaid` and commit the SVGs (CI would do it for you on push, but local is faster). Commit your edits on `m0-m1/foundation`.
-
-## Status
-Gate 1 was skipped on Ryan's instruction (2026-10-21, see docs/decisions.md). The run continued into M1 with the drafted fixtures. The three one-phrase fixes were applied on 2026-10-22; the remaining notes are for Ryan's own pass.
+## Resume
+In a new session in this repo, say: "resume autonomous run from HANDOFF.md". The controller recreates the SDD workspace from the archived ledger (`docs/runs/2026-10-22-m2-ledger.md`), regenerates briefs 6–9 from the plan, and dispatches Task 6.
