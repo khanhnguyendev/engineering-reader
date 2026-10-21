@@ -24,5 +24,5 @@ Items the reviewers parked for you (one phrase each):
 
 If you edit a Mermaid block, run `pnpm render-mermaid` and commit the SVGs (CI would do it for you on push, but local is faster). Commit your edits on `m0-m1/foundation`.
 
-## Resume
-In a new session in this repo, say: **"fixtures edited, continue"**. The run resumes with M1 (post page, themes, deploy), on the same branch and PR.
+## Status
+Gate 1 was skipped on Ryan's instruction (2026-10-21, see docs/decisions.md). The run continued into M1 with the drafted fixtures. The parked items above remain for whenever Ryan edits.
