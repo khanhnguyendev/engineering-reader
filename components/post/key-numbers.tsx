@@ -28,7 +28,7 @@ export function KeyNumbers({
             key={k.id}
             className="panel grid grid-cols-[minmax(0,44%)_minmax(0,1fr)_auto] items-baseline gap-x-3 bg-panel-2 px-3 py-2.5 sm:flex sm:flex-col sm:items-stretch sm:p-3 lg:p-4"
           >
-            <span className="font-mono text-[15px] font-semibold leading-[1.35] tracking-[-0.02em] break-words text-ink sm:text-[24px] sm:leading-[1.25]">
+            <span className="font-mono text-[15px] font-semibold leading-[1.35] tracking-[-0.02em] break-words text-ink sm:text-[18px] sm:leading-[1.3] lg:text-[24px] lg:leading-[1.25]">
               {k.value}
             </span>
             <span className="text-[13px] leading-[1.45] text-ink-2 sm:mt-1 sm:text-[12px] lg:text-[13px]">

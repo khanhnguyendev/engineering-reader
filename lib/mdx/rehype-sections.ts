@@ -50,24 +50,29 @@ export default function rehypeSections(options: { headings?: Heading[]; permalin
         for (let n = 2; seen.has(id); n++) id = `${base}-${n}`;
         seen.add(id);
         options.headings?.push({ id, text });
-        node.children = [
-          ...(node.children ?? []),
-          {
-            type: 'element',
-            tagName: 'a',
-            properties: {
-              href: `#${id}`,
-              className: ['h2-anchor'],
-              ariaLabel: options.permalinkLabel ?? 'Link to this section',
+        const row: Node = {
+          type: 'element',
+          tagName: 'div',
+          properties: { className: ['h2-row'] },
+          children: [
+            node,
+            {
+              type: 'element',
+              tagName: 'a',
+              properties: {
+                href: `#${id}`,
+                className: ['h2-anchor'],
+                ariaLabel: options.permalinkLabel ?? 'Link to this section',
+              },
+              children: [{ type: 'text', value: '#' }],
             },
-            children: [{ type: 'text', value: '#' }],
-          },
-        ];
+          ],
+        };
         current = {
           type: 'element',
           tagName: 'section',
           properties: { className: ['panel'], id },
-          children: [node],
+          children: [row],
         };
         out.push(current);
       } else if (current) {

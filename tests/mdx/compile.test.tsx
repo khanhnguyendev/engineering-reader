@@ -35,7 +35,10 @@ describe('compilePostBody', () => {
   it('appends a permalink anchor to each section h2', async () => {
     const { content, headings } = await compilePostBody(load(), 'vi', 'Liên kết đến mục này');
     const html = renderToStaticMarkup(content);
-    expect(html).toContain(`<a href="#${headings[0].id}" class="h2-anchor" aria-label="Liên kết đến mục này">#</a>`);
+    expect(html).toMatch(
+      new RegExp(`<div class="h2-row"><h2[^>]*>[^<]*(?:<(?!/h2)[^>]*>[^<]*)*</h2><a href="#${headings[0].id}" class="h2-anchor" aria-label="Liên kết đến mục này">#</a></div>`),
+    );
+    expect(headings.every((h) => !h.text.endsWith('#'))).toBe(true);
   });
 
   it('falls back to a code block when no SVG exists', async () => {

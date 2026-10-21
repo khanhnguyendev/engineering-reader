@@ -202,7 +202,12 @@
     transition: opacity 0.15s;
   }
 
-  :is(h2:hover, h2:focus-within) .h2-anchor,
+  .h2-row {
+    display: flex;
+    align-items: baseline;
+  }
+
+  :is(.h2-row:hover, .h2-row:focus-within) .h2-anchor,
   .h2-anchor:focus-visible {
     opacity: 1;
   }
