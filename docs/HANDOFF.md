@@ -15,7 +15,7 @@ Date: 2026-10-21. Branch `m0-m1/foundation`, draft PR #1: https://github.com/kha
 ## What you must do now (hand edit, not checklist review)
 Edit the three posts by hand in both locales. The validator will tell you if you break a rule (`pnpm validate`). Watch the lengths: Vietnamese deep layers sit at the 10-minute ceiling (Discord 1951 words, Cloudflare 1926, Netflix 1847 of 2000), so additions in vi must be paid for with cuts. Reading times: `pnpm exec tsx -e "import {readRawPost,parsePost} from './lib/content/load'; for (const s of ['discord-cassandra-to-scylladb','cloudflare-control-plane-outage-2023','netflix-microservices-mastering-chaos']) { const p=parsePost(readRawPost('content/posts/'+s)); console.log(s, JSON.stringify(Object.fromEntries(Object.entries(p.post!.locales).map(([l,d])=>[l,d.readingTime])))) }"`.
 
-Items the reviewers parked for you (one phrase each):
+Items the reviewers parked (the three one-phrase fixes below were applied in the final-review fix wave on 2026-10-22; listed for your awareness):
 - Discord tldr line 6: "skipped"/"bị bỏ qua" overstates the source's "cut down on" → "some routine maintenance was dropped" / "một số việc bảo trì định kỳ đã bị bỏ".
 - Discord lessons line 18: "in the plan from the start" adds a timing claim the source does not make.
 - Netflix line 82 (both locales): "repeat reads inside one request never leave the process" claims more than the talk; use "reuse the first result [S1 @32:44]". Lines 32 and 90 tell the 2012 ELB story twice; trim line 90 if you like.
