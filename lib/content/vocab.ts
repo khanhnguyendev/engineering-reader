@@ -24,7 +24,23 @@ function readJson(root: string, file: string): unknown {
   return JSON.parse(readFileSync(path.join(root, file), 'utf8'));
 }
 
-export function loadVocab(root = 'content'): Vocab {
+export const VOCAB_ROOT = process.env.VOCAB_ROOT ?? 'content';
+
+const vocabCache = new Map<string, Vocab>();
+
+export function _resetVocabCache(): void {
+  vocabCache.clear();
+}
+
+export function loadVocab(root: string = VOCAB_ROOT): Vocab {
+  const cached = vocabCache.get(root);
+  if (cached) return cached;
+  const vocab = readVocab(root);
+  vocabCache.set(root, vocab);
+  return vocab;
+}
+
+function readVocab(root: string): Vocab {
   return {
     companies: CompaniesSchema.parse(readJson(root, 'companies.json')),
     topics: TopicsSchema.parse(readJson(root, 'topics.json')),

@@ -100,6 +100,15 @@ export const SeriesSchema = z.record(
 );
 export const SourceHostsSchema = z.array(z.string().min(1));
 
+export const RedirectsSchema = z.array(
+  z.object({
+    from: z.string().startsWith('/'),
+    to: z.string().startsWith('/'),
+    permanent: z.boolean().default(true),
+  }),
+);
+export type Redirect = z.infer<typeof RedirectsSchema>[number];
+
 export type PostJson = z.infer<typeof PostJsonSchema>;
 export type LocaleFrontmatter = z.infer<typeof LocaleFrontmatterSchema>;
 export type Company = z.infer<typeof CompanySchema>;
