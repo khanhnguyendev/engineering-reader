@@ -19,3 +19,4 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-21 M1/T14 post page to the direction contract (+ Task 12 carry-overs) — e468223
 - 2026-10-21 M1/T15 home plain list, analytics — 6be1967
 - 2026-10-22 M1/T16 finish review ship (2 fix rounds), DESIGN.md — e9111c9
+- 2026-10-22 M0+M1 merged to main (PR #1 squash); production verification pending
