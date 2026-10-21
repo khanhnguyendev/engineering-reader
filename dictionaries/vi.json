@@ -6,7 +6,8 @@
   "nav": {
     "companies": "Công ty",
     "topics": "Chủ đề",
-    "about": "Giới thiệu"
+    "about": "Giới thiệu",
+    "label": "Điều hướng chính"
   },
   "post": {
     "label": "BÀI VIẾT",
@@ -22,7 +23,15 @@
     "missingLocale": "Bài này chưa có bản tiếng Anh.",
     "toc": "Mục lục",
     "share": "Sao chép link",
-    "breadcrumbHome": "Trang chủ"
+    "breadcrumbHome": "Trang chủ",
+    "copied": "Đã sao chép link",
+    "accessed": "Truy cập {date}",
+    "sourceTypes": {
+      "blog": "BLOG",
+      "talk": "TALK",
+      "paper": "PAPER"
+    },
+    "breadcrumb": "Đường dẫn"
   },
   "caseType": {
     "migration": "Di chuyển hệ thống",
@@ -33,7 +42,9 @@
   "theme": {
     "toggle": "Đổi giao diện",
     "light": "Giao diện sáng",
-    "dark": "Giao diện tối"
+    "dark": "Giao diện tối",
+    "lightShort": "Sáng",
+    "darkShort": "Tối"
   },
   "lang": {
     "switch": "Chuyển sang tiếng Anh"

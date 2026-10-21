@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { otherLocale, type Locale } from "@/lib/i18n";
+import { otherLocale, switchHref, type Locale } from "@/lib/i18n";
 
 export function LangSwitch({
   locale,
@@ -15,9 +15,7 @@ export function LangSwitch({
 }) {
   const pathname = usePathname();
   const other = otherLocale(locale);
-  const segments = pathname.split("/");
-  segments[1] = other;
-  const href = twinMissing ? `/${other}` : segments.join("/");
+  const href = switchHref(pathname, locale, twinMissing);
   const current = (
     <span className="text-ink" aria-current="true">
       {locale.toUpperCase()}

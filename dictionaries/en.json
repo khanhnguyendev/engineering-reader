@@ -6,7 +6,8 @@
   "nav": {
     "companies": "Companies",
     "topics": "Topics",
-    "about": "About"
+    "about": "About",
+    "label": "Main navigation"
   },
   "post": {
     "label": "ARTICLE",
@@ -22,7 +23,15 @@
     "missingLocale": "This post is not yet available in Vietnamese.",
     "toc": "Contents",
     "share": "Copy link",
-    "breadcrumbHome": "Home"
+    "breadcrumbHome": "Home",
+    "copied": "Link copied",
+    "accessed": "Accessed {date}",
+    "sourceTypes": {
+      "blog": "BLOG",
+      "talk": "TALK",
+      "paper": "PAPER"
+    },
+    "breadcrumb": "Breadcrumb"
   },
   "caseType": {
     "migration": "Migration",
@@ -33,7 +42,9 @@
   "theme": {
     "toggle": "Toggle theme",
     "light": "Light theme",
-    "dark": "Dark theme"
+    "dark": "Dark theme",
+    "lightShort": "Light",
+    "darkShort": "Dark"
   },
   "lang": {
     "switch": "Switch to Vietnamese"

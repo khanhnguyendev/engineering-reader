@@ -9,19 +9,16 @@ export function otherLocale(l: Locale): Locale {
   return l === 'vi' ? 'en' : 'vi';
 }
 
-import vi from "@/dictionaries/vi.json";
-import en from "@/dictionaries/en.json";
-
-export type Dictionary = typeof vi;
-
-const dictionaries: Record<Locale, Dictionary> = { vi, en };
-
-export function getDictionary(l: Locale): Dictionary {
-  return dictionaries[l];
-}
-
 export function fmt(s: string, vars: Record<string, string | number>): string {
   return s.replace(/\{(\w+)\}/g, (m, k: string) =>
     k in vars ? String(vars[k]) : m,
   );
+}
+
+/** The same page in the other locale, or that locale's home when the twin is missing. */
+export function switchHref(pathname: string, locale: Locale, twinMissing?: boolean): string {
+  const other = otherLocale(locale);
+  if (twinMissing) return `/${other}`;
+  const rest = pathname.split('/').slice(2).filter(Boolean);
+  return ['', other, ...rest].join('/');
 }
