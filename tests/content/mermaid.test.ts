@@ -5,6 +5,7 @@ import path from 'node:path';
 import { readRawPost } from '@/lib/content/load';
 import {
   MERMAID_THEME,
+  POSTPROCESS_VERSION,
   SENTINELS,
   hashBlock,
   svgName,
@@ -47,6 +48,11 @@ describe('hashBlock', () => {
     } finally {
       MERMAID_THEME.themeVariables.primaryColor = orig;
     }
+  });
+  it('is bound to the post-process version', () => {
+    const src = readFileSync(path.resolve(import.meta.dirname, '../../lib/content/mermaid.ts'), 'utf8');
+    expect(POSTPROCESS_VERSION).toBe(2);
+    expect(src).toMatch(/JSON\.stringify\(\{ MERMAID_THEME, SENTINELS, POSTPROCESS_VERSION \}\)/);
   });
   it('mermaid.config.json equals MERMAID_THEME', () => {
     const json = JSON.parse(readFileSync(path.resolve(import.meta.dirname, '../../mermaid.config.json'), 'utf8'));
@@ -97,12 +103,13 @@ describe('classic look', () => {
   });
   it('postProcessSvg removes paired gradient elements and filter attributes', () => {
     const out = postProcessSvg(
-      '<svg><defs><radialGradient id="r"><stop offset="0"/></radialGradient><linearGradient id="l"><stop offset="1"/></linearGradient></defs><rect fill="url(#r-Gradient)" filter="url(#drop)"/></svg>',
+      '<svg><defs><radialGradient id="r"><stop offset="0"/></radialGradient><linearGradient id="l"><stop offset="1"/></linearGradient></defs><rect fill="url(#r)" stroke="url(#l)" filter="url(#drop)"/></svg>',
       { id: 't' },
     );
     expect(out).not.toMatch(/Gradient/i);
     expect(out).not.toContain('filter=');
-    expect(out).toContain('fill="var(--hairline-strong)"');
+    expect(out).toContain('fill="var(--panel)"');
+    expect(out).toContain('stroke="var(--hairline-strong)"');
   });
 });
 
@@ -111,6 +118,27 @@ describe('classic look css', () => {
     const out = postProcessSvg('<svg><style>.a{stroke:red;filter:drop-shadow( 1px 2px 2px rgba(1,2,3,1));}.b{filter:blur(2px)}</style></svg>', { id: 't' });
     expect(out).not.toContain('filter');
     expect(out).toContain('stroke:red;');
+  });
+});
+
+describe('classic look scoping', () => {
+  it('leaves filter text outside style contexts alone', () => {
+    const svg = '<svg id="t"><p>Bloom filter: x</p><g class="n"/></svg>';
+    expect(postProcessSvg(svg, { id: 't' })).toBe(svg);
+  });
+  it('only replaces urls of removed gradients, property-aware', () => {
+    const keep = 'url(#gradient-x-en-1_flowchart-v2-pointEnd)';
+    const out = postProcessSvg(
+      `<svg><defs><radialGradient id="r"><stop/></radialGradient></defs><path fill="url(#r)" style="stroke:url(#r)" marker-end="${keep}"/></svg>`,
+      { id: 't' },
+    );
+    expect(out).toContain(keep);
+    expect(out).toContain('fill="var(--panel)"');
+    expect(out).toContain('stroke:var(--hairline-strong)');
+    expect(out).not.toContain('url(#r)');
+  });
+  it('removes <filter> definitions', () => {
+    expect(postProcessSvg('<svg><defs><filter id="f"><feDropShadow/></filter></defs></svg>', { id: 't' })).not.toContain('filter');
   });
 });
 

@@ -46,9 +46,12 @@ export type RenderPlan = {
   status: RenderStatus;
 };
 
+/** Bump whenever postProcessSvg changes so committed SVGs go stale. */
+export const POSTPROCESS_VERSION = 2;
+
 export function hashBlock(src: string): string {
   return createHash('sha256')
-    .update(src + JSON.stringify({ MERMAID_THEME, SENTINELS }))
+    .update(src + JSON.stringify({ MERMAID_THEME, SENTINELS, POSTPROCESS_VERSION }))
     .digest('hex')
     .slice(0, 12);
 }
@@ -61,6 +64,8 @@ export function readSvgHash(svg: string): string | undefined {
   const firstLine = svg.split('\n', 1)[0];
   return /^<!-- mermaid:([0-9a-f]+) -->\s*$/.exec(firstLine)?.[1];
 }
+
+const FILTER_DECL = /(?<![-\w])filter\s*:[^;}"<]*;?/gi;
 
 export function postProcessSvg(svg: string, opts: { id: string }): string {
   let out = svg;
@@ -78,10 +83,19 @@ export function postProcessSvg(svg: string, opts: { id: string }): string {
     },
   );
   // Classic look should not emit these, but strip any that survive: no gradients, no glow.
+  const gradientIds = [...out.matchAll(/<(?:linear|radial)Gradient\b[^>]*\bid="([^"]+)"/gi)].map((m) => m[1]);
   out = out.replace(/<(linearGradient|radialGradient)\b(?:[^>]*\/>|[\s\S]*?<\/\1>)/gi, '');
-  out = out.replace(/url\(\s*#[^)]*gradient[^)]*\)/gi, 'var(--hairline-strong)');
+  for (const id of gradientIds) {
+    const ref = `url\\(\\s*#${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\)`;
+    out = out.replace(new RegExp(`(\\b(fill|stroke)\\s*(?:=\\s*"|:\\s*))${ref}`, 'gi'), (_m, lead: string, prop: string) =>
+      `${lead}${prop.toLowerCase() === 'fill' ? 'var(--panel)' : 'var(--hairline-strong)'}`,
+    );
+    out = out.replace(new RegExp(ref, 'gi'), 'var(--hairline-strong)');
+  }
+  out = out.replace(/<filter\b[^>]*>[\s\S]*?<\/filter>/gi, '');
   out = out.replace(/\sfilter="\s*url\(#[^"]*"/gi, '');
-  out = out.replace(/(?<![-\w])filter\s*:[^;}"]*;?/gi, '');
+  out = out.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, (b) => b.replace(FILTER_DECL, ''));
+  out = out.replace(/\sstyle="[^"]*"/gi, (a) => a.replace(FILTER_DECL, ''));
   out = out.replace(/\sstyle="\s*"/gi, '');
   return out.replace(/<svg\b([^>]*)>/, (_m, attrs: string) => {
     const rest = attrs.replace(/\sid="[^"]*"/, '');
