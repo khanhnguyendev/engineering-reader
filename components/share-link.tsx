@@ -6,6 +6,7 @@ type Status = "idle" | "copied" | "failed";
 
 /** Fallback for contexts without the async clipboard (http, older browsers, denied permission). */
 function copyWithTextarea(text: string): boolean {
+  const previous = document.activeElement;
   const area = document.createElement("textarea");
   area.value = text;
   area.setAttribute("readonly", "");
@@ -21,6 +22,7 @@ function copyWithTextarea(text: string): boolean {
     ok = false;
   }
   document.body.removeChild(area);
+  if (previous instanceof HTMLElement) previous.focus();
   return ok;
 }
 

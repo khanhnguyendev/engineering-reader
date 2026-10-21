@@ -1,5 +1,6 @@
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeScript } from "@/components/theme-script";
+import { Analytics } from "@vercel/analytics/next";
 import "../globals.css";
 
 const inter = Inter({
@@ -37,7 +38,10 @@ export default async function LocaleLayout({
       <head>
         <ThemeScript />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

@@ -73,6 +73,12 @@ describe('post page (vi)', () => {
     expect(html).toContain('Soạn thảo với AI từ các nguồn trên, Ryan đọc lại và biên tập.');
   });
 
+  it('has the skip-link target and the sources anchor', () => {
+    expect(html).toContain('id="content"');
+    expect(html).toContain('href="#content"');
+    expect(html).toContain('id="post-sources"');
+  });
+
   it('links key numbers to their source', () => {
     expect(html).toContain('href="#S1"');
   });
