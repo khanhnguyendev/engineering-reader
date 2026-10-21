@@ -1,0 +1,54 @@
+{
+  "site": {
+    "name": "Hệ thống lớn",
+    "tagline": "Lessons from big systems, for small teams"
+  },
+  "nav": {
+    "companies": "Companies",
+    "topics": "Topics",
+    "about": "About",
+    "label": "Main navigation",
+    "skip": "Skip to content"
+  },
+  "post": {
+    "byline": "Ryan",
+    "readMinutes": "{n} min read",
+    "keyNumbers": "Key numbers",
+    "tldr": "TL;DR",
+    "smallTeam": "For a small team",
+    "deepRead": "DEEP READ · {n} MIN",
+    "lessons": "Lessons",
+    "sources": "Sources",
+    "aiLine": "Drafted with AI from the sources above, reviewed and edited by Ryan.",
+    "missingLocale": "This post is not yet available in Vietnamese.",
+    "toc": "Contents",
+    "share": "Copy link",
+    "breadcrumbHome": "Home",
+    "copied": "Link copied",
+    "accessed": "Accessed {date}",
+    "sourceTypes": {
+      "blog": "BLOG",
+      "talk": "TALK",
+      "paper": "PAPER"
+    },
+    "breadcrumb": "Breadcrumb",
+    "permalink": "Link to this section",
+    "copyFailed": "Copy failed"
+  },
+  "caseType": {
+    "migration": "Migration",
+    "incident": "Incident",
+    "design-decision": "Design decision",
+    "scaling": "Scaling"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light theme",
+    "dark": "Dark theme",
+    "lightShort": "Light",
+    "darkShort": "Dark"
+  },
+  "lang": {
+    "switch": "Switch to Vietnamese"
+  }
+}

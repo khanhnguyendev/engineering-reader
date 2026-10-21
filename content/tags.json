@@ -1,0 +1,152 @@
+[
+  {
+    "slug": "cassandra",
+    "vi": "Cassandra",
+    "en": "Cassandra"
+  },
+  {
+    "slug": "scylladb",
+    "vi": "ScyllaDB",
+    "en": "ScyllaDB"
+  },
+  {
+    "slug": "postgres",
+    "vi": "PostgreSQL",
+    "en": "PostgreSQL"
+  },
+  {
+    "slug": "sharding",
+    "vi": "Phân mảnh dữ liệu",
+    "en": "Sharding"
+  },
+  {
+    "slug": "kafka",
+    "vi": "Kafka",
+    "en": "Kafka"
+  },
+  {
+    "slug": "rust",
+    "vi": "Rust",
+    "en": "Rust"
+  },
+  {
+    "slug": "data-center",
+    "vi": "Trung tâm dữ liệu",
+    "en": "Data center"
+  },
+  {
+    "slug": "control-plane",
+    "vi": "Control plane",
+    "en": "Control plane"
+  },
+  {
+    "slug": "chaos-engineering",
+    "vi": "Kỹ thuật hỗn loạn",
+    "en": "Chaos engineering"
+  },
+  {
+    "slug": "microservices",
+    "vi": "Microservices",
+    "en": "Microservices"
+  },
+  {
+    "slug": "storage",
+    "vi": "Lưu trữ",
+    "en": "Storage"
+  },
+  {
+    "slug": "performance",
+    "vi": "Hiệu năng",
+    "en": "Performance"
+  },
+  {
+    "slug": "request-coalescing",
+    "vi": "Gộp request",
+    "en": "Request coalescing"
+  },
+  {
+    "slug": "hot-partition",
+    "vi": "Phân vùng nóng",
+    "en": "Hot partition"
+  },
+  {
+    "slug": "high-availability",
+    "vi": "Tính sẵn sàng cao",
+    "en": "High availability"
+  },
+  {
+    "slug": "gc-pause",
+    "vi": "Tạm dừng GC",
+    "en": "GC pause"
+  },
+  {
+    "slug": "migration-tooling",
+    "vi": "Công cụ migration",
+    "en": "Migration tooling"
+  },
+  {
+    "slug": "observability",
+    "vi": "Khả năng quan sát",
+    "en": "Observability"
+  },
+  {
+    "slug": "circuit-breaker",
+    "vi": "Circuit breaker",
+    "en": "Circuit breaker"
+  },
+  {
+    "slug": "service-discovery",
+    "vi": "Service discovery",
+    "en": "Service discovery"
+  },
+  {
+    "slug": "caching",
+    "vi": "Bộ nhớ đệm",
+    "en": "Caching"
+  },
+  {
+    "slug": "load-balancing",
+    "vi": "Cân bằng tải",
+    "en": "Load balancing"
+  },
+  {
+    "slug": "rate-limiting",
+    "vi": "Giới hạn tốc độ",
+    "en": "Rate limiting"
+  },
+  {
+    "slug": "consistency",
+    "vi": "Nhất quán dữ liệu",
+    "en": "Consistency"
+  },
+  {
+    "slug": "replication",
+    "vi": "Sao chép dữ liệu",
+    "en": "Replication"
+  },
+  {
+    "slug": "latency",
+    "vi": "Độ trễ",
+    "en": "Latency"
+  },
+  {
+    "slug": "capacity-planning",
+    "vi": "Hoạch định năng lực",
+    "en": "Capacity planning"
+  },
+  {
+    "slug": "incident-response",
+    "vi": "Xử lý sự cố",
+    "en": "Incident response"
+  },
+  {
+    "slug": "edge-computing",
+    "vi": "Edge computing",
+    "en": "Edge computing"
+  },
+  {
+    "slug": "streaming",
+    "vi": "Xử lý luồng",
+    "en": "Streaming"
+  }
+]

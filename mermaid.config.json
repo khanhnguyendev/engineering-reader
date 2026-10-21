@@ -1,0 +1,24 @@
+{
+  "look": "classic",
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#010101",
+    "primaryTextColor": "#020202",
+    "primaryBorderColor": "#030303",
+    "lineColor": "#030303",
+    "secondaryColor": "#040404",
+    "tertiaryColor": "#040404",
+    "background": "#050505",
+    "secondaryBorderColor": "#030303",
+    "tertiaryBorderColor": "#030303",
+    "clusterBorder": "#030303",
+    "noteBorderColor": "#030303",
+    "arrowheadColor": "#030303",
+    "secondaryTextColor": "#020202",
+    "tertiaryTextColor": "#020202",
+    "titleColor": "#020202",
+    "noteTextColor": "#020202",
+    "noteBkgColor": "#040404",
+    "fontFamily": "Inter, Arial, sans-serif"
+  }
+}

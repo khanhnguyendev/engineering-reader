@@ -1,0 +1,31 @@
+{
+  "slug": "discord-cassandra-to-scylladb",
+  "company": "discord",
+  "topic": "data",
+  "caseType": "migration",
+  "tags": ["cassandra", "scylladb", "rust", "hot-partition", "request-coalescing"],
+  "series": null,
+  "publishedAt": "2026-10-21",
+  "updatedAt": null,
+  "sourcePublishedAt": "2023-03-06",
+  "featured": false,
+  "author": "ryan",
+  "reviewedBy": "ryan",
+  "keyNumbers": [
+    { "id": "nodes", "value": "177 → 72", "ref": "S1" },
+    { "id": "latency", "value": "p99 40–125 → 15 ms", "ref": "S1" },
+    { "id": "migration", "value": "9 days", "ref": "S1" }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "type": "blog",
+      "title": "How Discord Stores Trillions of Messages",
+      "authors": ["Bo Ingram"],
+      "publishedAt": "2023-03-06",
+      "url": "https://discord.com/blog/how-discord-stores-trillions-of-messages",
+      "accessedAt": "2026-10-21",
+      "locator": null
+    }
+  ]
+}

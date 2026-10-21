@@ -1,0 +1,54 @@
+{
+  "site": {
+    "name": "Hệ thống lớn",
+    "tagline": "Bài học từ hệ thống lớn, cho team nhỏ"
+  },
+  "nav": {
+    "companies": "Công ty",
+    "topics": "Chủ đề",
+    "about": "Giới thiệu",
+    "label": "Điều hướng chính",
+    "skip": "Bỏ qua đến nội dung"
+  },
+  "post": {
+    "byline": "Biên tập: Ryan",
+    "readMinutes": "{n} phút đọc",
+    "keyNumbers": "Con số chính",
+    "tldr": "Tóm tắt nhanh",
+    "smallTeam": "Cho team nhỏ",
+    "deepRead": "ĐỌC SÂU · {n} PHÚT",
+    "lessons": "Bài học",
+    "sources": "Nguồn",
+    "aiLine": "Soạn thảo với AI từ các nguồn trên, Ryan đọc lại và biên tập.",
+    "missingLocale": "Bài này chưa có bản tiếng Anh.",
+    "toc": "Mục lục",
+    "share": "Sao chép link",
+    "breadcrumbHome": "Trang chủ",
+    "copied": "Đã sao chép link",
+    "accessed": "Truy cập {date}",
+    "sourceTypes": {
+      "blog": "BLOG",
+      "talk": "BÀI NÓI",
+      "paper": "BÀI BÁO"
+    },
+    "breadcrumb": "Đường dẫn",
+    "permalink": "Liên kết đến mục này",
+    "copyFailed": "Không sao chép được"
+  },
+  "caseType": {
+    "migration": "Di chuyển hệ thống",
+    "incident": "Sự cố",
+    "design-decision": "Quyết định thiết kế",
+    "scaling": "Mở rộng quy mô"
+  },
+  "theme": {
+    "toggle": "Đổi giao diện",
+    "light": "Giao diện sáng",
+    "dark": "Giao diện tối",
+    "lightShort": "Sáng",
+    "darkShort": "Tối"
+  },
+  "lang": {
+    "switch": "Chuyển sang tiếng Anh"
+  }
+}

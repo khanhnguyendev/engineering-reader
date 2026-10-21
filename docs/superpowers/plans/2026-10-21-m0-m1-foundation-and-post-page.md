@@ -4,448 +4,296 @@
 
 **Goal:** A validated content repo with three real bilingual fixture posts (M0) and a deployed, static Next.js 16 site that renders the post page to the direction contract in both themes (M1).
 
-**Architecture:** Content lives in `content/posts/<slug>/{post.json,vi.mdx,en.mdx}` and is loaded at build time by `lib/content`, validated by the same zod schemas the CLI validator uses (`prebuild`). MDX compiles server-side with `next-mdx-remote/rsc`; Mermaid blocks are rendered to committed SVGs by a CI script and inlined at build. All routes are static via `generateStaticParams` for `vi` and `en`.
+**Architecture:** Content lives in `content/posts/<slug>/{post.json,vi.mdx,en.mdx}` and is loaded at build time by `lib/content`, validated by the same zod schemas the CLI validator uses (`prebuild`). MDX compiles server-side with `next-mdx-remote/rsc`; Mermaid blocks are rendered to committed SVGs by a script (run locally and by CI, which commits renders back to the PR branch) and inlined at build. All routes are static via `generateStaticParams` for `vi` and `en`.
 
-**Tech Stack:** Next.js 16 (App Router, `proxy.ts`), React 19, TypeScript, pnpm, Tailwind v4 (`@theme` tokens), zod, gray-matter, next-mdx-remote, remark-gfm, rehype-pretty-code + shiki, @mermaid-js/mermaid-cli (CI only), vitest, @vercel/analytics, GitHub Actions, Vercel.
+**Tech Stack:** Next.js 16 (App Router, `proxy.ts`), React 19, TypeScript, pnpm, Tailwind v4 (`@theme inline` tokens), zod, gray-matter, next-mdx-remote, remark-gfm, rehype-pretty-code + shiki, @mermaid-js/mermaid-cli (local + CI only, never the pipeline), vitest + jsdom + @testing-library/react, @vercel/analytics, GitHub Actions, Vercel.
 
-**Spec:** `docs/superpowers/specs/2026-10-21-engineering-reader-design.md` (sections 4, 5, 7, 8, 10). Direction contract: `.impeccable/surfaces/app-locale-posts-slug-page-tsx.md`. Chosen first-viewport sketch: `.impeccable/mocks/decision/pinned-neon-navy-carded.html`.
+**Spec:** `docs/superpowers/specs/2026-10-21-engineering-reader-design.md` (sections 4, 5, 7, 8, 10). Direction contract: `.impeccable/surfaces/app-locale-posts-slug-page-tsx.md`. Chosen first-viewport sketch: `.impeccable/mocks/decision/pinned-neon-navy-carded.html` (its gradient title rule is overridden by the spec's "no gradients": use a solid 1px accent rule).
+
+Plan revision 2 (2026-10-21): folds in the plan review. Rulings are in `docs/decisions.md`.
 
 ## Global Constraints
 
-- Next.js 16, React 19, TypeScript strict, pnpm. Fully static output; no runtime file reads; no paid services; Vercel free tier.
-- Locales: exactly `vi` and `en`. Every route under `/[locale]`. `/` redirects to `/vi` with 308.
+- Next.js 16, React 19, TypeScript strict, pnpm. Fully static output; no runtime file reads; no paid services; Vercel free tier. `lint` is `eslint .`.
+- Locales: exactly `vi` and `en`, defined once in `lib/i18n.ts`. Every route under `/[locale]`. `/` redirects to `/vi` with 308.
 - Top-layer order, everywhere it is rendered: title, summary, key numbers, TL;DR, "Cho team nhỏ" / "For a small team". Then the deep-read divider, deep layer, Lessons (optional), Sources with the AI line.
-- Topics enum: `distributed-systems`, `data`, `realtime`, `infra`, `reliability`. caseType enum: `migration`, `incident`, `design-decision`, `scaling`. Tags 2 to 5 from `tags.json`. Key numbers 2 to 4.
-- Reading time: 200 words/min Vietnamese, 230 words/min English (one constant each). Deep layer 6 to 10 min; whole post 8 to 12 min. Summary at most 160 characters.
-- Sources primary only: company blog host from `companies.json` or a host in `content/source-hosts.json`. `talk` and `paper` sources must have a `locator`.
+- Topics enum: `distributed-systems`, `data`, `realtime`, `infra`, `reliability`. caseType enum: `migration`, `incident`, `design-decision`, `scaling`. Tags 2 to 5 from `tags.json`. Key numbers 2 to 4; every `keyNumbers[].ref` must be a source id.
+- Reading time: 200 words/min Vietnamese, 230 words/min English (one constant each). Deep layer 6 to 10 min; whole post 8 to 12 min. Summary at most 160 code points after NFC normalization.
+- Sources primary only: company blog host from `companies.json` or a host in `content/source-hosts.json`. `talk` and `paper` sources must have a `locator`. Every source id is referenced at least once (body ref or key-number ref, any locale).
+- URL normalization (ruling, spec §5 updated): lowercase scheme and host, strip fragment, remove `utm_*` params, keep other query params sorted, drop trailing slash.
 - Assets: 300 KB per image, 2 MB per post folder, no external image URL, alt text on every image in both locales.
-- Monospace (JetBrains Mono) only for numbers, references, ASCII labels; never Vietnamese prose or headings. Inter with the Vietnamese subset for text. Body 16 to 18px, line-height 1.6 to 1.7.
-- One accent only (`#6ee7b7` dark; a darkened derivative for light meeting WCAG AA). No gradients, no glow, no nested panels. Company brand colour only on logo marks on cards.
-- Both themes complete from tokens; default follows `prefers-color-scheme`; toggle persists to `localStorage` key `theme`; applied before first paint.
+- Monospace (JetBrains Mono, subsets latin + latin-ext + vietnamese) only for numbers, references, and short uppercase labels (including the Vietnamese divider "ĐỌC SÂU"); never prose or headings. Inter (subsets latin + vietnamese) for text. Body 16 to 18px, line-height 1.6 to 1.7.
+- One accent only (`#6ee7b7` dark; a darkened derivative for light meeting WCAG AA). No gradients, no glow. Panels never nest: inside a section panel, code blocks and diagrams get a hairline border and no panel fill. Company brand colour only on logo marks on cards.
+- Both themes complete from tokens; default follows `prefers-color-scheme` (CSS fallback for no-JS); toggle persists to `localStorage` key `theme`; applied before first paint via inline script; `<html suppressHydrationWarning>` with no server-rendered `data-theme`.
 - Byline: "Biên tập: Ryan" (vi) / "Ryan" (en). AI line beside Sources: vi "Soạn thảo với AI từ các nguồn trên, Ryan đọc lại và biên tập." en "Drafted with AI from the sources above, reviewed and edited by Ryan."
-- Every git commit ends with the two attribution lines given in the session reminder (`Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>` and the `Claude-Session:` line). Shown once in Task 1; implied in every later commit step.
-- The pipeline never runs Chromium; only CI renders Mermaid.
+- Every git commit ends with the two attribution lines from the executing session's system reminder (this session: `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>` and `Claude-Session: https://claude.ai/code/session_01LaKJt5FibpbGVQpy31eJ4G`).
+- The pipeline never runs Chromium; Mermaid is rendered locally by authors and by CI, which commits renders to the PR branch.
+- Fixture posts: real cases, traced numbers only (a number not in the verified list is not used), both locales, committed to the milestone branch; Ryan hand-edits them at gate 1 (no per-post PRs).
 
 ## Review Focus
 
-1. A locale file with Windows line endings or a UTF-8 BOM must still parse and validate identically (Vietnamese authors paste from many editors). Test in Task 5.
-2. A body that references `[S3]` when only `S1` and `S2` exist must fail with the reference named, not crash. Test in Task 5.
-3. A Mermaid block edited after its SVG was rendered must fail `render-mermaid --check` (stale hash), and the page must fall back to the source code block when the SVG is missing. Tests in Tasks 6 and 11.
-4. A source URL on a company's blog host but with `utm_` query parameters must still pass the primary-host check and normalize to the same `seen.json` key. Tests in Tasks 3 and 5.
-5. Theme must not flash: with `localStorage.theme = "light"` and OS dark, the first paint is light. Test in Task 9 (DOM test of the inline script).
+1. A locale file with Windows line endings or a UTF-8 BOM must still parse and validate identically. Test in Task 5.
+2. A body that references `[S3]` when only `S1` and `S2` exist must fail with the reference named, not crash; a key number with `ref: "S9"` must fail too. Tests in Task 5.
+3. A Mermaid block edited after its SVG was rendered must fail `render-mermaid --check` (stale hash), and the page must fall back to the source code block when the SVG is missing. Tests in Tasks 6 and 13.
+4. A source URL on a company's blog host with `utm_` query parameters must pass the primary-host check and normalize to the same key; a YouTube URL must keep `v=`. Tests in Tasks 3 and 5.
+5. Theme must not flash: with `localStorage.theme = "light"` and OS dark, the first paint is light; a thrown `localStorage` (private mode) falls back to OS. Test in Task 11.
 
 ---
 
 ## File structure
 
 ```
-package.json, pnpm-lock.yaml, tsconfig.json, next.config.ts, postcss.config.mjs, vitest.config.ts, proxy.ts
-.github/workflows/ci.yml
-.gitignore
+package.json, pnpm-lock.yaml, pnpm-workspace.yaml, tsconfig.json, next.config.ts, postcss.config.mjs, vitest.config.ts, eslint.config.mjs, proxy.ts, puppeteer.json, mermaid.config.json
+.github/workflows/ci.yml, .github/pull_request_template.md
 app/
-  globals.css                       tokens for both themes, base typography
-  layout.tsx                        passthrough root (no html element)
-  [locale]/layout.tsx               <html lang data-theme> + theme script + fonts + Header
-  [locale]/page.tsx                 plain post list (M1 only; M2 replaces)
+  globals.css                       raw tokens on :root / [data-theme], @theme inline mapping, base typography, code-theme switch
+  layout.tsx                        passthrough root
+  not-found.tsx                     own <html><body>
+  [locale]/layout.tsx               <html lang suppressHydrationWarning> + theme script + fonts + Analytics
+  [locale]/page.tsx                 plain post list (M1 only)
   [locale]/posts/[slug]/page.tsx    post page
 components/
-  theme-script.tsx                  inline before-paint script
-  theme-toggle.tsx                  client
-  header.tsx                        brand, nav, locale switch, theme toggle
-  reading-progress.tsx              client, scroll only
-  post/key-numbers.tsx, tldr.tsx, small-team.tsx, deep-divider.tsx, lessons.tsx, sources.tsx, byline.tsx, post-meta.tsx
+  theme-script.tsx, theme-toggle.tsx, lang-switch.tsx (client, usePathname), header.tsx, reading-progress.tsx, toc.tsx (client, IntersectionObserver), share-link.tsx (client, copy URL)
+  post/post-meta.tsx, tags-row.tsx, key-numbers.tsx, tldr.tsx, small-team.tsx, deep-divider.tsx, lessons.tsx, sources.tsx, byline.tsx, missing-locale-note.tsx
   mdx/mermaid.tsx, mdx/components.tsx
 content/                            see spec §5
-dictionaries/vi.json, en.json
+dictionaries/vi.json, en.json       nested JSON, dotted access
 lib/
-  i18n.ts                           Locale type, LOCALES, dictionary loader
-  content/schema.ts                 zod schemas + inferred types
-  content/vocab.ts                  loads companies/topics/tags/series/source-hosts
-  content/reading-time.ts
-  content/refs.ts
-  content/normalize-url.ts
-  content/load.ts                   readPostFolder, listPosts, getPost
-  content/validate.ts               rules → ValidationReport
-  mdx/compile.tsx                   compileMDX wrapper with plugins
+  i18n.ts                           LOCALES, Locale, isLocale, otherLocale, getDictionary, fmt
+  site.ts                           SITE_URL constant (env NEXT_PUBLIC_SITE_URL, default http://localhost:3000)
+  content/schema.ts, vocab.ts, reading-time.ts, refs.ts, normalize-url.ts, load.ts, validate.ts, mermaid.ts
+  mdx/compile.tsx, mdx/remark-mermaid.ts, mdx/remark-refs.ts, mdx/rehype-sections.ts
 scripts/validate-content.ts, scripts/render-mermaid.ts
-tests/                              vitest; tests/fixtures/ holds good and broken post folders
+tests/                              vitest; tests/fixtures/posts/good-post (valid, full length); tests use CONTENT_ROOT
 ```
+
+Content root: every loader entry point takes `root` defaulting to `process.env.CONTENT_ROOT ?? 'content/posts'`.
 
 ---
 
-### Task 1: Scaffold, toolchain, CI skeleton
+### Task 1: Scaffold, toolchain, CI skeleton (done, commit 90b8555)
 
-**Files:**
-- Create: `package.json`, `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`, `vitest.config.ts`, `.gitignore`, `app/layout.tsx`, `app/[locale]/layout.tsx`, `app/[locale]/page.tsx`, `app/globals.css`, `.github/workflows/ci.yml`
-- Test: `tests/smoke.test.ts`
-
-**Interfaces:**
-- Produces: scripts `pnpm dev|build|test|validate|render-mermaid`; `prebuild` runs `validate`. `app/[locale]/layout.tsx` with `generateStaticParams` returning `[{locale:'vi'},{locale:'en'}]`.
-
-- [ ] **Step 1: Create the Next 16 app**
-
-Run: `cd /Users/ryan/ws/5.vercel/engineering-reader && pnpm dlx create-next-app@latest . --ts --app --tailwind --eslint --src-dir=false --import-alias "@/*" --use-pnpm --no-turbopack-prompt` (accept defaults if prompted; keep App Router, Tailwind v4, no `src/`). Then `git init -b main` if create-next-app did not.
-
-- [ ] **Step 2: Add dependencies**
-
-Run: `pnpm add zod gray-matter next-mdx-remote remark-gfm rehype-pretty-code shiki @vercel/analytics` and `pnpm add -D vitest @vitest/coverage-v8 tsx @types/node @mermaid-js/mermaid-cli`.
-
-- [ ] **Step 3: Add scripts to `package.json`**
-
-```json
-"scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "prebuild": "pnpm validate",
-  "start": "next start",
-  "lint": "next lint",
-  "test": "vitest run",
-  "validate": "tsx scripts/validate-content.ts",
-  "render-mermaid": "tsx scripts/render-mermaid.ts"
-}
-```
-
-- [ ] **Step 4: Write `vitest.config.ts`** with `test.include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx']`, `environment: 'node'`, alias `@` to repo root.
-
-- [ ] **Step 5: Write the smoke test** `tests/smoke.test.ts`: `expect(1 + 1).toBe(2)`.
-
-- [ ] **Step 6: Run `pnpm test`**. Expected: 1 passed.
-
-- [ ] **Step 7: Replace the generated app with the locale skeleton**
-
-`app/layout.tsx`: `export default function RootLayout({children}) { return children }`.
-`app/[locale]/layout.tsx`: `export const dynamicParams = false; export function generateStaticParams() { return [{locale:'vi'},{locale:'en'}] }`; renders `<html lang={locale}><body>{children}</body></html>` (params is a Promise in Next 16: `const {locale} = await params`).
-`app/[locale]/page.tsx`: renders `<h1>Hệ thống lớn</h1>`.
-`app/globals.css`: `@import "tailwindcss";` only for now.
-
-- [ ] **Step 8: Write placeholder `scripts/validate-content.ts`** that prints `validate: no rules yet` and exits 0, so `pnpm build` runs.
-
-- [ ] **Step 9: Run `pnpm build`**. Expected: build succeeds, output lists `/vi` and `/en` as static.
-
-- [ ] **Step 10: Write `.github/workflows/ci.yml`**: on `pull_request` and `push` to `main`; ubuntu-latest; pnpm via `pnpm/action-setup`; Node 22; steps `pnpm install --frozen-lockfile`, `pnpm test`, `pnpm validate`, `pnpm build`. (Task 7 adds the Mermaid step.)
-
-- [ ] **Step 11: `.gitignore`** adds `.superpowers/`, `.impeccable/review/`, `.next/`, `node_modules/`, `.env*`.
-
-- [ ] **Step 12: Commit**
-
-```bash
-git add -A
-git commit -m "chore: scaffold Next 16 app, toolchain, CI skeleton
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01LaKJt5FibpbGVQpy31eJ4G"
-```
+Delivered: Next 16.4.2 / React 19.3 / Tailwind 4.3 / Vitest 5 scaffold, scripts (`lint: eslint .`, `prebuild: pnpm validate`), vitest with react plugin + jsdom deps, locale layout skeleton with `suppressHydrationWarning`, `not-found.tsx`, placeholder validator, CI job `ci`. pnpm build-script approvals live in `pnpm-workspace.yaml` (`allowBuilds`).
 
 ---
 
 ### Task 2: Vocabulary files and zod schemas
 
-**Files:**
-- Create: `content/companies.json`, `content/topics.json`, `content/tags.json`, `content/series.json`, `content/featured.json`, `content/redirects.json`, `content/seen.json`, `content/source-hosts.json`, `lib/content/schema.ts`, `lib/content/vocab.ts`
-- Test: `tests/content/schema.test.ts`
+**Files:** `content/{companies,topics,tags,series,featured,redirects,seen,source-hosts}.json`, `lib/i18n.ts` (LOCALES only for now), `lib/content/schema.ts`, `lib/content/vocab.ts`. Test: `tests/content/schema.test.ts`.
 
 **Interfaces:**
-- Produces (`lib/content/schema.ts`): `PostJsonSchema`, `LocaleFrontmatterSchema`, `CompaniesSchema`, `TopicsSchema`, `TagsSchema`, `SeriesSchema`, `SourceHostsSchema`, and types `PostJson`, `LocaleFrontmatter`, `Company`, `Source`, `KeyNumber`. Constants `TOPICS`, `CASE_TYPES`, `LOCALES = ['vi','en'] as const`, `Locale`.
-- Produces (`lib/content/vocab.ts`): `loadVocab(root = 'content'): Vocab` where `Vocab = { companies: Company[]; topics: Topic[]; tags: Tag[]; series: Record<string, Series>; sourceHosts: string[] }`.
+- `lib/i18n.ts`: `export const LOCALES = ['vi','en'] as const; export type Locale = typeof LOCALES[number]; export function isLocale(x: string): x is Locale; export function otherLocale(l: Locale): Locale`. (Dictionary functions come in Task 12.)
+- `lib/content/schema.ts` imports `LOCALES`. Exports `SourceSchema`, `KeyNumberSchema`, `PostJsonSchema`, `LocaleFrontmatterSchema`, `CompanySchema`, `CompaniesSchema`, `TopicsSchema`, `TagsSchema`, `SeriesSchema`, `SourceHostsSchema`, constants `TOPICS`, `CASE_TYPES`, types `PostJson`, `LocaleFrontmatter`, `Company`, `Source`, `KeyNumber`. Rules: `Source.type ∈ blog|talk|paper`; `locator` required when talk/paper (superRefine, issue path `sources.<i>.locator`); `keyNumbers` 2–4; `tags` 2–5; dates `YYYY-MM-DD`; `updatedAt`, `series` nullable; `summary` max 160 code points after `normalize('NFC')`; `tldr` 3–5; `smallTeam` 2–4; `lessons` optional 2–3; `keyNumberLabels` record; `draft` optional.
+- `lib/content/vocab.ts`: `loadVocab(root = 'content'): Vocab` with `Vocab = { companies: Company[]; topics: Topic[]; tags: Tag[]; series: Record<string, Series>; sourceHosts: string[] }`.
 
-- [ ] **Step 1: Write the vocabulary files**
-
-`companies.json`: array of `{slug,name,blogUrl,feedUrl,brandColor,logo}`. Seed with at least: discord, cloudflare, netflix, uber, meta, stripe, grab, figma, shopify, airbnb, linkedin, pinterest, dropbox, slack, github, spotify, twitter, instagram, doordash, canva (use each company's real engineering blog URL and RSS URL; `logo` is `public/logos/<slug>.svg` and may not exist yet). `topics.json`: the five topics with `{slug, vi, en}`. `tags.json`: 30 starter tags with `{slug, vi, en}` including cassandra, scylladb, postgres, sharding, kafka, rust, data-center, control-plane, chaos-engineering, microservices, storage, performance, request-coalescing, hot-partition, high-availability. `series.json`: `{}`. `featured.json`: `[]`. `redirects.json`: `[]`. `seen.json`: `{}`. `source-hosts.json`: `["youtube.com","www.youtube.com","youtu.be","www.infoq.com","infoq.com","www.usenix.org","usenix.org","dl.acm.org","acm.org","arxiv.org","www.arxiv.org","qconferences.com","qconsf.com","qconlondon.com","www.cncf.io","kccnc.io"]`.
-
-- [ ] **Step 2: Write failing schema tests** `tests/content/schema.test.ts`:
-
-```ts
-test('PostJsonSchema accepts the Discord fixture shape', () => {
-  expect(PostJsonSchema.safeParse(discordPostJson).success).toBe(true) })
-test('rejects unknown topic', () => {
-  const r = PostJsonSchema.safeParse({...discordPostJson, topic: 'performance'})
-  expect(r.success).toBe(false) })
-test('rejects 1 key number and 5 key numbers', ...)
-test('rejects talk source without locator', ...)
-test('LocaleFrontmatterSchema rejects summary over 160 chars', ...)
-test('LocaleFrontmatterSchema requires keyNumberLabels record', ...)
-```
-`discordPostJson` is the object from spec §5 with `keyNumbers` ids `messages`, `nodes`, `latency`.
-
-- [ ] **Step 3: Run `pnpm test tests/content/schema.test.ts`**. Expected: FAIL, module not found.
-
-- [ ] **Step 4: Implement `lib/content/schema.ts`**
-
-Schemas per spec §5. `SourceSchema` with `type: z.enum(['blog','talk','paper'])` and a `superRefine` requiring `locator` when type is `talk` or `paper`. `PostJsonSchema.keyNumbers` min 2 max 4, `tags` min 2 max 5, dates as `YYYY-MM-DD` strings (regex), `updatedAt` nullable, `series` nullable string, `author` string, `reviewedBy` string. `LocaleFrontmatterSchema`: `title` min 1, `summary` max 160, `tldr` min 3 max 5, `keyNumberLabels` `z.record(z.string(), z.string())`, `smallTeam` min 2 max 4, `lessons` optional min 2 max 3, `draft` optional boolean.
-
-- [ ] **Step 5: Implement `lib/content/vocab.ts`** `loadVocab(root)` reading the six JSON files with `fs.readFileSync` and parsing with the schemas; throws with the file name on failure.
-
-- [ ] **Step 6: Run the tests**. Expected: all pass.
-
-- [ ] **Step 7: Commit** `feat(content): vocabulary files and zod schemas`.
+- [ ] Write vocabulary files. `companies.json`: only verified entries now: discord (`https://discord.com/blog`, feed `https://discord.com/blog/rss.xml`), cloudflare (`https://blog.cloudflare.com`, feed `https://blog.cloudflare.com/rss/`), netflix (`https://netflixtechblog.com`, feed `https://netflixtechblog.com/feed`); fetch each feed URL with curl and record the HTTP status in the report; a non-200 feed URL is replaced by the one found on the blog's page or set to `null` with a note. `logo` paths `public/logos/<slug>.svg` (may not exist). `topics.json` five entries `{slug, vi, en}`. `tags.json` 30 starter tags `{slug, vi, en}` including cassandra, scylladb, postgres, sharding, kafka, rust, data-center, control-plane, chaos-engineering, microservices, storage, performance, request-coalescing, hot-partition, high-availability, gc-pause, migration-tooling, observability, circuit-breaker, service-discovery. `series.json` `{}`, `featured.json` `[]`, `redirects.json` `[]`, `seen.json` `{}`, `source-hosts.json` `["youtube.com","www.youtube.com","youtu.be","www.infoq.com","infoq.com","www.usenix.org","usenix.org","dl.acm.org","acm.org","arxiv.org","www.arxiv.org","qconferences.com","qconsf.com","qconlondon.com","www.cncf.io"]`.
+- [ ] Failing tests: Discord-shaped post.json passes; unknown topic fails; 1 and 5 key numbers fail; talk without locator fails with issue path `sources.0.locator`; summary of 161 code points fails and a 160-code-point NFD Vietnamese string passes; `keyNumberLabels` required.
+- [ ] Implement; tests pass; commit.
 
 ---
 
 ### Task 3: Pure utilities: reading time, references, URL normalization
 
-**Files:**
-- Create: `lib/content/reading-time.ts`, `lib/content/refs.ts`, `lib/content/normalize-url.ts`
-- Test: `tests/content/utils.test.ts`
+**Files:** `lib/content/reading-time.ts`, `lib/content/refs.ts`, `lib/content/normalize-url.ts`. Test: `tests/content/utils.test.ts`.
 
 **Interfaces:**
-- `readingTime(text: string, locale: Locale): { words: number; minutes: number }` (minutes rounded up; words counted on whitespace after stripping fenced code blocks and frontmatter).
-- `WPM: Record<Locale, number> = { vi: 200, en: 230 }`.
+- `WPM: Record<Locale, number> = { vi: 200, en: 230 }`; `countWords(text: string): number` (strip frontmatter and fenced code, split on whitespace); `readingTime(text: string, locale: Locale): { words: number; minutes: number }` (ceil).
 - `extractRefs(body: string): Array<{ id: string; locator?: string; raw: string }>` matching `[S1]`, `[S2 §3]`, `[S3 @12:40]`, `[S4 p.7]`.
-- `normalizeSourceUrl(url: string): string` lowercases scheme and host, strips fragment, removes `utm_*` and empty query, drops trailing slash, keeps other query params sorted.
-- `hostOf(url: string): string`.
+- `normalizeSourceUrl(url: string): string` per Global Constraints; `hostOf(url: string): string`.
 
-- [ ] **Step 1: Write failing tests**
-
-```ts
-test('readingTime vi: 1000 words = 5 minutes', () => expect(readingTime(words(1000),'vi').minutes).toBe(5))
-test('readingTime en: 1000 words = 5 minutes (230 wpm, ceil)', () => expect(readingTime(words(1000),'en').minutes).toBe(5))
-test('readingTime ignores fenced code', ...)
-test('extractRefs finds id and locator', () => expect(extractRefs('x [S1] y [S2 §3] z [S3 @12:40]')).toEqual([{id:'S1',raw:'[S1]'},{id:'S2',locator:'§3',raw:'[S2 §3]'},{id:'S3',locator:'@12:40',raw:'[S3 @12:40]'}]))
-test('normalizeSourceUrl strips utm and trailing slash', () => expect(normalizeSourceUrl('https://Discord.com/blog/x/?utm_source=a#top')).toBe('https://discord.com/blog/x'))
-test('hostOf', () => expect(hostOf('https://www.youtube.com/watch?v=CZ3wIuvmHeM')).toBe('www.youtube.com'))
-```
-
-- [ ] **Step 2: Run tests**. Expected: FAIL.
-- [ ] **Step 3: Implement the three modules.**
-- [ ] **Step 4: Run tests**. Expected: PASS.
-- [ ] **Step 5: Commit** `feat(content): reading time, refs, url normalization`.
+- [ ] Failing tests: vi 1000 words → 5; en 1000 words → 5; fenced code ignored; refs with locators; `normalizeSourceUrl('https://Discord.com/blog/x/?utm_source=a#top') === 'https://discord.com/blog/x'`; `normalizeSourceUrl('https://www.youtube.com/watch?v=CZ3wIuvmHeM&utm_medium=x') === 'https://www.youtube.com/watch?v=CZ3wIuvmHeM'`; `hostOf`.
+- [ ] Implement; pass; commit.
 
 ---
 
 ### Task 4: Post loader
 
-**Files:**
-- Create: `lib/content/load.ts`, `lib/i18n.ts`
-- Test: `tests/content/load.test.ts`, fixtures `tests/fixtures/posts/good-post/{post.json,vi.mdx,en.mdx}` (a minimal valid post with one mermaid block and refs)
+**Files:** `lib/content/load.ts`. Test: `tests/content/load.test.ts`; fixture `tests/fixtures/posts/good-post/{post.json,vi.mdx,en.mdx}`.
 
 **Interfaces:**
-- `lib/i18n.ts`: `export const LOCALES = ['vi','en'] as const; export type Locale; export function isLocale(x: string): x is Locale; export function otherLocale(l: Locale): Locale; export async function getDictionary(l: Locale): Promise<Dictionary>` (Dictionary type generated from `dictionaries/vi.json` keys).
-- `lib/content/load.ts`:
-  - `type PostRecord = { slug: string; dir: string; meta: PostJson; locales: Partial<Record<Locale, LocaleDoc>> }`
-  - `type LocaleDoc = { frontmatter: LocaleFrontmatter; body: string; readingTime: { deep: number; whole: number }; refs: Ref[]; mermaidBlocks: string[] }`
-  - `readPostFolder(dir: string): PostRecord` (throws on schema failure with file name)
-  - `listPosts(root = 'content/posts'): PostRecord[]` sorted by `publishedAt` desc, excluding locales marked draft
-  - `getPost(root, slug): PostRecord | undefined`
-  - `hasLocale(p: PostRecord, l: Locale): boolean`
-  - `listPostsBy(root, filter: { company?: string; topic?: string; tag?: string; series?: string }): PostRecord[]` (same sort; M2 consumes it, M1 implements it with a test)
-- Whole reading time = deep + top layer words (summary, tldr, smallTeam, lessons, keyNumberLabels) at the locale WPM.
+- `type RawLocale = { file: string; frontmatter: unknown; body: string; draft: boolean }`
+- `type RawPost = { slug: string; dir: string; meta: unknown; locales: Partial<Record<Locale, RawLocale>> }`
+- `readRawPost(dir: string): RawPost` (strips BOM, CRLF → LF, NFC-normalizes; gray-matter frontmatter; never throws on schema problems).
+- `type LocaleDoc = { frontmatter: LocaleFrontmatter; body: string; readingTime: { deep: number; whole: number }; refs: Ref[]; mermaidBlocks: string[] }`
+- `type PostRecord = { slug: string; dir: string; meta: PostJson; locales: Partial<Record<Locale, LocaleDoc>> }`
+- `parsePost(raw: RawPost): { post?: PostRecord; issues: ZodIssueWithFile[] }` (`ZodIssueWithFile = ZodIssue & { file: string }`); drafts stay in the raw post but are excluded from `PostRecord.locales`.
+- `CONTENT_ROOT = process.env.CONTENT_ROOT ?? 'content/posts'`; `listPosts(root = CONTENT_ROOT): PostRecord[]` (throws if any issues; `publishedAt` desc), `getPost(root, slug)`, `hasLocale(p, l)`, `listPostsBy(root, filter: { company?; topic?; tag?; series? })`.
+- Whole reading time = deep words + top-layer words (summary, tldr, smallTeam, lessons, keyNumberLabels) at locale WPM.
 
-- [ ] **Step 1: Write the fixture post** under `tests/fixtures/posts/good-post/` (company `discord`, topic `data`, caseType `migration`, two key numbers, one blog source, body with `[S1]` and one ```mermaid block, both locales).
-- [ ] **Step 2: Write failing tests**: `listPostsBy(root,{company:'discord'})` returns 1 and `{topic:'infra'}` returns 0; `readPostFolder` returns both locales, `mermaidBlocks.length === 1`, refs include `S1`, `readingTime.deep > 0`; `listPosts` on `tests/fixtures/posts` returns 1; `getPost(root,'good-post')` defined; a copy with `draft: true` in `en.mdx` yields `hasLocale(p,'en') === false`.
-- [ ] **Step 3: Run tests**. Expected: FAIL.
-- [ ] **Step 4: Implement `lib/i18n.ts` and `lib/content/load.ts`** (gray-matter for frontmatter; `mermaidBlocks` via regex on ```mermaid fences).
-- [ ] **Step 5: Run tests**. Expected: PASS.
-- [ ] **Step 6: Commit** `feat(content): post loader`.
+- [ ] Write `good-post` as a full-length valid post (company discord, topic data, caseType migration, 3 key numbers all `ref: S1`, one blog source, vi deep layer ≥1500 words and en deep layer ≥1600 words of real sentences, one ```mermaid block each, `[S1]` refs, summary ≤160). Test asserts both locales' `readingTime.deep` within 6–10 and `whole` within 8–12.
+- [ ] Failing tests: readRawPost on a CRLF+BOM copy equals the LF copy; parsePost gives both locales, `mermaidBlocks.length === 1`, refs include S1; draft `en.mdx` copy → `hasLocale(p,'en') === false` while raw lists it `draft: true`; `listPosts` 1; `listPostsBy({company:'discord'})` 1, `{topic:'infra'}` 0.
+- [ ] Implement; pass; commit.
 
 ---
 
 ### Task 5: Validator rules and CLI
 
-**Files:**
-- Create: `lib/content/validate.ts`, replace `scripts/validate-content.ts`
-- Test: `tests/content/validate.test.ts`, fixtures `tests/fixtures/posts/bad-*` (one folder per rule, built in the test by copying `good-post` into a temp dir and mutating)
+**Files:** `lib/content/validate.ts`, `scripts/validate-content.ts` (replace). Test: `tests/content/validate.test.ts` (temp copies of `good-post`, mutated per rule).
 
 **Interfaces:**
 - `type Finding = { level: 'error'|'warn'; rule: string; slug: string; file?: string; message: string }`
-- `validatePost(p: PostRecord, vocab: Vocab, opts: { today: string }): Finding[]`
-- `validateAll(root: string, vocab: Vocab, opts): { findings: Finding[]; ok: boolean }` (`ok` is false when any error)
-- CLI: `tsx scripts/validate-content.ts [root]` prints findings grouped by slug, exits 1 on any error. Errors and warnings exactly as spec §5 "Validation". Rule ids: `schema`, `enum`, `labels`, `refs`, `source-host`, `locator`, `image-external`, `asset-size`, `alt-text`, `mermaid-count`, `reading-time`, `summary-length`, `locales`, `published-at` (warn), `lessons-omitted` (warn).
+- `zodIssuesToFindings(issues, slug): Finding[]`: path `topic|caseType|tags|company|series` → `enum`, `sources.*.locator` → `locator`, `summary` → `summary-length`, else `schema`.
+- `validatePost(raw: RawPost, vocab: Vocab, opts: { today: string }): Finding[]`: zod mapping first; on success the rules `labels`, `refs` (body refs and `keyNumbers[].ref` resolve; every source id referenced somewhere), `source-host`, `image-external`, `asset-size`, `alt-text`, `mermaid-count`, `reading-time`, `locales` (both present unless `draft`); warnings `published-at` (>3 days before `today`), `lessons-omitted`.
+- `validateAll(root, vocab, opts): { findings: Finding[]; ok: boolean }`. CLI prints grouped findings, exits 1 on any error; default root `content/posts`.
 
-- [ ] **Step 1: Write failing tests**, one per rule, each mutating a temp copy of `good-post` and asserting a finding with that `rule`, plus: `good-post` yields zero errors; CRLF + BOM copy of `vi.mdx` yields zero errors (Review Focus 1); `[S3]` with two sources yields `refs` error whose message contains `S3` (Review Focus 2); a source URL `https://discord.com/blog/x?utm_source=rss` passes `source-host` (Review Focus 4); reading-time error when the deep layer is 300 words; `published-at` warn when `publishedAt` is 4 days before `today`.
-- [ ] **Step 2: Run tests**. Expected: FAIL.
-- [ ] **Step 3: Implement `lib/content/validate.ts`** (strip BOM and normalize CRLF in the loader before parsing; asset size via `fs.statSync`; image rules by scanning `![alt](src)` and `<img>` in the body).
-- [ ] **Step 4: Implement the CLI** and point `prebuild` at it (already wired).
-- [ ] **Step 5: Run tests and `pnpm validate`** (content/posts is still empty: expected `ok`, 0 posts). Expected: PASS.
-- [ ] **Step 6: Commit** `feat(content): validator rules and CLI`.
+- [ ] Failing tests, one per rule id, plus Review Focus 1, 2 (`[S3]` and `ref:"S9"`, message names the id), 4 (utm URL passes `source-host`); `good-post` zero errors; deep layer cut to 300 words → `reading-time`; `publishedAt` 4 days before today → warn.
+- [ ] Implement; `pnpm validate` on empty `content/posts` prints ok; commit.
 
 ---
 
 ### Task 6: Mermaid render script
 
-**Files:**
-- Create: `scripts/render-mermaid.ts`, `lib/content/mermaid.ts`
-- Test: `tests/content/mermaid.test.ts`
+**Files:** `lib/content/mermaid.ts`, `scripts/render-mermaid.ts`, `puppeteer.json` (`{"args":["--no-sandbox","--disable-setuid-sandbox"]}`), `mermaid.config.json`. Test: `tests/content/mermaid.test.ts` (temp copies only).
 
 **Interfaces:**
-- `lib/content/mermaid.ts`: `hashBlock(src: string): string` (sha256 hex, first 12), `svgName(locale: Locale, index: number): string` = `${locale}-diagram-${index+1}.svg`, `readSvgHash(svg: string): string | null` (reads `<!-- mermaid:<hash> -->` on the first line), `planRenders(p: PostRecord): Array<{ locale; index; src; file; status: 'missing'|'stale'|'fresh' }>`.
-- CLI: `tsx scripts/render-mermaid.ts [--check] [root]`. Without `--check`: for each `missing|stale`, write src to a temp `.mmd`, run `mmdc -i tmp.mmd -o <file> --backgroundColor transparent`, prepend the hash comment. With `--check`: exit 1 listing any `missing|stale`. SVG colours: pass `--configFile` with `theme: 'base'` and `themeVariables` mapped to CSS variables (`primaryColor: 'var(--panel)'`, `lineColor: 'var(--ink)'`, `textColor: 'var(--ink)'`, `fontFamily: 'Inter'`); if mmdc rejects var() values, the builder post-processes the SVG replacing the literal theme colours with the variables.
+- `MERMAID_THEME = { theme: 'base', themeVariables: { primaryColor: '#010101', primaryTextColor: '#020202', primaryBorderColor: '#030303', lineColor: '#030303', secondaryColor: '#040404', tertiaryColor: '#040404', background: '#050505', fontFamily: 'Inter, Arial, sans-serif' } }`; `SENTINELS = { '#010101': 'var(--panel)', '#020202': 'var(--ink)', '#030303': 'var(--hairline-strong)', '#040404': 'var(--panel-2)', '#050505': 'transparent' }`.
+- `hashBlock(src)` = sha256(`src + JSON.stringify(MERMAID_THEME)`)[0:12]; `svgName(locale, index)` = `${locale}-diagram-${index+1}.svg`; `readSvgHash(svg)` reads `<!-- mermaid:<hash> -->` on line 1; `postProcessSvg(svg, { id })` replaces sentinels with variables and sets the root `id`; `planRenders(raw: RawPost): Array<{ locale; index; src; file; status: 'missing'|'stale'|'fresh' }>`.
+- CLI `tsx scripts/render-mermaid.ts [--check] [root=content/posts]`: for each missing/stale, `mmdc -i tmp.mmd -o out.svg -c mermaid.config.json -p puppeteer.json --svgId <slug>-<locale>-<n> --backgroundColor transparent`, post-process, prepend hash comment. `--check` lists missing/stale, exits 1, never launches Chrome.
 
-- [ ] **Step 1: Write failing tests**: `hashBlock` stable; `planRenders` on `good-post` with no SVG returns one `missing`; after writing an SVG with the right hash comment, `fresh`; after changing the block, `stale` (Review Focus 3).
-- [ ] **Step 2: Run tests**. Expected: FAIL.
-- [ ] **Step 3: Implement `lib/content/mermaid.ts` and the CLI.**
-- [ ] **Step 4: Run tests**. Expected: PASS. Run `pnpm render-mermaid --check tests/fixtures/posts`; expected exit 1 naming `good-post vi-diagram-1.svg missing`.
-- [ ] **Step 5: Commit** `feat(content): mermaid render script with staleness check`.
+- [ ] Failing tests: hash stable and changes with theme; planRenders missing → fresh (after writing an SVG with the right hash) → stale (after editing the block); `postProcessSvg` replaces `#010101` with `var(--panel)`.
+- [ ] Implement; `pnpm render-mermaid --check tests/fixtures/posts` exits 1 naming the missing file; one real local render on a temp copy of `good-post` (`pnpm exec puppeteer browsers install chrome` if needed; report output); commit.
 
 ---
 
-### Task 7: CI Mermaid step and branch protection notes
+### Task 7: CI Mermaid render-and-commit, PR template, repo setup doc
 
-**Files:**
-- Modify: `.github/workflows/ci.yml`
-- Create: `docs/repo-setup.md`
+**Files:** `.github/workflows/ci.yml`, `.github/pull_request_template.md`, `docs/repo-setup.md`.
 
-- [ ] **Step 1: Add to CI** after install: `pnpm exec puppeteer browsers install chrome` (mermaid-cli depends on puppeteer), then `pnpm render-mermaid --check`. Keep order: test, validate, render-mermaid --check, build.
-- [ ] **Step 2: Write `docs/repo-setup.md`**: create a public repo under Ryan's personal account; push `main`; enable branch protection on `main` requiring the `ci` check, no auto-merge, no force push; connect Vercel (framework Next.js, root `/`), enable Vercel Analytics; add labels `pipeline`, `content`, `needs-source`, `clean`; create Milestones M0 to M8; create the Project board with fields Milestone, Type, Locale. These are manual steps for Ryan; mark each with a checkbox.
-- [ ] **Step 3: Commit** `ci: mermaid check; docs: repo setup checklist`.
+- [ ] CI after install: `pnpm exec puppeteer browsers install chrome`; `pnpm render-mermaid`; if `git status --porcelain content/posts` is non-empty and the event is a same-repo `pull_request`, commit `chore(mermaid): render diagrams` as `github-actions[bot]` and push to the PR branch (`permissions: contents: write`; checkout `ref: ${{ github.head_ref }}`, `fetch-depth: 0`); then `pnpm render-mermaid --check`, test, validate, build.
+- [ ] PR template: spec §4 review checklist as checkboxes, "Sources" section, "Lessons omitted? state why" line.
+- [ ] `docs/repo-setup.md`: public personal repo, branch protection requiring `ci`, Vercel connect, labels `pipeline`, `content`, `needs-source`, `clean`, Milestones M0–M8, Project fields. Marked as executed by the controller with `gh` (Task 7b); Vercel link via CLI if authenticated, else needs-human.
+- [ ] Commit.
+
+### Task 7b (controller): create the GitHub repo, push, open draft PR
+
+- [ ] `gh repo create engineering-reader --public --source . --push`; branch protection on `main` requiring check `ci` via `gh api`; labels and milestones; record the URL in `docs/decisions.md`; open the M0+M1 PR as draft from `m0-m1/foundation`.
 
 ---
 
 ### Task 8: Fixture post 1, Discord (migration, data, Mermaid)
 
-**Files:**
-- Create: `content/posts/discord-cassandra-to-scylladb/{post.json,vi.mdx,en.mdx}`
+**Files:** `content/posts/discord-cassandra-to-scylladb/{post.json,vi.mdx,en.mdx,vi-diagram-1.svg,en-diagram-1.svg}`.
 
-**Interfaces:** must pass `pnpm validate` with zero errors; `render-mermaid --check` may report missing SVGs until CI renders them (the implementer runs `pnpm render-mermaid content/posts` locally and commits the SVGs).
+Source (verified 2026-10-21): S1 blog, "How Discord Stores Trillions of Messages", Bo Ingram, 2023-03-06, `https://discord.com/blog/how-discord-stores-trillions-of-messages`. Verified numbers (use only these): 12 Cassandra nodes in 2017; 177 Cassandra nodes early 2022; 72 ScyllaDB nodes after; historical read p99 40–125 ms → 15 ms; insert p99 5–70 ms → 5 ms; migration estimated 3 months with Spark, done in about 9 days after rewriting the migrator in Rust; up to 3.2 million rows/s; cutover May 2022. "Trillions" is a word in the title, not a number: do not write "1T".
 
-Source (verified 2026-10-21): S1 blog, "How Discord Stores Trillions of Messages", Bo Ingram, 2023-03-06, `https://discord.com/blog/how-discord-stores-trillions-of-messages`. Numbers from S1: 12 Cassandra nodes in 2017; 177 Cassandra nodes early 2022; 72 ScyllaDB nodes after; historical read p99 40–125 ms → 15 ms; insert p99 5–70 ms → 5 ms; migration estimated 3 months with Spark, done in about 9 days after rewriting the migrator in Rust, up to 3.2 million rows/s; cutover May 2022.
-
-- [ ] **Step 1: Write `post.json`** with `topic: data`, `caseType: migration`, `tags: [cassandra, scylladb, rust, hot-partition, request-coalescing]`, `publishedAt` = today, `sourcePublishedAt: 2023-03-06`, `author: ryan`, `reviewedBy: ryan`, keyNumbers `messages` ("1T", S1), `nodes` ("177 → 72", S1), `latency` ("p99 125 → 15 ms", S1), and the S1 source with `accessedAt` = today.
-- [ ] **Step 2: Draft `vi.mdx`** per spec §4: frontmatter (title, summary ≤160, 3–5 tldr, keyNumberLabels for the three ids, 2–4 smallTeam in second person, 2–3 lessons), deep layer 1200–2000 words in story H2s, every number with an inline `[S1 §…]`, one ```mermaid flowchart (gateway → data service (Rust, request coalescing) → ScyllaDB) with Vietnamese labels. Technical terms stay English.
-- [ ] **Step 3: Draft `en.mdx`** as a full equivalent (same H2 count, same single Mermaid block with English labels, same refs).
-- [ ] **Step 4: Run `pnpm validate`**. Expected: zero errors; fix until clean. Run `pnpm render-mermaid content/posts` and `pnpm render-mermaid --check content/posts`. Expected: fresh.
-- [ ] **Step 5: Commit** `content: fixture post discord-cassandra-to-scylladb` including the two SVGs. Open the PR for Ryan's hand edit; merge after his edit.
+- [ ] `post.json`: topic `data`, caseType `migration`, tags `[cassandra, scylladb, rust, hot-partition, request-coalescing]`, `publishedAt` today, `sourcePublishedAt` 2023-03-06, `author: ryan`, `reviewedBy: ryan`, keyNumbers `nodes` ("177 → 72", S1), `latency` ("p99 40–125 → 15 ms", S1), `migration` (value "9 days", estimate in the label, S1); S1 with `accessedAt` today, `locator` null.
+- [ ] Draft `vi.mdx`: frontmatter per spec §4; deep layer 1500–2000 words in story H2s; every number with inline `[S1 §<heading>]`; one ```mermaid flowchart (gateway → data service (Rust, request coalescing) → ScyllaDB) with Vietnamese labels. Technical terms stay English.
+- [ ] Draft `en.mdx` as a full equivalent: deep layer 1500–2300 words, same H2 count, one Mermaid block with English labels, same refs.
+- [ ] `pnpm validate` zero errors (check both locales' reading times); `pnpm render-mermaid`; `--check` fresh; commit including SVGs.
 
 ---
 
 ### Task 9: Fixture post 2, Cloudflare (incident, reliability, Lessons omitted)
 
-**Files:**
-- Create: `content/posts/cloudflare-control-plane-outage-2023/{post.json,vi.mdx,en.mdx}`
+**Files:** `content/posts/cloudflare-control-plane-outage-2023/{post.json,vi.mdx,en.mdx}` (+ SVGs if a diagram is used).
 
-Source (verified): S1 blog, "Post mortem on the Cloudflare Control Plane and Analytics Outage", Matthew Prince, 2023-11-04, `https://blog.cloudflare.com/post-mortem-on-cloudflare-control-plane-and-analytics-outage/`. Numbers from S1: outage 2023-11-02 11:43 UTC to 2023-11-04 04:25 UTC; three data centers near Hillsboro; Cloudflare about 10% of PDX-04 capacity; UPS batteries lasted about 4 minutes against a 10-minute design.
+Source (verified): S1 blog, "Post mortem on the Cloudflare Control Plane and Analytics Outage", Matthew Prince, 2023-11-04, `https://blog.cloudflare.com/post-mortem-on-cloudflare-control-plane-and-analytics-outage/`. Verified numbers: outage 2023-11-02 11:43 UTC to 2023-11-04 04:25 UTC; three data centers near Hillsboro; Cloudflare about 10% of PDX-04 capacity; UPS batteries lasted about 4 minutes against a 10-minute design.
 
-- [ ] **Step 1: Write `post.json`**: `topic: reliability`, `caseType: incident`, `tags: [data-center, control-plane, high-availability, chaos-engineering]`, keyNumbers `duration` ("≈41 h", S1), `ups` ("4 min / 10 min", S1), `share` ("≈10%", S1).
-- [ ] **Step 2: Draft `vi.mdx` and `en.mdx`**: no `lessons` key. `smallTeam` carries the weight: a five-person team has no second data center; what this says about single points of failure in their own control plane (one admin box, one CI runner, one DNS account). One Mermaid sequence or flowchart of the failure chain is allowed but not required.
-- [ ] **Step 3: Run `pnpm validate`**. Expected: zero errors, one `lessons-omitted` warning.
-- [ ] **Step 4: Commit** `content: fixture post cloudflare-control-plane-outage-2023`. PR body states: "Lessons omitted deliberately: the source lists its own under 'Lessons and Remediation'."
+- [ ] `post.json`: topic `reliability`, caseType `incident`, tags `[data-center, control-plane, high-availability, chaos-engineering]`, keyNumbers `duration` ("≈41 h", S1), `ups` ("4 / 10 min", S1), `share` ("≈10%", S1), `sourcePublishedAt` 2023-11-04.
+- [ ] Draft both locales with no `lessons` key; `smallTeam` carries the weight: a five-person team has no second data center; what this says about single points of failure in their own control plane (one admin box, one CI runner, one DNS account). Same word targets as Task 8.
+- [ ] `pnpm validate`: zero errors, one `lessons-omitted` warning. Commit. Gate-1 handoff states: "Lessons omitted deliberately: the source lists its own under 'Lessons and Remediation'."
 
 ---
 
 ### Task 10: Fixture post 3, Netflix talk (design-decision, reliability, timestamp locators)
 
-**Files:**
-- Create: `content/posts/netflix-microservices-mastering-chaos/{post.json,vi.mdx,en.mdx}`
+**Files:** `content/posts/netflix-microservices-mastering-chaos/{post.json,vi.mdx,en.mdx}`.
 
-Sources (verified 2026-10-21): S1 talk, "Mastering Chaos - A Netflix Guide to Microservices", Josh Evans, QCon San Francisco 2016, `https://www.youtube.com/watch?v=CZ3wIuvmHeM`, locator required (`@mm:ss` of each claim). S2 talk page, same title, `https://www.infoq.com/presentations/netflix-chaos-microservices/` (InfoQ blocks non-browser fetches; the implementer reads it in a browser or via the transcript on YouTube).
+Source (verified 2026-10-21): S1 talk, "Mastering Chaos - A Netflix Guide to Microservices", Josh Evans, QCon San Francisco, November 2016, `https://www.youtube.com/watch?v=CZ3wIuvmHeM`; `publishedAt` = the YouTube upload date read from the page (record it); `locator` = `@mm:ss` of the headline number. Only one source (InfoQ page dropped: it blocks fetches and would need its own reference).
 
-- [ ] **Step 1: Watch or read the transcript; collect 2–4 concrete numbers with timestamps** (candidates: number of microservices, request fan-out, availability targets, the Chaos Monkey / FIT stats he quotes). Record each as a key number with `ref: S1` and a locator in the source `locator` field (`"@mm:ss"` for the headline number) plus inline `[S1 @mm:ss]` for every number in the body.
-- [ ] **Step 2: Write `post.json`**: `caseType: design-decision`, `topic: reliability`, tags from `[microservices, chaos-engineering, high-availability, ...]`.
-- [ ] **Step 3: Draft `vi.mdx` and `en.mdx`** with lessons present.
-- [ ] **Step 4: Run `pnpm validate`**. Expected: zero errors (proves the talk-host allowlist and locator rules).
-- [ ] **Step 5: Commit** `content: fixture post netflix-microservices-mastering-chaos`.
+- [ ] Read the transcript (`yt-dlp --write-auto-sub --skip-download` or the YouTube transcript panel); collect 2–4 concrete numbers with timestamps; every number in the body carries `[S1 @mm:ss]`.
+- [ ] `post.json`: caseType `design-decision`, topic `reliability`, tags from `[microservices, chaos-engineering, high-availability, circuit-breaker, service-discovery]`, `sourcePublishedAt` = upload date.
+- [ ] Draft both locales with lessons present; same word targets.
+- [ ] `pnpm validate` zero errors (proves talk-host allowlist and locator rules). Commit.
 
-M0 done when: `pnpm build` passes on the three posts, and fails when one post is copied with a number reference removed (verify once, do not commit the broken copy).
+M0 done when: `pnpm build` passes on the three posts, and fails when a temp copy of one post has a key-number ref changed to `S9` (verify once; do not commit the broken copy). Then gate 1: write `docs/HANDOFF.md`, stop.
 
 ---
 
 ### Task 11: Tokens, themes, theme script and toggle
 
-**Files:**
-- Modify: `app/globals.css`, `app/[locale]/layout.tsx`
-- Create: `components/theme-script.tsx`, `components/theme-toggle.tsx`
-- Test: `tests/ui/theme-script.test.ts` (jsdom)
+**Files:** `app/globals.css`, `app/[locale]/layout.tsx`, `components/theme-script.tsx`, `components/theme-toggle.tsx`. Test: `tests/ui/theme-script.test.ts` (`// @vitest-environment jsdom`).
 
 **Interfaces:**
-- CSS variables under `@theme` and per-theme blocks: `--ground`, `--grid`, `--ink`, `--ink-2`, `--muted`, `--hairline`, `--panel`, `--panel-2`, `--accent`, `--accent-ink` (text on accent), `--font-sans`, `--font-mono`, `--radius`. Dark values from spec §7. Light values builder-derived, each text/ground pair ≥ 4.5:1 (document in a comment).
-- `themeScript(): string` returns the inline JS: read `localStorage.theme`; if `light|dark` set `document.documentElement.dataset.theme`; else set from `matchMedia('(prefers-color-scheme: dark)')`. Rendered in `<head>` via `<script dangerouslySetInnerHTML>` before any CSS-dependent paint.
-- `ThemeToggle` (client): button with `aria-label` from dictionary, toggles `data-theme` and writes `localStorage.theme`. No transition on switch (state snaps).
-- Fonts: `next/font/google` Inter `subsets: ['latin','vietnamese']`, JetBrains Mono `subsets: ['latin']`, exposed as `--font-sans`, `--font-mono`.
+- Raw variables on `:root` (dark values, spec §7) and `:root[data-theme="light"]` (light values, builder-derived, each text/ground pair ≥ 4.5:1, documented in a comment), plus `@media (prefers-color-scheme: light) { :root:not([data-theme]) { …light } }` for no-JS: `--ground`, `--grid`, `--ink`, `--ink-2`, `--muted`, `--hairline`, `--hairline-strong`, `--panel`, `--panel-2`, `--accent`, `--accent-ink`, `--radius`.
+- `@theme inline { --color-ground: var(--ground); --color-ink: var(--ink); … --font-sans: var(--font-inter); --font-mono: var(--font-jetbrains); --radius-panel: var(--radius); }`.
+- Code theme switch: `html[data-theme="dark"] [data-rehype-pretty-code-figure] :is(code, span) { color: var(--shiki-dark) }` and the light equivalent; every theme selector scoped to `html[data-theme=…]`.
+- Utility classes `.panel`, `.hairline`, `.callout`, `.mono-label`; body grid background 40px using `--grid`.
+- Fonts in the locale layout: `Inter({ subsets: ['latin','vietnamese'], variable: '--font-inter', display: 'swap' })`, `JetBrains_Mono({ subsets: ['latin','latin-ext','vietnamese'], variable: '--font-jetbrains', display: 'swap' })`.
+- `themeScript(): string` (try/catch around `localStorage`; stored `light|dark` wins; else `matchMedia('(prefers-color-scheme: dark)')`; sets `document.documentElement.dataset.theme`), rendered via `<script dangerouslySetInnerHTML>` in `<head>`.
+- `ThemeToggle({ ariaLabel }: { ariaLabel: string })` (client): toggles `data-theme`, writes `localStorage.theme`, no transition.
 
-- [ ] **Step 1: Write failing test**: evaluate `themeScript()` in jsdom with `localStorage.theme='light'` and `matchMedia` mocked dark; expect `document.documentElement.dataset.theme === 'light'` (Review Focus 5). Second case: no stored value, mock dark → `'dark'`.
-- [ ] **Step 2: Run test**. Expected: FAIL.
-- [ ] **Step 3: Write `globals.css`** tokens, base typography (body 17px/1.65 phone, 18px/1.7 desktop; headings Inter 700, tracking no tighter than -0.02em), the 40px grid background on `body` using `--grid`, panel and hairline utility classes (`.panel`, `.hairline`, `.callout`, `.mono-label`).
-- [ ] **Step 4: Implement theme script, toggle, fonts, and wire into `app/[locale]/layout.tsx`**.
-- [ ] **Step 5: Run tests and `pnpm dev`**; toggle both themes manually; check no flash on reload. Expected: PASS.
-- [ ] **Step 6: Commit** `feat(ui): tokens, both themes, before-paint theme script, toggle`.
+- [ ] Failing tests: stored light + OS dark → `light`; nothing stored + OS dark → `dark`; `localStorage` getter throws + OS light → `light`.
+- [ ] Implement; manual check in `pnpm dev` of both themes and reload without flash; commit.
 
 ---
 
 ### Task 12: Locale shell: dictionaries, header, language switch, root redirect
 
-**Files:**
-- Create: `dictionaries/vi.json`, `dictionaries/en.json`, `components/header.tsx`, `proxy.ts`
-- Modify: `app/[locale]/layout.tsx`, `lib/i18n.ts`
-- Test: `tests/ui/i18n.test.ts`
+**Files:** `dictionaries/vi.json`, `dictionaries/en.json`, `lib/i18n.ts` (add `getDictionary`, `fmt`), `lib/site.ts`, `components/lang-switch.tsx`, `components/header.tsx`, `proxy.ts`, `app/[locale]/page.tsx` (render Header). Test: `tests/ui/i18n.test.ts`.
 
 **Interfaces:**
-- Dictionary keys (both files, same keys): `site.name`, `site.tagline`, `nav.companies`, `nav.topics`, `nav.about`, `post.byline` ("Biên tập: Ryan" / "Ryan"), `post.readMinutes` ("{n} phút đọc" / "{n} min read"), `post.tldr`, `post.keyNumbers`, `post.smallTeam` ("Cho team nhỏ" / "For a small team"), `post.deepRead` ("ĐỌC SÂU · {n} PHÚT" / "DEEP READ · {n} MIN"), `post.lessons`, `post.sources`, `post.aiLine` (exact strings from Global Constraints), `post.missingLocale` ("Bài này chưa có bản tiếng Anh." / "This post is not yet available in Vietnamese."), `theme.toggle`, `lang.switch`.
-- `Header({ locale, altHref }: { locale: Locale; altHref: string })`: brand (links to `/${locale}`), nav links (companies, topics, about; M2 routes may 404 until M2, that is accepted), `VI | EN` linking to `altHref`, `ThemeToggle`.
-- `proxy.ts`: `export function proxy(req)`: if pathname is `/`, `NextResponse.redirect(new URL('/vi', req.url), 308)`; `config.matcher = ['/']`.
+- Dictionaries (nested JSON, identical key sets): `site.name` ("Hệ thống lớn" both), `site.tagline`, `nav.companies`, `nav.topics`, `nav.about`, `post.label` ("BÀI VIẾT" / "ARTICLE"), `post.byline` ("Biên tập: Ryan" / "Ryan"), `post.readMinutes` ("{n} phút đọc" / "{n} min read"), `post.keyNumbers`, `post.tldr`, `post.smallTeam` ("Cho team nhỏ" / "For a small team"), `post.deepRead` ("ĐỌC SÂU · {n} PHÚT" / "DEEP READ · {n} MIN"), `post.lessons`, `post.sources`, `post.aiLine` (exact strings from Global Constraints), `post.missingLocale` ("Bài này chưa có bản tiếng Anh." / "This post is not yet available in Vietnamese."), `post.toc` ("Mục lục" / "Contents"), `post.share` ("Sao chép link" / "Copy link"), `post.breadcrumbHome` ("Trang chủ" / "Home"), `caseType.migration|incident|design-decision|scaling`, `theme.toggle`, `lang.switch`.
+- `getDictionary(l): Dictionary` (static imports; type from `vi.json`), `fmt(s, vars): string` replacing `{n}`.
+- `lib/site.ts`: `SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'`.
+- `LangSwitch({ locale, twinMissing }: { locale: Locale; twinMissing?: boolean })` (client): `usePathname()`; href = pathname with the first segment replaced by `otherLocale(locale)`, or `/${otherLocale(locale)}` when `twinMissing`.
+- `Header({ locale, twinMissing })`: brand → `/${locale}`, nav links (companies, topics, about: may 404 until M2), `LangSwitch`, `ThemeToggle`. Every page renders `<Header>` itself (ruling: not the layout).
+- `proxy.ts`: `export function proxy(req: NextRequest)`: pathname `/` → `NextResponse.redirect(new URL('/vi', req.url), 308)`; `export const config = { matcher: ['/'] }`.
 
-- [ ] **Step 1: Write failing test**: both dictionaries have identical key sets; `otherLocale('vi') === 'en'`.
-- [ ] **Step 2: Run test**. Expected: FAIL (files missing).
-- [ ] **Step 3: Write dictionaries, `getDictionary`, `Header`, `proxy.ts`; mount Header in the locale layout** (layout computes `altHref` as the same path under the other locale; the post page overrides it when the twin is missing).
-- [ ] **Step 4: Run tests; `curl -I localhost:3000/`** → `308` with `location: /vi`. Expected: PASS.
-- [ ] **Step 5: Commit** `feat(ui): locale shell, header, language switch, root redirect`.
+- [ ] Failing tests: key sets identical; `fmt('{n} phút', {n: 3}) === '3 phút'`; `otherLocale`.
+- [ ] Implement. Verify redirect: `pnpm build && (pnpm start &) && sleep 3 && curl -sI localhost:3000/ | head -3` → `308`, `location: /vi`; kill the server.
+- [ ] Commit.
 
 ---
 
 ### Task 13: MDX compile pipeline and components
 
-**Files:**
-- Create: `lib/mdx/compile.tsx`, `components/mdx/components.tsx`, `components/mdx/mermaid.tsx`
-- Test: `tests/mdx/compile.test.tsx`
+**Files:** `lib/mdx/compile.tsx`, `lib/mdx/remark-mermaid.ts`, `lib/mdx/remark-refs.ts`, `lib/mdx/rehype-sections.ts`, `components/mdx/components.tsx`, `components/mdx/mermaid.tsx`. Test: `tests/mdx/compile.test.tsx` (temp copy of `good-post`).
 
 **Interfaces:**
-- `compilePostBody(doc: LocaleDoc, post: PostRecord, locale: Locale): Promise<React.ReactElement>` using `compileMDX` from `next-mdx-remote/rsc` with `remarkPlugins: [remarkGfm]`, `rehypePlugins: [[rehypePrettyCode, { theme: { light: 'github-light', dark: 'github-dark-dimmed' }, keepBackground: false }]]`, `components` from `components/mdx/components.tsx`.
-- Mermaid handling: a remark plugin in `compile.tsx` replaces each ```mermaid code node with an MDX JSX node `<Mermaid index={i} />`; `Mermaid` reads `post.dir/<locale>-diagram-<i+1>.svg` at build; if present and its hash matches `hashBlock(src)`, inlines the SVG (`<figure class="diagram">`); otherwise renders `<pre><code class="language-mermaid">` with the source (Review Focus 3).
-- Components: `a` (external links `rel="noopener"`), `code` inline (mono), `pre` (panel), `table` (wrapped for horizontal scroll), `img` (uses `next/image` with `unoptimized` for SVG, enforces alt), `Ref` span for `[S1 §2]` patterns rendered as `<a href="#S1" class="ref">` (a remark text transform).
+- `compilePostBody(post: PostRecord, locale: Locale): Promise<{ content: React.ReactElement; headings: Array<{ id: string; text: string }> }>` via `compileMDX` from `next-mdx-remote/rsc`, `remarkPlugins: [remarkGfm, remarkRefs, [remarkMermaid, { post, locale }]]`, `rehypePlugins: [[rehypePrettyCode, { theme: { light: 'github-light', dark: 'github-dark-dimmed' }, keepBackground: false }], rehypeSections]`.
+- `remarkMermaid`: replaces the i-th ```mermaid code node with `<Mermaid index={i} />` (mdxJsxFlowElement).
+- `remarkRefs`: text `[S1 §2]` → `<Ref id="S1" locator="§2" />` rendered as `<a href="#S1" class="ref">[S1 §2]</a>`.
+- `rehypeSections`: groups each `h2` and its following siblings (until the next `h2`) into `<section class="panel" id={slug(h2)}>`; collects headings; nothing before the first `h2` is wrapped.
+- `Mermaid({ index })` (server): reads `svgName(locale, index)` from `post.dir`; if present and `readSvgHash === hashBlock(src)`, inlines the SVG in `<figure class="diagram">`; else `<pre class="diagram-fallback"><code class="language-mermaid">src</code></pre>`.
+- Components: `a` (external → `rel="noopener noreferrer" target="_blank"`), inline `code` (mono), `pre` (hairline border, no panel fill), `table` wrapped in `.table-scroll`. No `img` component in M1 (deferred; no fixture has images).
 
-- [ ] **Step 1: Write failing tests** with `good-post`: compiled output contains a `.ref` anchor for `[S1]`; with no SVG present, output contains `language-mermaid`; after writing a fresh SVG, output contains `<svg`.
-- [ ] **Step 2: Run**. Expected: FAIL.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4: Run tests**. Expected: PASS.
-- [ ] **Step 5: Commit** `feat(mdx): compile pipeline, refs, mermaid inline with fallback`.
+- [ ] Failing tests: output contains `href="#S1"`; no SVG → contains `language-mermaid`; fresh SVG in the temp copy → contains `<svg`; two H2s → two `<section class="panel"`; headings length 2.
+- [ ] Implement; pass; commit.
 
 ---
 
 ### Task 14: Post page to the direction contract
 
-**Files:**
-- Create: `app/[locale]/posts/[slug]/page.tsx`, `components/post/post-meta.tsx`, `components/post/key-numbers.tsx`, `components/post/tldr.tsx`, `components/post/small-team.tsx`, `components/post/deep-divider.tsx`, `components/post/lessons.tsx`, `components/post/sources.tsx`, `components/post/byline.tsx`, `components/reading-progress.tsx`
-- Test: `tests/ui/post-page.test.tsx` (render with `good-post` via React Testing Library + jsdom)
+**Files:** `app/[locale]/posts/[slug]/page.tsx`, `components/post/*.tsx` (post-meta, tags-row, key-numbers, tldr, small-team, deep-divider, lessons, sources, byline, missing-locale-note), `components/toc.tsx`, `components/share-link.tsx`, `components/reading-progress.tsx`. Test: `tests/ui/post-page.test.tsx` (`// @vitest-environment jsdom`; `process.env.CONTENT_ROOT = 'tests/fixtures/posts'`; `const el = await Page({ params: Promise.resolve({ locale: 'vi', slug: 'good-post' }) })`; `renderToStaticMarkup(el)`; assertions on the HTML string).
 
 **Interfaces:**
-- `generateStaticParams()` returns every `{locale, slug}` where `hasLocale`. `dynamicParams = false`.
-- `generateMetadata`: `title`, `description` = summary, `alternates.languages` only for existing twin (`vi`/`en` keys plus `x-default: vi`), `openGraph.locale`.
-- Page order (Global Constraints): breadcrumb (`/[locale]/companies/[company]` link, company name), `<h1>`, `PostMeta` (byline, publishedAt, whole minutes, topic, caseType, mono labels), summary (dek), `KeyNumbers` (2–4 muted cells: mono value, label from `keyNumberLabels`, `<a href="#Sx">` ref), `Tldr` panel, `SmallTeam` callout (the only accent border), `DeepDivider` (mono: dictionary `post.deepRead` with deep minutes), compiled body (each H2 section wrapped in a `.panel`, done by the `h2` MDX component opening/closing sections or by a rehype plugin that groups siblings; no nested panels), `Lessons` (only if present), `Sources` (ordered list with `id="S1"`…: type label, title link, authors, publishedAt, locator, accessedAt) followed by the AI line, `Byline` block.
-- Missing twin: when `!hasLocale(post, otherLocale)`, Header `altHref` is `/${other}` and the page shows `post.missingLocale`.
-- `ReadingProgress` (client): fixed 2px bar at top, width = scroll fraction, uses `requestAnimationFrame`, no stored state.
-- Desktop layout: `max-w-[720px]` column plus `w-[260px]` sticky rail (`lg:` and up) holding the author card and a table of contents built from H2 texts (ids slugified); phone: single column, TOC as `<details>` after the top layer.
+- `generateStaticParams()` from `listPosts()` for every `{locale, slug}` with `hasLocale`; `dynamicParams = false`.
+- `generateMetadata`: `metadataBase: new URL(SITE_URL)`, `title`, `description` = summary, `alternates.canonical`, `alternates.languages` with keys for existing locales only and `x-default` only when `vi` exists, `openGraph.locale`.
+- Order: `Header`; breadcrumb (`post.breadcrumbHome` → `/${locale}`, company name → `/${locale}/companies/${company}`); `TagsRow` (mono `post.label` + pills: company, topic, caseType); `<h1>`; solid 1px accent rule; summary (dek); `PostMeta` (monogram avatar "R", byline, publishedAt, whole minutes, mono); `KeyNumbers` (2–4 muted cells: mono value, label, `<a href="#Sx">`); `Tldr` panel; `SmallTeam` callout (accent left border, the only accent-bordered block); `DeepDivider` (`post.deepRead` with deep minutes); phone `Toc` as `<details>`; compiled body (sections as panels); `Lessons` if present; `Sources` (`<ol>`, each `<li id="S1">`: type label, title link, authors, publishedAt, locator, accessedAt) + AI line; `Byline`.
+- Desktop (`lg:`): 720px column + 260px sticky rail with author card, `Toc` (client, IntersectionObserver marks the active heading with the accent), `ShareLink` (client, copies `location.href`, label `post.share`).
+- `MissingLocaleNote` and `Header twinMissing` when `!hasLocale(post, otherLocale(locale))`.
+- `ReadingProgress` (client): fixed 2px bar, width = scroll fraction via `requestAnimationFrame`, no stored state.
 
-- [ ] **Step 1: Write failing tests**: rendered page contains, in document order, h1, summary, key-number values, tldr items, small-team items, the deep-read label, then the first H2; Sources list has `id="S1"`; the AI line text matches the dictionary; a post without `lessons` renders no Lessons heading; with `en.mdx` marked draft, the Vietnamese page shows `post.missingLocale`.
-- [ ] **Step 2: Run**. Expected: FAIL.
-- [ ] **Step 3: Implement the components and page**, matching `pinned-neon-navy-carded.html` for arrangement, palette, type and density at 390 wide, and the contract's desktop layout at 1440.
-- [ ] **Step 4: Run tests and `pnpm build`**. Expected: PASS; six post routes static.
-- [ ] **Step 5: Commit** `feat(post): post page to the direction contract`.
+- [ ] Failing tests: document order h1 < summary < key-number values < tldr items < small-team items < deep-read label < first `<section class="panel"`; `id="S1"` present; AI line text; no Lessons heading when `lessons` absent; en draft copy → Vietnamese page contains `post.missingLocale`.
+- [ ] Implement, matching the sketch at 390 wide (arrangement, palette, type, density; solid rule instead of the gradient) and the contract at 1440.
+- [ ] `pnpm test`, `pnpm build` (six post routes static); commit.
 
 ---
 
 ### Task 15: Home as a plain list (M1 stand-in) and Analytics
 
-**Files:**
-- Modify: `app/[locale]/page.tsx`, `app/[locale]/layout.tsx`
-- Test: `tests/ui/home.test.tsx`
+**Files:** `app/[locale]/page.tsx`, `app/[locale]/layout.tsx`. Test: `tests/ui/home.test.tsx` (same invocation pattern as Task 14).
 
-**Interfaces:**
-- Home lists posts with `hasLocale`, newest first: company name, title (link), first key number (mono) and whole read minutes. Tagline under the site name.
-- `<Analytics />` from `@vercel/analytics/next` in the locale layout.
-
-- [ ] **Step 1: Write failing test**: home for `vi` lists three fixture titles in `publishedAt` desc order.
-- [ ] **Step 2: Run**. Expected: FAIL.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4: Run tests and `pnpm build`**. Expected: PASS.
-- [ ] **Step 5: Commit** `feat(home): plain post list; analytics`.
+- [ ] Failing test: `vi` home lists the fixture titles in `publishedAt` desc order with company name, first key number (mono) and whole minutes; tagline present.
+- [ ] Implement; add `<Analytics />` from `@vercel/analytics/next` to the locale layout; `pnpm build`; commit.
 
 ---
 
 ### Task 16: Deploy and finish review (M1 exit)
 
-**Files:**
-- Create: `.impeccable/review/` captures (gitignored), `DESIGN.md` (written by the Impeccable documenter at the end)
-
-- [ ] **Step 1: Ryan completes `docs/repo-setup.md`** (push, branch protection, Vercel connect). Confirm the production URL serves `/vi/posts/discord-cassandra-to-scylladb` and `/en/...`.
-- [ ] **Step 2: Capture `desktop.png` (1440 full page) and `mobile.png` (390)** of the Discord post in both themes into `.impeccable/review/`; run `/Users/ryan/.claude/skills/impeccable/scripts/impeccable detect --json app components` once; fix mechanical findings.
-- [ ] **Step 3: Spawn the Impeccable finish reviewer** with the request, the direction contract, the sketch, the screenshots, the craft references (Linear, Stripe, fly.io), and the detector output. Apply one fix batch; recapture; verdict.
-- [ ] **Step 4: Spawn the Impeccable documenter** to write `DESIGN.md` and `.impeccable/design.json` from the built world.
-- [ ] **Step 5: Commit** `chore: finish review fixes; docs: DESIGN.md`. M1 done when the reviewer's disposition is `ship` and three posts are live.
+- [ ] Vercel: link and deploy with the `vercel` CLI if authenticated (`vercel whoami`); else open a `needs-human` issue with the exact steps and continue. Confirm the production URL serves both locales of the Discord post. Set `NEXT_PUBLIC_SITE_URL` in Vercel env and `.env.example`.
+- [ ] Capture `desktop.png` (1440 full page) and `mobile.png` (390) of the Discord post in both themes into `.impeccable/review/`; run `impeccable detect --json app components` once; fix mechanical findings.
+- [ ] Spawn the Impeccable finish reviewer with the request, the direction contract, the sketch, the screenshots, the craft references (Linear, Stripe, fly.io) and the detector output. One fix batch; recapture; verdict.
+- [ ] Spawn the Impeccable documenter for `DESIGN.md` and `.impeccable/design.json`.
+- [ ] Commit; mark M1 in `ROADMAP.md` when the disposition is `ship` and three posts are live; merge the PR.

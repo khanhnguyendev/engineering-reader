@@ -169,7 +169,7 @@ Shared across languages. English, kebab-case, company slug first, then the case 
 
 ### seen.json
 
-Keyed by normalized source URL (scheme and host lowercased, query and fragment stripped, utm parameters removed, trailing slash removed):
+Keyed by normalized source URL (scheme and host lowercased, fragment stripped, `utm_*` parameters removed, other query parameters kept and sorted so YouTube `v=` ids stay distinct, trailing slash removed):
 
 ```json
 {
@@ -240,7 +240,7 @@ World
 - Light: a first-class twin from the same tokens: paper ground, the same grid at low opacity, the same single accent darkened for contrast, same hairline and panel roles. Light must look as intentional as dark.
 - Default theme follows `prefers-color-scheme`; a toggle persists the choice; a small inline script applies the stored theme before first paint.
 - Type: Inter for all text (Vietnamese subset), JetBrains Mono for numbers, references, and ASCII labels only. Body 16 to 18px, line-height 1.6 to 1.7. Title tracking no tighter than -2%.
-- Dividing blocks, three levels: hairlines for large regions; muted panels for TL;DR, each deep-layer H2 section, code, the rail; an accent border only on the "Cho team nhỏ" callout. A monospace divider "ĐỌC SÂU · n PHÚT" / "DEEP READ · n MIN" marks where the deep layer begins. No nested panels. No gradients, no glow, no second colour.
+- Dividing blocks, three levels: hairlines for large regions; muted panels for TL;DR, each deep-layer H2 section, code, the rail; an accent border only on the "Cho team nhỏ" callout. A monospace divider "ĐỌC SÂU · n PHÚT" / "DEEP READ · n MIN" marks where the deep layer begins. No nested panels: code blocks, diagrams and tables inside a section panel are set off by hairline rules, never bordered boxes. No gradients, no glow, no second colour.
 - Company colours appear only on logo marks on cards.
 - The chosen first-viewport sketch is `.impeccable/mocks/decision/pinned-neon-navy-carded.html` (phone, 390 wide). The direction contract lives in the surface brief; the build is audited against both.
 
@@ -251,7 +251,7 @@ OG images: generated at build per locale from post.json and the locale title (co
 - Next.js 16 App Router, React 19, TypeScript, pnpm, Tailwind v4 with tokens as CSS variables under `@theme`; `[data-theme]` attribute with `prefers-color-scheme` fallback.
 - Content loader `lib/content.ts`: reads post folders at build, parses frontmatter with gray-matter, validates with the shared zod schemas, compiles MDX with `next-mdx-remote/rsc` and `remark-gfm`. All routes use `generateStaticParams` for both locales. No runtime file reads.
 - Syntax highlighting: `rehype-pretty-code` over Shiki at build, dual theme via CSS variables, no client JS.
-- Mermaid: build-time. `scripts/render-mermaid.ts` finds every ```mermaid block, renders it to SVG (Mermaid CLI with headless Chromium), and writes `<slug>/<locale>-diagram-<n>.svg` into the post folder; the SVG is committed. The script is idempotent: it re-renders only when the block's hash differs from a hash comment stored in the SVG. CI runs it and fails the PR if a rendered SVG is missing or stale, so the pipeline and humans must run it before pushing. At build, the MDX component for a mermaid block inlines the matching SVG; if the SVG is missing, it renders the source as a code block. SVG colours use CSS variables so both themes work.
+- Mermaid: build-time. `scripts/render-mermaid.ts` finds every ```mermaid block, renders it to SVG (Mermaid CLI with headless Chromium), and writes `<slug>/<locale>-diagram-<n>.svg` into the post folder; the SVG is committed. The script is idempotent: it re-renders only when the block's hash differs from a hash comment stored in the SVG. Authors run it locally; CI also runs it on every pull request, commits any new or re-rendered SVG back to the PR branch, and then fails the PR if anything is still stale. The pipeline never runs it (it writes Mermaid source only). At build, the MDX component for a mermaid block inlines the matching SVG; if the SVG is missing, it renders the source as a code block. SVG colours use CSS variables so both themes work.
 - i18n: `[locale]` segment with `generateStaticParams(['vi','en'])`; UI strings in `dictionaries/{vi,en}.json`; `proxy.ts` only redirects `/` to `/vi`. `generateMetadata` emits canonical, OG, Twitter card, and `alternates.languages` only for existing pairs.
 - SEO: `app/sitemap.ts`, `app/robots.ts`, JSON-LD `Article` with `author`, `inLanguage`, and `citation` from sources. `llms.txt` lists both locales' posts with summaries. `/[locale]/posts/[slug].md` route returns Markdown assembled from frontmatter and body.
 - RSS: `app/[locale]/feed.xml/route.ts`, static, summary plus link, not full content.
