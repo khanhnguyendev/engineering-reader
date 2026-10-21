@@ -1,1 +1,134 @@
 @import "tailwindcss";
+
+/*
+  Tokens. Dark is the default; light is a builder-derived twin.
+  Contrast (WCAG, computed from sRGB relative luminance):
+  Dark, on ground #0a111c:
+    ink #eef0f1 16.55:1 | ink-2 #d4d9db 13.29:1 | muted #9aa5ad 7.53:1
+    accent #6ee7b7 12.41:1 | accent-ink #04070a on accent 13.25:1
+  Light, on ground #f7f8f7:
+    ink #111827 16.66:1 | ink-2 #374151 9.68:1 | muted #55606b 6.03:1
+    accent #0f7a5a 4.99:1 | accent-ink #ffffff on accent 5.31:1
+*/
+:root {
+  --ground: #0a111c;
+  --grid: rgba(110, 231, 183, 0.07);
+  --ink: #eef0f1;
+  --ink-2: #d4d9db;
+  --muted: #9aa5ad;
+  --hairline: rgba(148, 197, 180, 0.17);
+  --hairline-strong: rgba(148, 197, 180, 0.34);
+  --panel: rgba(255, 255, 255, 0.025);
+  --panel-2: rgba(255, 255, 255, 0.04);
+  --accent: #6ee7b7;
+  --accent-ink: #04070a;
+  --radius: 10px;
+}
+
+:root[data-theme="light"] {
+  --ground: #f7f8f7;
+  --grid: rgba(15, 122, 90, 0.07);
+  --ink: #111827;
+  --ink-2: #374151;
+  --muted: #55606b;
+  --hairline: rgba(15, 122, 90, 0.2);
+  --hairline-strong: rgba(15, 122, 90, 0.4);
+  --panel: rgba(17, 24, 39, 0.03);
+  --panel-2: rgba(17, 24, 39, 0.05);
+  --accent: #0f7a5a;
+  --accent-ink: #ffffff;
+}
+
+/* No-JS fallback: follow the OS when the inline script has not set data-theme. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --ground: #f7f8f7;
+    --grid: rgba(15, 122, 90, 0.07);
+    --ink: #111827;
+    --ink-2: #374151;
+    --muted: #55606b;
+    --hairline: rgba(15, 122, 90, 0.2);
+    --hairline-strong: rgba(15, 122, 90, 0.4);
+    --panel: rgba(17, 24, 39, 0.03);
+    --panel-2: rgba(17, 24, 39, 0.05);
+    --accent: #0f7a5a;
+    --accent-ink: #ffffff;
+  }
+}
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
+  --radius-panel: var(--radius);
+}
+
+body {
+  background-color: var(--ground);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+@media (min-width: 64rem) {
+  body {
+    font-size: 18px;
+    line-height: 1.7;
+  }
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.mono-label {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+
+.hairline {
+  border-top: 1px solid var(--hairline);
+}
+
+/* The only accent border in the system. */
+.callout {
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+/* Code theme switch for rehype-pretty-code (dual themes). */
+html[data-theme="dark"] [data-rehype-pretty-code-figure] :is(code, span) {
+  color: var(--shiki-dark);
+}
+html[data-theme="light"] [data-rehype-pretty-code-figure] :is(code, span) {
+  color: var(--shiki-light);
+}
