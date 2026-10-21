@@ -17,3 +17,4 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-21 M1/T13 MDX compile pipeline, refs, sections, mermaid inline — 4d22422
 - 2026-10-21 M1/T13b mermaid classic look, gradient/filter stripping, post-process version in hash — 58774ea
 - 2026-10-21 M1/T14 post page to the direction contract (+ Task 12 carry-overs) — e468223
+- 2026-10-21 M1/T15 home plain list, analytics — 6be1967
