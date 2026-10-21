@@ -5,6 +5,7 @@ import { LOCALES, type Locale } from '@/lib/i18n';
 import { mermaidBlocksOf, type RawPost } from '@/lib/content/load';
 
 export const MERMAID_THEME = {
+  look: 'classic',
   theme: 'base',
   themeVariables: {
     primaryColor: '#010101',
@@ -76,6 +77,12 @@ export function postProcessSvg(svg: string, opts: { id: string }): string {
       return `color-mix(in srgb, ${variable} ${pct}%, transparent)`;
     },
   );
+  // Classic look should not emit these, but strip any that survive: no gradients, no glow.
+  out = out.replace(/<(linearGradient|radialGradient)\b(?:[^>]*\/>|[\s\S]*?<\/\1>)/gi, '');
+  out = out.replace(/url\(\s*#[^)]*gradient[^)]*\)/gi, 'var(--hairline-strong)');
+  out = out.replace(/\sfilter="\s*url\(#[^"]*"/gi, '');
+  out = out.replace(/(?<![-\w])filter\s*:[^;}"]*;?/gi, '');
+  out = out.replace(/\sstyle="\s*"/gi, '');
   return out.replace(/<svg\b([^>]*)>/, (_m, attrs: string) => {
     const rest = attrs.replace(/\sid="[^"]*"/, '');
     return `<svg id="${opts.id}"${rest}>`;

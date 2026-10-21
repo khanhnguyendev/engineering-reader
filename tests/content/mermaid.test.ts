@@ -83,6 +83,37 @@ describe('svg helpers', () => {
   });
 });
 
+describe('classic look', () => {
+  it('theme uses the classic look', () => expect(MERMAID_THEME.look).toBe('classic'));
+  it('postProcessSvg strips gradients, url refs and filters', () => {
+    const out = postProcessSvg(
+      '<svg><defs><linearGradient id="x-gradient"/></defs><g style="filter:drop-shadow(1px 2px 2px rgba(185,185,185,1));stroke:url(#x-gradient)"/></svg>',
+      { id: 't' },
+    );
+    expect(out).not.toContain('filter:');
+    expect(out).not.toContain('linearGradient');
+    expect(out).not.toContain('url(#');
+    expect(out).toContain('stroke:var(--hairline-strong)');
+  });
+  it('postProcessSvg removes paired gradient elements and filter attributes', () => {
+    const out = postProcessSvg(
+      '<svg><defs><radialGradient id="r"><stop offset="0"/></radialGradient><linearGradient id="l"><stop offset="1"/></linearGradient></defs><rect fill="url(#r-Gradient)" filter="url(#drop)"/></svg>',
+      { id: 't' },
+    );
+    expect(out).not.toMatch(/Gradient/i);
+    expect(out).not.toContain('filter=');
+    expect(out).toContain('fill="var(--hairline-strong)"');
+  });
+});
+
+describe('classic look css', () => {
+  it('postProcessSvg strips filter declarations from <style> blocks', () => {
+    const out = postProcessSvg('<svg><style>.a{stroke:red;filter:drop-shadow( 1px 2px 2px rgba(1,2,3,1));}.b{filter:blur(2px)}</style></svg>', { id: 't' });
+    expect(out).not.toContain('filter');
+    expect(out).toContain('stroke:red;');
+  });
+});
+
 describe('leftoverColors', () => {
   it('reports distinct non-sentinel colours only', () => {
     const svg = '<svg><path fill="#ABCDEF"/><path stroke="#abcdef" style="fill:rgb(1, 2, 3)"/><g fill="var(--ink)"/>&#123;</svg>';

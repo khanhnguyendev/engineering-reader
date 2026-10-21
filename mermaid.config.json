@@ -1,4 +1,5 @@
 {
+  "look": "classic",
   "theme": "base",
   "themeVariables": {
     "primaryColor": "#010101",
