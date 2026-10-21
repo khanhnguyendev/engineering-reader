@@ -1,0 +1,641 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-21T17:04:46.623Z",
+  "title": "Design System: Engineering Reader",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Night Navy",
+        "cssVar": "--ground",
+        "theme": "dark (default)",
+        "tonalRamp": [
+          "oklch(15.0% 0.025 259.2)",
+          "oklch(26.4% 0.025 259.2)",
+          "oklch(37.9% 0.025 259.2)",
+          "oklch(49.3% 0.025 259.2)",
+          "oklch(60.7% 0.025 259.2)",
+          "oklch(72.1% 0.025 259.2)",
+          "oklch(83.6% 0.025 259.2)",
+          "oklch(95.0% 0.025 259.2)"
+        ],
+        "canonical": "#0a111c"
+      },
+      "grid": {
+        "role": "neutral",
+        "displayName": "Grid Mint",
+        "cssVar": "--grid",
+        "theme": "dark (default)",
+        "tonalRamp": [
+          "oklch(15.0% 0.130 165.0)",
+          "oklch(26.4% 0.130 165.0)",
+          "oklch(37.9% 0.130 165.0)",
+          "oklch(49.3% 0.130 165.0)",
+          "oklch(60.7% 0.130 165.0)",
+          "oklch(72.1% 0.130 165.0)",
+          "oklch(83.6% 0.130 165.0)",
+          "oklch(95.0% 0.130 165.0)"
+        ],
+        "canonical": "rgba(110, 231, 183, 0.07)"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "cssVar": "--ink",
+        "theme": "dark (default)",
+        "tonalRamp": [
+          "oklch(15.0% 0.003 228.8)",
+          "oklch(26.4% 0.003 228.8)",
+          "oklch(37.9% 0.003 228.8)",
+          "oklch(49.3% 0.003 228.8)",
+          "oklch(60.7% 0.003 228.8)",
+          "oklch(72.1% 0.003 228.8)",
+          "oklch(83.6% 0.003 228.8)",
+          "oklch(95.0% 0.003 228.8)"
+        ],
+        "canonical": "#eef0f1"
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Ink Secondary",
+        "cssVar": "--ink-2",
+        "theme": "dark (default)",
+        "tonalRamp": [
+          "oklch(15.0% 0.006 223.5)",
+          "oklch(26.4% 0.006 223.5)",
+          "oklch(37.9% 0.006 223.5)",
+          "oklch(49.3% 0.006 223.5)",
+          "oklch(60.7% 0.006 223.5)",
+          "oklch(72.1% 0.006 223.5)",
+          "oklch(83.6% 0.006 223.5)",
+          "oklch(95.0% 0.006 223.5)"
+        ],
+        "canonical": "#d4d9db"
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Slate",
+        "cssVar": "--muted",
+        "theme": "dark (default)",
+        "tonalRamp": [
+          "oklch(15.0% 0.017 239.2)",
+          "oklch(26.4% 0.017 239.2)",
+          "oklch(37.9% 0.017 239.2)",
+          "oklch(49.3% 0.017 239.2)",
+          "oklch(60.7% 0.017 239.2)",
+          "oklch(72.1% 0.017 239.2)",
+          "oklch(83.6% 0.017 239.2)",
+          "oklch(95.0% 0.017 239.2)"
+        ],
+        "canonical": "#9aa5ad"
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "cssVar": "--hairline",
+        "theme": "dark (default)",
+        "tonalRamp": [
+          "oklch(15.0% 0.057 171.4)",
+          "oklch(26.4% 0.057 171.4)",
+          "oklch(37.9% 0.057 171.4)",
+          "oklch(49.3% 0.057 171.4)",
+          "oklch(60.7% 0.057 171.4)",
+          "oklch(72.1% 0.057 171.4)",
+          "oklch(83.6% 0.057 171.4)",
+          "oklch(95.0% 0.057 171.4)"
+        ],
+        "canonical": "rgba(148, 197, 180, 0.17)"
+      },
+      "hairline-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "cssVar": "--hairline-strong",
+        "theme": "dark (default)",
+        "tonalRamp": [
+          "oklch(15.0% 0.057 171.4)",
+          "oklch(26.4% 0.057 171.4)",
+          "oklch(37.9% 0.057 171.4)",
+          "oklch(49.3% 0.057 171.4)",
+          "oklch(60.7% 0.057 171.4)",
+          "oklch(72.1% 0.057 171.4)",
+          "oklch(83.6% 0.057 171.4)",
+          "oklch(95.0% 0.057 171.4)"
+        ],
+        "canonical": "rgba(148, 197, 180, 0.34)"
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel Veil",
+        "cssVar": "--panel",
+        "theme": "dark (default)",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ],
+        "canonical": "rgba(255, 255, 255, 0.025)"
+      },
+      "panel-2": {
+        "role": "neutral",
+        "displayName": "Panel Raised",
+        "cssVar": "--panel-2",
+        "theme": "dark (default)",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ],
+        "canonical": "rgba(255, 255, 255, 0.04)"
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Signal Mint",
+        "cssVar": "--accent",
+        "theme": "dark (default)",
+        "tonalRamp": [
+          "oklch(15.0% 0.130 165.0)",
+          "oklch(26.4% 0.130 165.0)",
+          "oklch(37.9% 0.130 165.0)",
+          "oklch(49.3% 0.130 165.0)",
+          "oklch(60.7% 0.130 165.0)",
+          "oklch(72.1% 0.130 165.0)",
+          "oklch(83.6% 0.130 165.0)",
+          "oklch(95.0% 0.130 165.0)"
+        ],
+        "canonical": "#6ee7b7"
+      },
+      "accent-ink": {
+        "role": "neutral",
+        "displayName": "Accent Ink",
+        "cssVar": "--accent-ink",
+        "theme": "dark (default)",
+        "tonalRamp": [
+          "oklch(15.0% 0.010 241.8)",
+          "oklch(26.4% 0.010 241.8)",
+          "oklch(37.9% 0.010 241.8)",
+          "oklch(49.3% 0.010 241.8)",
+          "oklch(60.7% 0.010 241.8)",
+          "oklch(72.1% 0.010 241.8)",
+          "oklch(83.6% 0.010 241.8)",
+          "oklch(95.0% 0.010 241.8)"
+        ],
+        "canonical": "#04070a"
+      },
+      "ground-light": {
+        "role": "neutral",
+        "displayName": "Cool Paper",
+        "cssVar": "--ground",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15.0% 0.002 165.1)",
+          "oklch(26.4% 0.002 165.1)",
+          "oklch(37.9% 0.002 165.1)",
+          "oklch(49.3% 0.002 165.1)",
+          "oklch(60.7% 0.002 165.1)",
+          "oklch(72.1% 0.002 165.1)",
+          "oklch(83.6% 0.002 165.1)",
+          "oklch(95.0% 0.002 165.1)"
+        ],
+        "canonical": "#f2f4f3"
+      },
+      "grid-light": {
+        "role": "neutral",
+        "displayName": "Grid Forest",
+        "cssVar": "--grid",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15.0% 0.103 166.1)",
+          "oklch(26.4% 0.103 166.1)",
+          "oklch(37.9% 0.103 166.1)",
+          "oklch(49.3% 0.103 166.1)",
+          "oklch(60.7% 0.103 166.1)",
+          "oklch(72.1% 0.103 166.1)",
+          "oklch(83.6% 0.103 166.1)",
+          "oklch(95.0% 0.103 166.1)"
+        ],
+        "canonical": "rgba(15, 122, 90, 0.07)"
+      },
+      "ink-light": {
+        "role": "neutral",
+        "displayName": "Ink (light)",
+        "cssVar": "--ink",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15.0% 0.032 264.7)",
+          "oklch(26.4% 0.032 264.7)",
+          "oklch(37.9% 0.032 264.7)",
+          "oklch(49.3% 0.032 264.7)",
+          "oklch(60.7% 0.032 264.7)",
+          "oklch(72.1% 0.032 264.7)",
+          "oklch(83.6% 0.032 264.7)",
+          "oklch(95.0% 0.032 264.7)"
+        ],
+        "canonical": "#111827"
+      },
+      "ink-2-light": {
+        "role": "neutral",
+        "displayName": "Ink Secondary (light)",
+        "cssVar": "--ink-2",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15.0% 0.031 259.7)",
+          "oklch(26.4% 0.031 259.7)",
+          "oklch(37.9% 0.031 259.7)",
+          "oklch(49.3% 0.031 259.7)",
+          "oklch(60.7% 0.031 259.7)",
+          "oklch(72.1% 0.031 259.7)",
+          "oklch(83.6% 0.031 259.7)",
+          "oklch(95.0% 0.031 259.7)"
+        ],
+        "canonical": "#374151"
+      },
+      "muted-light": {
+        "role": "neutral",
+        "displayName": "Muted Slate (light)",
+        "cssVar": "--muted",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15.0% 0.022 248.3)",
+          "oklch(26.4% 0.022 248.3)",
+          "oklch(37.9% 0.022 248.3)",
+          "oklch(49.3% 0.022 248.3)",
+          "oklch(60.7% 0.022 248.3)",
+          "oklch(72.1% 0.022 248.3)",
+          "oklch(83.6% 0.022 248.3)",
+          "oklch(95.0% 0.022 248.3)"
+        ],
+        "canonical": "#55606b"
+      },
+      "hairline-light": {
+        "role": "neutral",
+        "displayName": "Hairline (light)",
+        "cssVar": "--hairline",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15.0% 0.103 166.1)",
+          "oklch(26.4% 0.103 166.1)",
+          "oklch(37.9% 0.103 166.1)",
+          "oklch(49.3% 0.103 166.1)",
+          "oklch(60.7% 0.103 166.1)",
+          "oklch(72.1% 0.103 166.1)",
+          "oklch(83.6% 0.103 166.1)",
+          "oklch(95.0% 0.103 166.1)"
+        ],
+        "canonical": "rgba(15, 122, 90, 0.2)"
+      },
+      "hairline-strong-light": {
+        "role": "neutral",
+        "displayName": "Strong Hairline (light)",
+        "cssVar": "--hairline-strong",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15.0% 0.103 166.1)",
+          "oklch(26.4% 0.103 166.1)",
+          "oklch(37.9% 0.103 166.1)",
+          "oklch(49.3% 0.103 166.1)",
+          "oklch(60.7% 0.103 166.1)",
+          "oklch(72.1% 0.103 166.1)",
+          "oklch(83.6% 0.103 166.1)",
+          "oklch(95.0% 0.103 166.1)"
+        ],
+        "canonical": "rgba(15, 122, 90, 0.4)"
+      },
+      "panel-light": {
+        "role": "neutral",
+        "displayName": "Panel Sheet",
+        "cssVar": "--panel",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ],
+        "canonical": "#ffffff"
+      },
+      "panel-2-light": {
+        "role": "neutral",
+        "displayName": "Panel Raised (light)",
+        "cssVar": "--panel-2",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15.0% 0.002 145.6)",
+          "oklch(26.4% 0.002 145.6)",
+          "oklch(37.9% 0.002 145.6)",
+          "oklch(49.3% 0.002 145.6)",
+          "oklch(60.7% 0.002 145.6)",
+          "oklch(72.1% 0.002 145.6)",
+          "oklch(83.6% 0.002 145.6)",
+          "oklch(95.0% 0.002 145.6)"
+        ],
+        "canonical": "#fbfcfb"
+      },
+      "accent-light": {
+        "role": "primary",
+        "displayName": "Forest Mint",
+        "cssVar": "--accent",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15.0% 0.103 166.1)",
+          "oklch(26.4% 0.103 166.1)",
+          "oklch(37.9% 0.103 166.1)",
+          "oklch(49.3% 0.103 166.1)",
+          "oklch(60.7% 0.103 166.1)",
+          "oklch(72.1% 0.103 166.1)",
+          "oklch(83.6% 0.103 166.1)",
+          "oklch(95.0% 0.103 166.1)"
+        ],
+        "canonical": "#0f7a5a"
+      },
+      "accent-ink-light": {
+        "role": "neutral",
+        "displayName": "Accent Ink (light)",
+        "cssVar": "--accent-ink",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ],
+        "canonical": "#ffffff"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Post title only, phone size; followed by the 1px accent rule."
+      },
+      "display-lg": {
+        "displayName": "Display (desktop)",
+        "purpose": "Post title from 1024px."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section H2s, Lessons and Sources headings on phones."
+      },
+      "headline-lg": {
+        "displayName": "Headline (desktop)",
+        "purpose": "Section H2s from 1024px."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Top-layer block headings and H3s."
+      },
+      "dek": {
+        "displayName": "Dek",
+        "purpose": "One-line summary under the title rule; 19px from 1024px."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Prose on phones; 720px column."
+      },
+      "body-lg": {
+        "displayName": "Body (desktop)",
+        "purpose": "Prose from 1024px."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Breadcrumbs, byline, TOC links, source details."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "Key-number values (15px row on phones, 18px from 640px, 24px from 1024px)."
+      },
+      "label": {
+        "displayName": "Mono Label",
+        "purpose": "Short uppercase labels: nav, TOC heading, share, language switch, source type, divider."
+      },
+      "ref": {
+        "displayName": "Ref",
+        "purpose": "Inline source references, relative to context size."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "fade-fast",
+        "value": "opacity 150ms ease",
+        "purpose": "Section permalink reveal on heading hover or focus."
+      },
+      {
+        "name": "color-fast",
+        "value": "color 150ms, background-color 150ms",
+        "purpose": "TOC active item, share button hover."
+      },
+      {
+        "name": "chevron-turn",
+        "value": "transform 200ms",
+        "purpose": "Phone TOC chevron rotates 180deg when open."
+      },
+      {
+        "name": "progress",
+        "value": "width per animation frame (no easing)",
+        "purpose": "2px accent reading-progress bar follows scroll fraction."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ],
+    "ground": {
+      "value": "linear-gradient(to right, var(--grid) 1px, transparent 1px), linear-gradient(to bottom, var(--grid) 1px, transparent 1px); background-size: 40px 40px",
+      "purpose": "The 40px hairline grid on body; the only use of linear-gradient, drawing lines, not a fill."
+    },
+    "focus": {
+      "value": "outline: 2px solid var(--accent); outline-offset: 2px",
+      "purpose": "Every :focus-visible."
+    },
+    "selection": {
+      "value": "background: var(--accent); color: var(--accent-ink)",
+      "purpose": "Text selection."
+    },
+    "callout": {
+      "value": "background: color-mix(in srgb, var(--accent) 7%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-left: 3px solid var(--accent); border-radius: 10px",
+      "purpose": "The single accent-bordered block per post."
+    }
+  },
+  "components": [
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The section and block container: veil tint, 1px hairline, 10px radius. Never nested.",
+      "html": "<div class=\"ds-panel\"><h2 class=\"ds-panel-h\">TL;DR</h2><ul class=\"ds-panel-list\"><li>Reads stayed under 15 ms at p99 after the move.</li><li>The cutover ran region by region.</li></ul></div>",
+      "css": ".ds-panel { background: var(--panel, rgba(255,255,255,0.025)); border: 1px solid var(--hairline, rgba(148,197,180,0.17)); border-radius: 10px; padding: 16px; color: var(--ink, #eef0f1); font-family: Inter, system-ui, sans-serif; } .ds-panel-h { margin: 0 0 8px; font-size: 16px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.35; } .ds-panel-list { margin: 0; padding-left: 20px; font-size: 16px; line-height: 1.6; } .ds-panel-list li::marker { color: var(--muted, #9aa5ad); }"
+    },
+    {
+      "name": "Callout",
+      "kind": "custom",
+      "refersTo": "callout",
+      "description": "\"For a small team\": the only accent-bordered block, one per post.",
+      "html": "<aside class=\"ds-callout\"><h2 class=\"ds-callout-h\">Cho team nhỏ</h2><ul class=\"ds-callout-list\"><li>Đo p99 trước khi đổi database.</li><li>Chạy song song hai hệ thống một tuần.</li></ul></aside>",
+      "css": ".ds-callout { background: color-mix(in srgb, var(--accent, #6ee7b7) 7%, transparent); border: 1px solid color-mix(in srgb, var(--accent, #6ee7b7) 35%, transparent); border-left: 3px solid var(--accent, #6ee7b7); border-radius: 10px; padding: 16px; color: var(--ink, #eef0f1); font-family: Inter, system-ui, sans-serif; } .ds-callout-h { margin: 0 0 8px; font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: var(--accent, #6ee7b7); } .ds-callout-list { margin: 0; padding-left: 20px; font-size: 16px; line-height: 1.6; } .ds-callout-list li::marker { color: var(--accent, #6ee7b7); }"
+    },
+    {
+      "name": "Key-Number Cell",
+      "kind": "card",
+      "refersTo": "key-number-cell",
+      "description": "Mono value, Inter label, accent ref pinned to the bottom; panel-2 tint.",
+      "html": "<div class=\"ds-kn\"><span class=\"ds-kn-v\">15 ms</span><span class=\"ds-kn-l\">p99 read latency after migration</span><a class=\"ds-ref\" href=\"#S1\">[S1]</a></div>",
+      "css": ".ds-kn { display: flex; flex-direction: column; width: 200px; background: var(--panel-2, rgba(255,255,255,0.04)); border: 1px solid var(--hairline, rgba(148,197,180,0.17)); border-radius: 10px; padding: 16px; } .ds-kn-v { font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 24px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.25; color: var(--ink, #eef0f1); } .ds-kn-l { margin-top: 4px; font-family: Inter, system-ui, sans-serif; font-size: 13px; line-height: 1.45; color: var(--ink-2, #d4d9db); } .ds-ref { margin-top: 6px; font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: -0.02em; color: var(--accent, #6ee7b7); text-decoration: none; } .ds-ref:hover { text-decoration: underline; text-underline-offset: 3px; } .ds-ref:focus-visible { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; }"
+    },
+    {
+      "name": "Deep-Read Divider",
+      "kind": "custom",
+      "refersTo": "deep-divider-label",
+      "description": "Mono accent label between two strong hairlines; marks the start of the deep layer.",
+      "html": "<div class=\"ds-divider\"><span class=\"ds-divider-rule\"></span><p class=\"ds-divider-label\">ĐỌC SÂU · 8 PHÚT</p><span class=\"ds-divider-rule\"></span></div>",
+      "css": ".ds-divider { display: flex; align-items: center; gap: 12px; } .ds-divider-rule { height: 1px; flex: 1; background: var(--hairline-strong, rgba(148,197,180,0.34)); } .ds-divider-label { margin: 0; font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent, #6ee7b7); }"
+    },
+    {
+      "name": "Tag",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "Outlined 6px tag for company, topic and case type.",
+      "html": "<ul class=\"ds-tags\"><li class=\"ds-tag\">Discord</li><li class=\"ds-tag\">Data</li><li class=\"ds-tag\">Migration</li></ul>",
+      "css": ".ds-tags { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; } .ds-tag { border: 1px solid var(--hairline-strong, rgba(148,197,180,0.34)); border-radius: 6px; padding: 3px 8px; font-family: Inter, system-ui, sans-serif; font-size: 12px; line-height: 1.35; color: var(--ink-2, #d4d9db); }"
+    },
+    {
+      "name": "Outline Button (Share)",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Mono-labeled outlined button; hover lifts to panel-2.",
+      "html": "<button type=\"button\" class=\"ds-btn-outline\">SAO CHÉP LIÊN KẾT</button>",
+      "css": ".ds-btn-outline { width: 220px; background: transparent; border: 1px solid var(--hairline-strong, rgba(148,197,180,0.34)); border-radius: 10px; padding: 10px 12px; font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2, #d4d9db); cursor: pointer; transition: color 150ms, background-color 150ms; } .ds-btn-outline:hover { background: var(--panel-2, rgba(255,255,255,0.04)); color: var(--ink, #eef0f1); } .ds-btn-outline:focus-visible { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; }"
+    },
+    {
+      "name": "Theme Toggle",
+      "kind": "button",
+      "refersTo": "segment-option",
+      "description": "Two pressed-state options in a 10px outlined frame.",
+      "html": "<div class=\"ds-seg\" role=\"group\"><button type=\"button\" class=\"ds-seg-opt\" aria-pressed=\"true\">Tối</button><button type=\"button\" class=\"ds-seg-opt\" aria-pressed=\"false\">Sáng</button></div>",
+      "css": ".ds-seg { display: inline-flex; border: 1px solid var(--hairline-strong, rgba(148,197,180,0.34)); border-radius: 10px; padding: 2px; } .ds-seg-opt { background: transparent; border: 0; border-radius: 7px; padding: 6px 8px; font-family: Inter, system-ui, sans-serif; font-size: 12px; line-height: 1; color: var(--muted, #9aa5ad); cursor: pointer; } .ds-seg-opt:hover { color: var(--ink, #eef0f1); } .ds-seg-opt[aria-pressed=\"true\"] { background: var(--panel-2, rgba(255,255,255,0.04)); color: var(--ink, #eef0f1); } .ds-seg-opt:focus-visible { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; }"
+    },
+    {
+      "name": "TOC Rail",
+      "kind": "nav",
+      "refersTo": "toc-link-active",
+      "description": "Panel with a mono heading; the section on screen is accent.",
+      "html": "<nav class=\"ds-toc\"><p class=\"ds-toc-h\">MỤC LỤC</p><ol class=\"ds-toc-list\"><li><a href=\"#a\" class=\"ds-toc-a\">Vì sao Cassandra chậm</a></li><li><a href=\"#b\" class=\"ds-toc-a is-active\" aria-current=\"location\">Kế hoạch di chuyển</a></li><li><a href=\"#c\" class=\"ds-toc-a\">Kết quả</a></li></ol></nav>",
+      "css": ".ds-toc { width: 260px; background: var(--panel, rgba(255,255,255,0.025)); border: 1px solid var(--hairline, rgba(148,197,180,0.17)); border-radius: 10px; padding: 16px; } .ds-toc-h { margin: 0 0 12px; font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted, #9aa5ad); } .ds-toc-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; } .ds-toc-a { display: block; font-family: Inter, system-ui, sans-serif; font-size: 14px; line-height: 1.45; color: var(--muted, #9aa5ad); text-decoration: none; transition: color 150ms; } .ds-toc-a:hover { color: var(--ink, #eef0f1); } .ds-toc-a.is-active { color: var(--accent, #6ee7b7); font-weight: 500; } .ds-toc-a:focus-visible { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; }"
+    },
+    {
+      "name": "Header Nav",
+      "kind": "nav",
+      "refersTo": "mono-label",
+      "description": "Brand, mono-label links, language switch; closed by a hairline.",
+      "html": "<header class=\"ds-hdr\"><a class=\"ds-brand\" href=\"#\">Engineering Reader</a><nav class=\"ds-nav\"><a href=\"#\">CÔNG TY</a><a href=\"#\">CHỦ ĐỀ</a><a href=\"#\">GIỚI THIỆU</a></nav><span class=\"ds-lang\"><span class=\"ds-lang-cur\">VI</span><span class=\"ds-lang-sep\">|</span><a href=\"#\">EN</a></span></header>",
+      "css": ".ds-hdr { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--hairline, rgba(148,197,180,0.17)); } .ds-brand { font-family: Inter, system-ui, sans-serif; font-weight: 600; color: var(--ink, #eef0f1); text-decoration: none; } .ds-nav { display: flex; gap: 24px; } .ds-nav a, .ds-lang a { font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted, #9aa5ad); text-decoration: none; } .ds-nav a:hover, .ds-lang a:hover { color: var(--ink, #eef0f1); } .ds-nav a:focus-visible, .ds-lang a:focus-visible { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; } .ds-lang { display: flex; gap: 8px; font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; } .ds-lang-cur { color: var(--ink, #eef0f1); } .ds-lang-sep { color: var(--muted, #9aa5ad); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Case File on the Grid",
+    "overview": "Every page is a case file laid on a faint drafting grid: a navy (dark, default) or paper (light twin) ground ruled every 40px, with the document set on it in quiet translucent panels. The file has two layers. The top layer is structured and stands alone on a phone: title over a single mint rule, a dek, three sourced number cells, a TL;DR panel and the one mint-edged \"for a small team\" callout. A mono divider (\"ĐỌC SÂU · n PHÚT\" / \"DEEP READ · n MIN\") marks where the second layer, the story, begins in a column of section panels.\n\nThe look is the dark developer-docs convention (user-pinned \"Neon on Navy, carded\") executed with restraint: one accent, hairlines instead of shadows, Inter for everything that is read and JetBrains Mono only for what is counted, cited or labeled. Differentiation comes from content structure, not ornament, so the system stays flat and quiet and lets numbers and references carry the accent. The light theme is a first-class twin built from the same roles, not an inversion: paper ground, white panels lifting off it, the mint darkened to a forest green that passes contrast.\n\nDensity is reading density: a 720px column, 17px body on phones and 18px from 1024px, line heights of 1.65 to 1.7 to leave room for stacked Vietnamese diacritics. On desktop a 260px sticky rail carries the author card, the table of contents with its mint active item, and the share control.",
+    "keyCharacteristics": [
+      "Navy or paper ground with a 40px hairline grid at 7% accent opacity.",
+      "One accent (mint in dark, forest green in light); it never changes per company or topic.",
+      "Flat: depth is panel tint and hairline, never shadow, glow or gradient fill.",
+      "Inter for prose and headings; JetBrains Mono for numbers, references and short uppercase labels.",
+      "Two-layer post anatomy separated by a mono deep-read divider.",
+      "Three border roles: hairline, panel, callout."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "The page has exactly one accent hue per theme. Company colours appear only on logo marks; no secondary or status hues enter the reading surface.",
+        "section": "colors"
+      },
+      {
+        "name": "The Twin Rule",
+        "body": "Every colour is a role with a dark value and a light value. A new surface adds a role to both themes (and the no-JS `prefers-color-scheme` block) or adds nothing.",
+        "section": "colors"
+      },
+      {
+        "name": "The Accent-Means-Signal Rule",
+        "body": "The accent marks what is cited, current, focused or the one action for the reader. It is never a background fill for a panel or a decorative wash.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono-Is-Measured Rule",
+        "body": "JetBrains Mono is used only for numbers (key numbers, dates, reading time, locators), references and short uppercase labels. Never for a heading, a sentence or a paragraph.",
+        "section": "typography"
+      },
+      {
+        "name": "The Diacritics Rule",
+        "body": "Body line height stays at 1.6 or more and every face loads its vietnamese subset; a font without Vietnamese coverage does not enter the system.",
+        "section": "typography"
+      },
+      {
+        "name": "The Two-Layer Rule",
+        "body": "Every post renders its structured top layer, then the mono deep-read divider, then the prose layer. Nothing from the deep layer moves above the divider, and the top layer must stand alone in one phone screen and a short scroll.",
+        "section": "layout"
+      },
+      {
+        "name": "The 40px Ground Rule",
+        "body": "The grid is the ground of every page, set on the body, never re-drawn inside a panel, never resized per surface.",
+        "section": "layout"
+      },
+      {
+        "name": "The No-Shadow Rule",
+        "body": "No box-shadow, text-shadow, glow or gradient fill. If something needs to stand forward, it moves from panel to panel-2 or gains a hairline-strong border.",
+        "section": "elevation"
+      },
+      {
+        "name": "The No-Nesting Rule",
+        "body": "Panels never nest. Code blocks, Mermaid diagrams and tables inside a section panel lose their box and are set off by a hairline above and below; they get a bordered box only outside a panel.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Three Borders Rule",
+        "body": "A border is a hairline (structure), a strong hairline (something you can press or a divider), or the callout. There is no fourth border role.",
+        "section": "shapes"
+      },
+      {
+        "name": "The One Callout Rule",
+        "body": "The callout is the only accent-bordered block on a page, and a post has one: \"Cho team nhỏ\" / \"For a small team\".",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do take every colour from a role token and set it in both themes and the no-JS light block.",
+      "Do keep the accent to signals: the title rule, refs, the active TOC item, the divider label, focus, selection, progress and the one callout.",
+      "Do set numbers, dates, reading time, locators, refs and short uppercase labels in JetBrains Mono; set everything else in Inter.",
+      "Do separate figures inside a panel with a hairline above and below (12px vertical padding, 16px margin).",
+      "Do use the 10px radius for every container and outlined control unless it is a tag (6px).",
+      "Do render the top layer, the mono deep-read divider, then the deep layer, in that order."
+    ],
+    "donts": [
+      "Don't add a second accent hue, per-company page colours, or status colours to the reading surface.",
+      "Don't use box-shadows, glows, or gradient fills; the 1px title rule is a flat accent line.",
+      "Don't put a panel, bordered code block, diagram box or table box inside another panel.",
+      "Don't give any block other than the one callout an accent border.",
+      "Don't set headings, sentences or paragraphs in mono.",
+      "Don't place eyebrow or kicker labels above titles; the tag row is the only element between breadcrumb and title."
+    ]
+  }
+}
