@@ -70,7 +70,7 @@ const BODY = [
   "[&_h3]:mt-7 [&_h3]:mb-2 [&_h3]:text-[17px] [&_h3]:leading-[1.35] lg:[&_h3]:text-[19px]",
   "[&_p]:mb-4 [&_p:last-child]:mb-0 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1.5 [&_li]:marker:text-muted",
   "[&_a:not(.ref)]:underline [&_a:not(.ref)]:decoration-hairline-strong [&_a:not(.ref)]:underline-offset-4 [&_a:not(.ref):hover]:decoration-accent",
-  "[&_.diagram]:my-6 [&_pre]:my-5 [&_.table-scroll]:my-5 [&_blockquote]:my-5 [&_blockquote]:border-l [&_blockquote]:border-hairline-strong [&_blockquote]:pl-4 [&_blockquote]:text-ink-2",
+  "[&_blockquote]:my-5 [&_blockquote]:border-l [&_blockquote]:border-hairline-strong [&_blockquote]:pl-4 [&_blockquote]:text-ink-2",
 ].join(" ");
 
 export default async function Page({ params }: { params: Params }) {
@@ -88,7 +88,7 @@ export default async function Page({ params }: { params: Params }) {
   const company = vocab.companies.find((c) => c.slug === meta.company);
   const companyName = company?.name ?? meta.company;
   const topic = vocab.topics.find((t) => t.slug === meta.topic)?.[locale] ?? meta.topic;
-  const { content, headings } = await compilePostBody(post, locale);
+  const { content, headings } = await compilePostBody(post, locale, dict.post.permalink);
 
   return (
     <>
@@ -99,7 +99,7 @@ export default async function Page({ params }: { params: Params }) {
         tabIndex={-1}
         className="mx-auto max-w-[1200px] px-4 pb-24 focus:outline-none pt-5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,720px)_260px] lg:justify-between lg:gap-10 lg:pt-10"
       >
-        <article className="min-w-0 selection:bg-accent selection:text-accent-ink">
+        <article className="min-w-0">
           {twinMissing && <MissingLocaleNote text={dict.post.missingLocale} />}
 
           <nav aria-label={dict.post.breadcrumb} className="mb-3 text-[13px] text-muted">
@@ -122,10 +122,7 @@ export default async function Page({ params }: { params: Params }) {
             </ol>
           </nav>
 
-          <TagsRow
-            label={dict.post.label}
-            pills={[companyName, topic, dict.caseType[meta.caseType]]}
-          />
+          <TagsRow pills={[companyName, topic, dict.caseType[meta.caseType]]} />
 
           <h1 className="mb-3 text-[25px] leading-[1.25] text-balance text-ink lg:mb-4 lg:text-[40px] lg:leading-[1.18]">
             {fm.title}

@@ -36,7 +36,7 @@ const isH2 = (n: Node) => n.type === 'element' && n.tagName === 'h2';
 
 /** Wraps each h2 and its following siblings in <section class="panel" id>.
  * The id lives on the section only, to avoid duplicate ids in the document. */
-export default function rehypeSections(options: { headings?: Heading[] } = {}) {
+export default function rehypeSections(options: { headings?: Heading[]; permalinkLabel?: string } = {}) {
   return (tree: Node) => {
     const children = tree.children ?? [];
     const out: Node[] = [];
@@ -50,6 +50,19 @@ export default function rehypeSections(options: { headings?: Heading[] } = {}) {
         for (let n = 2; seen.has(id); n++) id = `${base}-${n}`;
         seen.add(id);
         options.headings?.push({ id, text });
+        node.children = [
+          ...(node.children ?? []),
+          {
+            type: 'element',
+            tagName: 'a',
+            properties: {
+              href: `#${id}`,
+              className: ['h2-anchor'],
+              ariaLabel: options.permalinkLabel ?? 'Link to this section',
+            },
+            children: [{ type: 'text', value: '#' }],
+          },
+        ];
         current = {
           type: 'element',
           tagName: 'section',

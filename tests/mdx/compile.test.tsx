@@ -32,6 +32,12 @@ describe('compilePostBody', () => {
     expect(renderToStaticMarkup(content)).toContain('<a href="#S1" class="ref"><span class="ref-id">[S1]</span></a>');
   });
 
+  it('appends a permalink anchor to each section h2', async () => {
+    const { content, headings } = await compilePostBody(load(), 'vi', 'Liên kết đến mục này');
+    const html = renderToStaticMarkup(content);
+    expect(html).toContain(`<a href="#${headings[0].id}" class="h2-anchor" aria-label="Liên kết đến mục này">#</a>`);
+  });
+
   it('falls back to a code block when no SVG exists', async () => {
     const { content } = await compilePostBody(load(), 'vi');
     expect(renderToStaticMarkup(content)).toContain('language-mermaid');

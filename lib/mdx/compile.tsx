@@ -13,6 +13,7 @@ import rehypeSections, { type Heading } from '@/lib/mdx/rehype-sections';
 export async function compilePostBody(
   post: PostRecord,
   locale: Locale,
+  permalinkLabel?: string,
 ): Promise<{ content: ReactElement; headings: Heading[] }> {
   const doc = post.locales[locale];
   if (!doc) throw new Error(`No ${locale} document for ${post.slug}`);
@@ -33,7 +34,7 @@ export async function compilePostBody(
             rehypePrettyCode,
             { theme: { light: 'github-light', dark: 'github-dark-dimmed' }, keepBackground: false, defaultLang: { block: 'plaintext' } },
           ],
-          [rehypeSections, { headings }],
+          [rehypeSections, { headings, permalinkLabel }],
         ],
       },
     },

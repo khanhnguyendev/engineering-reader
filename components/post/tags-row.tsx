@@ -1,7 +1,6 @@
-export function TagsRow({ label, pills }: { label: string; pills: string[] }) {
+export function TagsRow({ pills }: { pills: string[] }) {
   return (
     <div className="mb-4 flex flex-wrap items-center gap-1.5">
-      <span className="mono-label mr-1.5 text-[10px] tracking-[0.12em] text-accent">{label}</span>
       <ul className="contents">
         {pills.map((p) => (
           <li
