@@ -29,7 +29,7 @@ function load() {
 describe('compilePostBody', () => {
   it('renders refs as anchors', async () => {
     const { content } = await compilePostBody(load(), 'vi');
-    expect(renderToStaticMarkup(content)).toContain('<a href="#S1" class="ref">[S1]</a>');
+    expect(renderToStaticMarkup(content)).toContain('<a href="#S1" class="ref"><span class="ref-id">[S1]</span></a>');
   });
 
   it('falls back to a code block when no SVG exists', async () => {
@@ -97,7 +97,7 @@ describe('compilePostBody', () => {
     const { content } = await compilePostBody(post, 'vi');
     const html = renderToStaticMarkup(content);
     expect(html).toMatch(/<code[^>]*>\[S1\]<\/code>/);
-    expect(html).toContain('<a href="#S2" class="ref">[S2 §3]</a>');
+    expect(html).toContain('<a href="#S2" class="ref"><span class="ref-id">[S2</span> §3]</a>');
   });
 
   it('leaves content before the first h2 unwrapped', async () => {

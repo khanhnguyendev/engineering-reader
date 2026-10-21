@@ -27,10 +27,14 @@ function fm(field: string): string {
 const escape = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-async function render(root: string, locale: string, slug = 'good-post') {
+async function load(root: string) {
   vi.resetModules();
   vi.stubEnv('CONTENT_ROOT', root);
-  const { default: Page } = await import('@/app/[locale]/posts/[slug]/page');
+  return import('@/app/[locale]/posts/[slug]/page');
+}
+
+async function render(root: string, locale: string, slug = 'good-post') {
+  const { default: Page } = await load(root);
   const el = await Page({ params: Promise.resolve({ locale, slug }) });
   return renderToStaticMarkup(el);
 }
@@ -110,5 +114,28 @@ describe('post page variants', () => {
   it('does not note a missing twin when both locales exist', async () => {
     const html = await render(tmp, 'vi');
     expect(html).not.toContain('Bài này chưa có bản tiếng Anh.');
+  });
+
+  it('omits the draft locale from static params and alternates', async () => {
+    edit('en.mdx', (s) => s.replace(/^---\n/, '---\ndraft: true\n'));
+    const mod = await load(tmp);
+    expect(mod.generateStaticParams()).toEqual([{ locale: 'vi', slug: 'good-post' }]);
+    const md = await mod.generateMetadata({
+      params: Promise.resolve({ locale: 'vi', slug: 'good-post' }),
+    });
+    expect(md.alternates?.languages).toEqual({
+      vi: '/vi/posts/good-post',
+      'x-default': '/vi/posts/good-post',
+    });
+  });
+
+  it('has no x-default when only en exists', async () => {
+    rmSync(path.join(tmp, 'good-post', 'vi.mdx'));
+    const mod = await load(tmp);
+    expect(mod.generateStaticParams()).toEqual([{ locale: 'en', slug: 'good-post' }]);
+    const md = await mod.generateMetadata({
+      params: Promise.resolve({ locale: 'en', slug: 'good-post' }),
+    });
+    expect(md.alternates?.languages).toEqual({ en: '/en/posts/good-post' });
   });
 });

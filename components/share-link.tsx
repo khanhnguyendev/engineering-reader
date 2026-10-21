@@ -2,31 +2,63 @@
 
 import { useEffect, useState } from "react";
 
-export function ShareLink({ label, copiedLabel }: { label: string; copiedLabel: string }) {
-  const [copied, setCopied] = useState(false);
+type Status = "idle" | "copied" | "failed";
+
+/** Fallback for contexts without the async clipboard (http, older browsers, denied permission). */
+function copyWithTextarea(text: string): boolean {
+  const area = document.createElement("textarea");
+  area.value = text;
+  area.setAttribute("readonly", "");
+  area.style.position = "fixed";
+  area.style.top = "0";
+  area.style.left = "-9999px";
+  document.body.appendChild(area);
+  area.select();
+  let ok = false;
+  try {
+    ok = document.execCommand("copy");
+  } catch {
+    ok = false;
+  }
+  document.body.removeChild(area);
+  return ok;
+}
+
+export function ShareLink({
+  label,
+  copiedLabel,
+  failedLabel,
+}: {
+  label: string;
+  copiedLabel: string;
+  failedLabel: string;
+}) {
+  const [status, setStatus] = useState<Status>("idle");
 
   useEffect(() => {
-    if (!copied) return;
-    const t = setTimeout(() => setCopied(false), 2000);
+    if (status === "idle") return;
+    const t = setTimeout(() => setStatus("idle"), 2000);
     return () => clearTimeout(t);
-  }, [copied]);
+  }, [status]);
 
   async function copy() {
+    const href = location.href;
     try {
-      await navigator.clipboard.writeText(location.href);
-      setCopied(true);
+      await navigator.clipboard.writeText(href);
+      setStatus("copied");
     } catch {
-      // clipboard blocked: the address bar still has the link
+      setStatus(copyWithTextarea(href) ? "copied" : "failed");
     }
   }
 
+  const text = status === "copied" ? copiedLabel : status === "failed" ? failedLabel : label;
   return (
     <button
       type="button"
       onClick={copy}
-      className="mono-label w-full rounded-panel border border-hairline-strong px-3 py-2.5 text-ink-2 transition-colors duration-150 hover:border-accent hover:text-ink"
+      className="mono-label w-full rounded-panel border border-hairline-strong px-3 py-2.5 text-ink-2 transition-colors duration-150 hover:bg-panel-2 hover:text-ink"
     >
-      <span aria-live="polite">{copied ? copiedLabel : label}</span>
+      <span aria-live="polite">{text}</span>
     </button>
   );
 }

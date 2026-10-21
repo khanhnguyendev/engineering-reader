@@ -1,11 +1,20 @@
 import type { Source } from "@/lib/content/schema";
 import type { Dictionary } from "@/lib/dictionaries";
-import { fmt } from "@/lib/i18n";
+import { fmt, type Locale } from "@/lib/i18n";
+import { formatDate } from "@/components/post/post-meta";
 
-export function Sources({ dict, sources }: { dict: Dictionary; sources: Source[] }) {
+export function Sources({
+  dict,
+  locale,
+  sources,
+}: {
+  dict: Dictionary;
+  locale: Locale;
+  sources: Source[];
+}) {
   return (
-    <section aria-labelledby="sources" className="hairline mt-10 pt-8">
-      <h2 id="sources" className="mb-4 text-[20px] leading-[1.3] text-ink lg:text-[24px]">
+    <section aria-labelledby="post-sources" className="hairline mt-10 pt-8">
+      <h2 id="post-sources" className="mb-4 text-[20px] leading-[1.3] text-ink lg:text-[24px]">
         {dict.post.sources}
       </h2>
       <ol className="space-y-5">
@@ -32,7 +41,7 @@ export function Sources({ dict, sources }: { dict: Dictionary; sources: Source[]
               {s.authors.length > 0 && <span>{s.authors.join(", ")}</span>}
               {s.authors.length > 0 && <span aria-hidden="true"> · </span>}
               <time dateTime={s.publishedAt} className="font-mono text-[13px]">
-                {s.publishedAt}
+                {formatDate(s.publishedAt, locale)}
               </time>
               {s.locator && (
                 <>
@@ -42,7 +51,7 @@ export function Sources({ dict, sources }: { dict: Dictionary; sources: Source[]
               )}
             </p>
             <p className="mt-0.5 text-[13px] text-muted">
-              {fmt(dict.post.accessed, { date: s.accessedAt })}
+              {fmt(dict.post.accessed, { date: formatDate(s.accessedAt, locale) })}
             </p>
           </li>
         ))}

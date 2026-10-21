@@ -41,8 +41,13 @@ export function Table(props: ComponentProps<'table'>) {
 export function Ref({ id, locator }: { id: string; locator?: string }) {
   return (
     <a href={`#${id}`} className="ref">
-      [{id}
-      {locator ? ' ' + locator : ''}]
+      {locator ? (
+        <>
+          <span className="ref-id">[{id}</span> {locator}]
+        </>
+      ) : (
+        <span className="ref-id">[{id}]</span>
+      )}
     </a>
   );
 }

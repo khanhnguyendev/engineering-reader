@@ -94,7 +94,11 @@ export default async function Page({ params }: { params: Params }) {
     <>
       <ReadingProgress />
       <Header locale={locale} twinMissing={twinMissing} />
-      <div className="mx-auto max-w-[1200px] px-4 pb-24 pt-5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,720px)_260px] lg:justify-between lg:gap-10 lg:pt-10">
+      <main
+        id="content"
+        tabIndex={-1}
+        className="mx-auto max-w-[1200px] px-4 pb-24 focus:outline-none pt-5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,720px)_260px] lg:justify-between lg:gap-10 lg:pt-10"
+      >
         <article className="min-w-0 selection:bg-accent selection:text-accent-ink">
           {twinMissing && <MissingLocaleNote text={dict.post.missingLocale} />}
 
@@ -150,7 +154,7 @@ export default async function Page({ params }: { params: Params }) {
           <div className={BODY}>{content}</div>
 
           {fm.lessons && <Lessons heading={dict.post.lessons} items={fm.lessons} />}
-          <Sources dict={dict} sources={meta.sources} />
+          <Sources dict={dict} locale={locale} sources={meta.sources} />
           <Byline text={dict.post.byline} />
         </article>
 
@@ -169,10 +173,14 @@ export default async function Page({ params }: { params: Params }) {
               </div>
             </div>
             <Toc label={dict.post.toc} headings={headings} variant="rail" />
-            <ShareLink label={dict.post.share} copiedLabel={dict.post.copied} />
+            <ShareLink
+              label={dict.post.share}
+              copiedLabel={dict.post.copied}
+              failedLabel={dict.post.copyFailed}
+            />
           </div>
         </aside>
-      </div>
+      </main>
     </>
   );
 }

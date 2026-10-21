@@ -19,6 +19,12 @@ export function Header({
   ];
   return (
     <header className="border-b border-hairline">
+      <a
+        href="#content"
+        className="sr-only rounded-panel bg-accent px-3 py-2 text-[14px] font-semibold text-accent-ink focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[60]"
+      >
+        {dict.nav.skip}
+      </a>
       <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-x-4 gap-y-2.5 px-4 py-3 sm:flex-nowrap sm:px-6 sm:py-4">
         <Link href={`/${locale}`} className="font-semibold text-ink">
           {dict.site.name}

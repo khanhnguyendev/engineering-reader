@@ -108,9 +108,20 @@
 @layer components {
   .ref {
     font-family: var(--font-jetbrains), ui-monospace, monospace;
-    font-size: 0.85em;
+    font-size: 0.78em;
+    letter-spacing: -0.02em;
     color: var(--accent);
     text-decoration: none;
+  }
+
+  .ref:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* The "[S1" part never breaks; a locator may wrap after it. */
+  .ref-id {
+    white-space: nowrap;
   }
 
   .code-block {
@@ -132,6 +143,9 @@
   .diagram {
     margin: 0;
     overflow-x: auto;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    padding: 12px;
   }
 
   .diagram svg {
