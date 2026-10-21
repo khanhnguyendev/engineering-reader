@@ -14,3 +14,4 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-21 M0 done-when verified; gate 1 reached — https://github.com/khanhnguyendev/engineering-reader/pull/1
 - 2026-10-21 M1/T11 tokens, both themes, theme script, toggle — a1dbd4d
 - 2026-10-21 M1/T12 dictionaries, header, language switch, root redirect — cd1009e
+- 2026-10-21 M1/T13 MDX compile pipeline, refs, sections, mermaid inline — 4d22422
