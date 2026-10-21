@@ -84,6 +84,9 @@
     "dek": "Mọi công nghệ và kỹ thuật được nhắc đến trong các bài.",
     "empty": "Chưa có bài nào gắn thẻ này."
   },
+  "list": {
+    "posts": "Bài viết"
+  },
   "series": {
     "title": "Loạt bài",
     "part": "Phần {i}/{n}",

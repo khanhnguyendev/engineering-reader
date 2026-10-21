@@ -297,7 +297,13 @@ export function validateAll(
   }
   const hasPost = (slug: string) => existsSync(path.join(root, slug, 'post.json'));
   // featured.json drives the home "start here" row; post.json.featured is ignored.
+  const featuredSeen = new Set<string>();
   for (const slug of vocab.featured) {
+    if (featuredSeen.has(slug)) {
+      findings.push({ level: 'error', rule: 'featured', slug, file: 'featured.json', message: `featured slug ${slug} is listed more than once` });
+      continue;
+    }
+    featuredSeen.add(slug);
     if (!hasPost(slug)) {
       findings.push({ level: 'error', rule: 'featured', slug, file: 'featured.json', message: `featured slug ${slug} has no post` });
     }

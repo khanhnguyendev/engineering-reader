@@ -28,7 +28,7 @@ describe("dictionaries", () => {
       "topics.title", "topics.dek", "topics.empty",
       "topics.shelf.distributed-systems", "topics.shelf.data", "topics.shelf.realtime",
       "topics.shelf.infra", "topics.shelf.reliability",
-      "tags.title", "tags.dek", "tags.empty",
+      "tags.title", "tags.dek", "tags.empty", "list.posts",
       "series.title", "series.part", "series.prev", "series.next", "series.index",
       "related.title", "about.title", "about.dek",
       "notFound.title", "notFound.body", "notFound.home",
@@ -49,6 +49,16 @@ describe("plural", () => {
     const d = getDictionary("en").companies;
     expect(plural("en", 1, d.postsOne, d.postsOther)).toBe("1 post");
     expect(plural("en", 3, d.postsOne, d.postsOther)).toBe("3 posts");
+  });
+  it("probes the selected form: en 1 is one, en 0 and 2 are other", () => {
+    expect(plural("en", 1, "ONE", "OTHER")).toBe("ONE");
+    expect(plural("en", 0, "ONE", "OTHER")).toBe("OTHER");
+    expect(plural("en", 2, "ONE", "OTHER")).toBe("OTHER");
+  });
+  it("probes the selected form: vi is always other", () => {
+    expect(plural("vi", 1, "ONE", "OTHER")).toBe("OTHER");
+    expect(plural("vi", 0, "ONE", "OTHER")).toBe("OTHER");
+    expect(plural("vi", 2, "ONE", "OTHER")).toBe("OTHER");
   });
   it("uses the other form for every n in vi", () => {
     const d = getDictionary("vi").companies;

@@ -84,6 +84,9 @@
     "dek": "Every technology and technique named across the cases.",
     "empty": "No posts with this tag yet."
   },
+  "list": {
+    "posts": "Posts"
+  },
   "series": {
     "title": "Series",
     "part": "Part {i} of {n}",

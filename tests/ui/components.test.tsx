@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import path from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { parsePost, readRawPost, type PostRecord } from '@/lib/content/load';
-import { loadVocab } from '@/lib/content/vocab';
+import type { Vocab } from '@/lib/content/vocab';
 import { getDictionary } from '@/lib/dictionaries';
 import { Monogram } from '@/components/monogram';
 import { PostCard } from '@/components/post-card';
@@ -16,7 +16,24 @@ vi.mock('server-only', () => ({}));
 
 const GOOD = path.resolve(import.meta.dirname, '../fixtures/posts/good-post');
 const post = parsePost(readRawPost(GOOD)).post as PostRecord;
-const vocab = loadVocab('content');
+// Inline vocab: these tests must not move when content/*.json changes.
+const vocab: Vocab = {
+  companies: [
+    {
+      slug: 'discord',
+      name: 'Discord',
+      blogUrl: 'https://discord.com/blog',
+      feedUrl: 'https://discord.com/blog/rss.xml',
+      brandColor: '#5865F2',
+      logo: 'public/logos/discord.svg',
+    },
+  ],
+  topics: [{ slug: 'data', vi: 'Dữ liệu', en: 'Data' }],
+  tags: [],
+  series: {},
+  sourceHosts: [],
+  featured: [],
+};
 const discord = vocab.companies.find((c) => c.slug === 'discord')!;
 const dict = getDictionary('vi');
 
@@ -120,6 +137,14 @@ describe('PostList', () => {
     );
     expect(html).toBe('<p class="text-muted">Chưa có bài nào.</p>');
   });
+
+  it('renders the empty label when no post has the locale', () => {
+    const viOnly: PostRecord = { ...post, locales: { vi: post.locales.vi } };
+    const html = renderToStaticMarkup(
+      <PostList posts={[viOnly]} locale="en" vocab={vocab} dict={getDictionary('en')} emptyLabel="None yet." />,
+    );
+    expect(html).toBe('<p class="text-muted">None yet.</p>');
+  });
 });
 
 describe('PageIntro', () => {
@@ -152,5 +177,11 @@ describe('SectionHeading', () => {
     expect(a.getAttribute('href')).toBe('/vi/posts');
     expect(a.className).toContain('mono-label');
     expect(a.textContent).toBe('Tất cả →');
+  });
+
+  it('requires hrefLabel whenever href is given (type-level)', () => {
+    // @ts-expect-error href without hrefLabel is not a valid prop combination
+    const bad = <SectionHeading title="Mới nhất" href="/vi/posts" />;
+    expect(bad).toBeDefined();
   });
 });
