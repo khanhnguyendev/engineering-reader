@@ -50,5 +50,57 @@
   },
   "lang": {
     "switch": "Chuyển sang tiếng Anh"
+  },
+  "home": {
+    "intro": "Các case study từ blog kỹ thuật của những công ty lớn, kể lại để một team nhỏ có thể áp dụng ngay tuần tới.",
+    "startHere": "Bắt đầu từ đây",
+    "latest": "Mới nhất",
+    "byCompany": "Theo công ty",
+    "byTopic": "Theo chủ đề",
+    "all": "Tất cả →"
+  },
+  "companies": {
+    "title": "Công ty",
+    "dek": "Những đội kỹ thuật có bài viết được kể lại ở đây, và số bài của từng nơi.",
+    "postsOne": "{n} bài",
+    "postsOther": "{n} bài",
+    "empty": "Chưa có bài nào về công ty này.",
+    "blog": "Blog kỹ thuật"
+  },
+  "topics": {
+    "title": "Chủ đề",
+    "dek": "Năm kệ sách cho cùng một câu hỏi: cái gì đã hỏng, và team đã xử lý thế nào.",
+    "shelf": {
+      "distributed-systems": "Đồng thuận, hàng đợi, thử lại và rắc rối khi có nhiều hơn một máy",
+      "data": "Lưu trữ, sharding, migration và những lần database không chịu nổi",
+      "realtime": "Socket, trạng thái online, fan-out và giữ hàng triệu client đồng bộ",
+      "infra": "Mạng, triển khai, máy chủ và phần hạ tầng mà mọi thứ khác chạy trên đó",
+      "reliability": "Sự cố, sập dịch vụ, trực on-call và cách các team phục hồi"
+    },
+    "empty": "Chưa có bài nào thuộc chủ đề này."
+  },
+  "tags": {
+    "title": "Thẻ",
+    "dek": "Mọi công nghệ và kỹ thuật được nhắc đến trong các bài.",
+    "empty": "Chưa có bài nào gắn thẻ này."
+  },
+  "series": {
+    "title": "Loạt bài",
+    "part": "Phần {i}/{n}",
+    "prev": "Bài trước",
+    "next": "Bài sau",
+    "index": "Xem cả loạt bài"
+  },
+  "related": {
+    "title": "Bài liên quan"
+  },
+  "about": {
+    "title": "Giới thiệu",
+    "dek": "Ai viết trang này, các bài được làm ra như thế nào và vì sao."
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "body": "Trang này không tồn tại hoặc đã được chuyển đi.",
+    "home": "Về trang chủ"
   }
 }

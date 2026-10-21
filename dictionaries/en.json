@@ -50,5 +50,57 @@
   },
   "lang": {
     "switch": "Switch to Vietnamese"
+  },
+  "home": {
+    "intro": "Case studies from the engineering blogs of large companies, retold so a small team can use them on Monday.",
+    "startHere": "Start here",
+    "latest": "Latest",
+    "byCompany": "By company",
+    "byTopic": "By topic",
+    "all": "All →"
+  },
+  "companies": {
+    "title": "Companies",
+    "dek": "The engineering teams whose write-ups we retell, and how many cases each has so far.",
+    "postsOne": "{n} post",
+    "postsOther": "{n} posts",
+    "empty": "No posts from this company yet.",
+    "blog": "Engineering blog"
+  },
+  "topics": {
+    "title": "Topics",
+    "dek": "Five shelves for the same question: what broke, and what the team did about it.",
+    "shelf": {
+      "distributed-systems": "Consensus, queues, retries and the trouble with more than one machine",
+      "data": "Storage, sharding, migrations and the day the database gave out",
+      "realtime": "Sockets, presence, fan-out and keeping millions of clients in sync",
+      "infra": "Networks, deploys, compute and the plumbing everything else runs on",
+      "reliability": "Incidents, outages, on-call and how teams recover from them"
+    },
+    "empty": "No posts on this topic yet."
+  },
+  "tags": {
+    "title": "Tags",
+    "dek": "Every technology and technique named across the cases.",
+    "empty": "No posts with this tag yet."
+  },
+  "series": {
+    "title": "Series",
+    "part": "Part {i} of {n}",
+    "prev": "Previous",
+    "next": "Next",
+    "index": "View the series"
+  },
+  "related": {
+    "title": "Related cases"
+  },
+  "about": {
+    "title": "About",
+    "dek": "Who writes this, how the posts are made and why."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This page does not exist or has moved.",
+    "home": "Back to the home page"
   }
 }

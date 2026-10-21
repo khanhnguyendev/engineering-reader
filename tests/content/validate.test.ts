@@ -296,4 +296,31 @@ describe('validateAll', () => {
   it('empty or missing root is ok', () => {
     expect(validateAll(path.join(tmp, 'nope'), vocab, { today: TODAY }).ok).toBe(true);
   });
+
+  it('featured: a featured slug with no post folder is an error', () => {
+    const root = path.join(tmp, 'featured');
+    mkdirSync(root);
+    cpSync(GOOD, path.join(root, 'good-post'), { recursive: true });
+    const ok = validateAll(root, { ...vocab, featured: ['good-post'] }, { today: TODAY });
+    expect(ok.findings.filter((f) => f.rule === 'featured')).toEqual([]);
+    const bad = validateAll(root, { ...vocab, featured: ['good-post', 'ghost'] }, { today: TODAY });
+    expect(bad.ok).toBe(false);
+    const fs = bad.findings.filter((f) => f.rule === 'featured');
+    expect(fs).toHaveLength(1);
+    expect(fs[0]).toMatchObject({ level: 'error', slug: 'ghost', message: 'featured slug ghost has no post' });
+  });
+
+  it('enum: every slug listed in series.json must exist as a post folder', () => {
+    const root = path.join(tmp, 'series');
+    mkdirSync(root);
+    cpSync(GOOD, path.join(root, 'good-post'), { recursive: true });
+    const series = { s: { slugs: ['good-post', 'ghost'], vi: 'S', en: 'S' } };
+    const r = validateAll(root, { ...vocab, series }, { today: TODAY });
+    expect(r.ok).toBe(false);
+    const fs = r.findings.filter((f) => f.rule === 'enum' && f.slug === 'ghost');
+    expect(fs).toHaveLength(1);
+    expect(fs[0].message).toMatch(/series "s".*ghost/);
+    const ok = validateAll(root, { ...vocab, series: { s: { slugs: ['good-post'], vi: 'S', en: 'S' } } }, { today: TODAY });
+    expect(ok.findings.filter((f) => f.rule === 'enum')).toEqual([]);
+  });
 });

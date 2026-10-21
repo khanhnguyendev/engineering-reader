@@ -131,11 +131,13 @@ export function _resetListPostsCache(): void {
   listPostsCache.clear();
 }
 
+/** Memoized per root in production; `next dev` re-reads so content edits show up. */
 export function listPosts(root: string = CONTENT_ROOT): readonly PostRecord[] {
-  const cached = listPostsCache.get(root);
+  const memo = process.env.NODE_ENV === 'production';
+  const cached = memo ? listPostsCache.get(root) : undefined;
   if (cached) return cached;
   const posts = Object.freeze(loadPosts(root));
-  listPostsCache.set(root, posts);
+  if (memo) listPostsCache.set(root, posts);
   return posts;
 }
 

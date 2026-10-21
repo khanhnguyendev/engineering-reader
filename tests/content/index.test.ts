@@ -46,6 +46,7 @@ const vocab: Vocab = {
   tags: ['rust', 'cassandra', 'alpha'].map(entry),
   series: { s: { slugs: ['a', 'b', 'c'], vi: 'Chuỗi', en: 'Series' } },
   sourceHosts: [],
+  featured: [],
 };
 
 describe('counts', () => {

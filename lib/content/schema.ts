@@ -99,6 +99,7 @@ export const SeriesSchema = z.record(
   z.object({ slugs: z.array(z.string()), ...LabelShape }),
 );
 export const SourceHostsSchema = z.array(z.string().min(1));
+export const FeaturedSchema = z.array(Slug);
 
 export const RedirectsSchema = z.array(
   z.object({

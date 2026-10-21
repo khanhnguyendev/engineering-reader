@@ -295,6 +295,20 @@ export function validateAll(
       findings.push(...validatePost(readRawPost(dir), vocab, opts));
     }
   }
+  const hasPost = (slug: string) => existsSync(path.join(root, slug, 'post.json'));
+  // featured.json drives the home "start here" row; post.json.featured is ignored.
+  for (const slug of vocab.featured) {
+    if (!hasPost(slug)) {
+      findings.push({ level: 'error', rule: 'featured', slug, file: 'featured.json', message: `featured slug ${slug} has no post` });
+    }
+  }
+  for (const [key, s] of Object.entries(vocab.series)) {
+    for (const slug of s.slugs) {
+      if (!hasPost(slug)) {
+        findings.push({ level: 'error', rule: 'enum', slug, file: 'series.json', message: `series "${key}" lists slug "${slug}", which has no post` });
+      }
+    }
+  }
   findings.sort(
     (a, b) => a.slug.localeCompare(b.slug) || LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level],
   );

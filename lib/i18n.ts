@@ -15,6 +15,11 @@ export function fmt(s: string, vars: Record<string, string | number>): string {
   );
 }
 
+/** `one` or `other` by the locale's plural rules, with `{n}` filled in. */
+export function plural(locale: Locale, n: number, one: string, other: string): string {
+  return fmt(new Intl.PluralRules(locale).select(n) === 'one' ? one : other, { n });
+}
+
 /** The same page in the other locale, or that locale's home when the twin is missing. */
 export function switchHref(pathname: string, locale: Locale, twinMissing?: boolean): string {
   const other = otherLocale(locale);
