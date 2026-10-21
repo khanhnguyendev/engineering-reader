@@ -25,7 +25,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 ## Accepted deviations (finish review 2026-10-21)
 - Phone (390): the three key-number cells render as stacked rows (value | label | ref) because real values such as "p99 40–125 → 15 ms" wrap to three lines in a third of 358px; three cells return from 640px.
-- Phone: a collapsed `<details>` table of contents sits between the deep-read divider and the first H2 panel (the desktop rail's TOC has no phone equivalent otherwise).
+- Phone: a collapsed `<details>` table of contents sits between the deep-read divider and the first H2 panel (the desktop rail's TOC has no phone equivalent otherwise). Approval: the owner delegated every decision for this run on 2026-10-21 ("I want done everything, just do whatever you want to achieve that", recorded in docs/decisions.md); the controller approved the addition under that delegation.
 - The mono "BÀI VIẾT" kicker above the pill row is removed (craft floor bans kickers); the pill row stays.
 - Code blocks, diagrams and tables inside section panels are separated by hairline rules (top/bottom), not bordered boxes (no nested cards).
 
