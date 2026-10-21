@@ -184,6 +184,8 @@ Keyed by normalized source URL (scheme and host lowercased, fragment stripped, `
 
 Skipped entries are kept so the pipeline never re-evaluates; deleting an entry re-queues it.
 
+`featured.json` (ordered slugs) is the single source of truth for the home page's "Start here" picks; the `featured` boolean in `post.json` is ignored (kept in the schema for now).
+
 ### Validation (`scripts/validate-content.ts`, runs as `prebuild` and in CI)
 
 Errors (fail the build):
