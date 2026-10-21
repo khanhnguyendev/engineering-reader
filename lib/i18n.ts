@@ -8,3 +8,20 @@ export function isLocale(x: string): x is Locale {
 export function otherLocale(l: Locale): Locale {
   return l === 'vi' ? 'en' : 'vi';
 }
+
+import vi from "@/dictionaries/vi.json";
+import en from "@/dictionaries/en.json";
+
+export type Dictionary = typeof vi;
+
+const dictionaries: Record<Locale, Dictionary> = { vi, en };
+
+export function getDictionary(l: Locale): Dictionary {
+  return dictionaries[l];
+}
+
+export function fmt(s: string, vars: Record<string, string | number>): string {
+  return s.replace(/\{(\w+)\}/g, (m, k: string) =>
+    k in vars ? String(vars[k]) : m,
+  );
+}

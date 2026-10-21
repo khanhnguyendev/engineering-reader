@@ -1,0 +1,41 @@
+{
+  "site": {
+    "name": "Hệ thống lớn",
+    "tagline": "Các case kỹ thuật thật, đọc trong tám phút."
+  },
+  "nav": {
+    "companies": "Công ty",
+    "topics": "Chủ đề",
+    "about": "Giới thiệu"
+  },
+  "post": {
+    "label": "BÀI VIẾT",
+    "byline": "Biên tập: Ryan",
+    "readMinutes": "{n} phút đọc",
+    "keyNumbers": "Con số chính",
+    "tldr": "Tóm tắt nhanh",
+    "smallTeam": "Cho team nhỏ",
+    "deepRead": "ĐỌC SÂU · {n} PHÚT",
+    "lessons": "Bài học",
+    "sources": "Nguồn",
+    "aiLine": "Soạn thảo với AI từ các nguồn trên, Ryan đọc lại và biên tập.",
+    "missingLocale": "Bài này chưa có bản tiếng Anh.",
+    "toc": "Mục lục",
+    "share": "Sao chép link",
+    "breadcrumbHome": "Trang chủ"
+  },
+  "caseType": {
+    "migration": "Di chuyển hệ thống",
+    "incident": "Sự cố",
+    "design-decision": "Quyết định thiết kế",
+    "scaling": "Mở rộng quy mô"
+  },
+  "theme": {
+    "toggle": "Đổi giao diện",
+    "light": "Giao diện sáng",
+    "dark": "Giao diện tối"
+  },
+  "lang": {
+    "switch": "Chuyển sang tiếng Anh"
+  }
+}
