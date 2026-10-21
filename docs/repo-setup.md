@@ -15,6 +15,6 @@ Repo: https://github.com/khanhnguyendev/engineering-reader (public, personal).
 ## Remaining
 
 - [x] Vercel project link and `NEXT_PUBLIC_SITE_URL` env var (Task 16; via CLI if authenticated, else `needs-human`)
-- [ ] Enable Vercel Analytics
+- [x] Enable Vercel Analytics (confirmed: /_vercel/insights/script.js returns 200 on production, 2026-10-22)
 - [ ] Project board with fields Milestone (M0 to M8), Type (code, content, pipeline, design), Locale (vi, en, both)
 - [ ] One issue per milestone bullet
