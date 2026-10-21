@@ -4,7 +4,7 @@ import { cpSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { parsePost, readRawPost } from '@/lib/content/load';
+import { mermaidBlocksOf, parsePost, readRawPost } from '@/lib/content/load';
 import { hashBlock, svgName } from '@/lib/content/mermaid';
 import { compilePostBody } from '@/lib/mdx/compile';
 import { slugify } from '@/lib/mdx/rehype-sections';
@@ -97,7 +97,7 @@ describe('compilePostBody', () => {
     const { content } = await compilePostBody(post, 'vi');
     const html = renderToStaticMarkup(content);
     expect(html).toMatch(/<code[^>]*>\[S1\]<\/code>/);
-    expect(html).toContain('class="ref">[S2 §3]</a>');
+    expect(html).toContain('<a href="#S2" class="ref">[S2 §3]</a>');
   });
 
   it('leaves content before the first h2 unwrapped', async () => {
@@ -110,12 +110,11 @@ describe('compilePostBody', () => {
 
   it('marks external links', async () => {
     const post = load();
-    post.locales.vi!.body += '\n\n[ext](https://example.com) [in](/vi)\n';
+    post.locales.vi!.body += '\n\n[ext](https://example.com) [pr](//example.com) [in](/vi)\n';
     const { content } = await compilePostBody(post, 'vi');
     const html = renderToStaticMarkup(content);
-    expect(html).toMatch(/<a [^>]*href="https:\/\/example.com"[^>]*>/);
-    expect(html).toMatch(/rel="noopener noreferrer"/);
-    expect(html).toMatch(/target="_blank"/);
+    expect(html).toMatch(/<a href="https:\/\/example.com" rel="noopener noreferrer" target="_blank">/);
+    expect(html).toMatch(/<a href="\/\/example.com" rel="noopener noreferrer" target="_blank">/);
     expect(html).not.toMatch(/<a [^>]*href="\/vi"[^>]*target/);
   });
 
@@ -128,11 +127,26 @@ describe('compilePostBody', () => {
     expect(html.match(/diagram-fallback/g)).toHaveLength(1);
   });
 
+  it('ignores nested and four-backtick mermaid fences', async () => {
+    const post = load();
+    const body =
+      '- item\n\n  ```mermaid\n  graph TD; N-->M\n  ```\n\n' +
+      '````mermaid\ngraph TD; F-->G\n````\n\n' +
+      '```mermaid\ngraph TD; TOP-->LEVEL\n```\n';
+    post.locales.vi!.body = body;
+    post.locales.vi!.mermaidBlocks = mermaidBlocksOf(body);
+    expect(post.locales.vi!.mermaidBlocks).toHaveLength(1);
+    const { content } = await compilePostBody(post, 'vi');
+    const html = renderToStaticMarkup(content);
+    expect(html.match(/class="diagram(-fallback)?"/g)).toHaveLength(1);
+    expect(html).toContain('TOP--&gt;LEVEL');
+  });
+
   it('keeps ref text in headings', async () => {
     const post = load();
-    post.locales.vi!.body += '\n\n## Có ref [S1]\n\nx\n';
+    post.locales.vi!.body += '\n\n## Có ref [S1 §2]\n\nx\n';
     const { headings } = await compilePostBody(post, 'vi');
-    expect(headings.at(-1)!.text).toBe('Có ref [S1]');
+    expect(headings.at(-1)!.text).toBe('Có ref [S1 §2]');
   });
 });
 

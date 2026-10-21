@@ -7,7 +7,12 @@ export default function remarkMermaid() {
     // Only backtick fences count, matching mermaidBlocksOf in lib/content/load.ts.
     const isBacktickFence = (node: Node) => {
       const offset = (node.position as { start?: { offset?: number } } | undefined)?.start?.offset;
-      return source === undefined || offset === undefined || source.startsWith('```', offset);
+      if (source === undefined || offset === undefined) return true;
+      return (
+        (offset === 0 || source[offset - 1] === '\n') &&
+        source.startsWith('```', offset) &&
+        source[offset + 3] !== '`'
+      );
     };
     let i = 0;
     const walk = (node: Node) => {

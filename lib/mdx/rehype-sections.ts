@@ -23,8 +23,11 @@ export function slugify(text: string): string {
 function textOf(node: Node): string {
   if (node.type === 'text') return node.value ?? '';
   if (node.type === 'mdxJsxTextElement' && node.name === 'Ref') {
-    const id = node.attributes?.find((a) => a.name === 'id')?.value;
-    return typeof id === 'string' ? `[${id}]` : '';
+    const attr = (n: string) => node.attributes?.find((a) => a.name === n)?.value;
+    const id = attr('id');
+    const locator = attr('locator');
+    if (typeof id !== 'string') return '';
+    return `[${id}${typeof locator === 'string' && locator ? ' ' + locator : ''}]`;
   }
   return (node.children ?? []).map(textOf).join('');
 }
