@@ -4,99 +4,96 @@
 
 **Goal:** Every route in the information architecture resolves in both locales: home per the IA, companies index and pages, topic pages, tag pages, series pages with prev/next, about, redirects, localized 404.
 
-**Architecture:** All list pages are static (`generateStaticParams` over vocab × locales), built on the M1 loader (`listPosts`, `listPostsBy`, `hasLocale`) plus a small set of pure helpers (`lib/content/index.ts`) and one shared card component. The about page is MDX compiled by the M1 pipeline. Redirects come from `content/redirects.json` into `next.config.ts`.
+**Architecture:** All list pages are static (`generateStaticParams` over vocab × locales) built on the M1 loader (`listPosts`, `listPostsBy`, `hasLocale`) plus the pure helpers in `lib/content/index.ts` (Task 1, done) and one shared card component. The about page is MDX compiled by a page-only variant of the M1 pipeline. Redirects come from `content/redirects.json` into `next.config.ts` through an alias-free module.
 
 **Tech Stack:** unchanged from M1 (Next.js 16, Tailwind v4 tokens, next-mdx-remote, zod, vitest).
 
-**Spec:** `docs/superpowers/specs/2026-10-21-engineering-reader-design.md` §6 (IA), §7 (world), §10 M2. DESIGN.md is the visual authority for new surfaces (tokens, named rules: one accent, no nested panels, mono only for numbers/refs/labels, callout only on the post page).
+**Spec:** `docs/superpowers/specs/2026-10-21-engineering-reader-design.md` §6 (IA), §7 (world), §10 M2. DESIGN.md is the visual authority for new surfaces: Three Borders rule (hairline, strong hairline, callout), One Accent, circle reserved for the avatar, chips = strong hairline + 6px radius, no eyebrow/kicker labels above titles, no nested panels.
+
+Plan revision 2 (2026-10-22): folds in the plan review (localized 404 design, key conflicts, featured.json loading, seriesNav signature, redirects module, dev-mode cache, home duplication, DESIGN.md conformance).
 
 ## Global Constraints
 
-- Everything under `/[locale]`; both locales for every page; dictionary keys identical across locales; no hard-coded English on vi pages.
-- Visual rules from DESIGN.md: `.panel` cards, hairlines, one accent, no gradients/shadows, company brand colour only on the monogram mark on cards (never as page accent), Inter prose, mono for numbers and uppercase labels only.
-- Metadata on every page: title, description, canonical, `alternates.languages` for both locales (+ `x-default: vi`), `openGraph` with `locale` in `ll_CC` form (`vi_VN`, `en_GB`), title, description, url.
-- Static output; loaders read files at build only; `listPosts` memoized per root.
-- `VOCAB_ROOT` env (default `content`) mirrors `CONTENT_ROOT` so page tests can point at fixtures.
+- Everything under `/[locale]`; both locales for every page; dictionary keys identical across locales; no hard-coded English on vi pages; `export const dynamicParams = false` on every new dynamic page.
+- Visual rules from DESIGN.md: `.panel` cards, hairlines, one accent, no gradients/shadows; company brand colour appears only on the letter of a monogram mark inside a card (PostCard, company card); never as a border, never on the home company row or page intros (those use ink).
+- Metadata on every page via `buildMetadata` (Task 1): title `${title} · ${site.name}`, description from the page's dek key, canonical, `alternates.languages` vi/en (+ `x-default` vi), `openGraph` locale `vi_VN`/`en_GB`, title, description, url.
+- Static output; loaders read files at build only. `listPosts` and `loadVocab` are memoized per root in production and bypass the cache when `process.env.NODE_ENV !== 'production'` (so `next dev` sees edits).
+- `VOCAB_ROOT` env (default `content`) mirrors `CONTENT_ROOT`; `loadVocab` reads companies, topics, tags, series, source-hosts AND featured.
+- New UI tests: `// @vitest-environment jsdom`, `vi.mock('server-only')`, `vi.mock('next/navigation')` where client components use it, a temp `VOCAB_ROOT` dir holding all six vocab JSONs, `vi.resetModules()` before dynamic page imports.
 - Commit messages end with the session's two attribution lines.
 
 ## Review Focus
 
-1. A company with zero posts in one locale must render an empty state in that locale, not a crash or an English string. Test in Task 4.
-2. A tag listed in `tags.json` but used by no post must still have a page (static params from vocab) with an empty state. Test in Task 5.
-3. A post in a series must show prev/next only within the series order, and a series with one post shows neither. Test in Task 6.
-4. A redirect entry with `from` equal to a real route must not shadow it: validator rejects it. Test in Task 8.
-5. `/vi/does-not-exist` renders the localized 404 with the header, in Vietnamese. Test in Task 8.
+1. A company with zero posts in one locale renders an empty state in that locale, not a crash or an English string. Test in Task 4.
+2. A tag listed in `tags.json` but used by no post still has a page with an empty state. Test in Task 5.
+3. A post in a series shows prev/next only within the series order; a single-post series shows neither; a post whose slug is not listed in its series renders no series block and fails validation. Test in Task 6.
+4. A redirect `from` that equals an existing static route is rejected by the validator. Test in Task 8.
+5. `/vi/does-not-exist` and `/en/does-not-exist` render the styled, localized 404 (root `app/not-found.tsx`) with the header. Test in Task 8 and curl in Task 9.
 
 ---
 
 ## File structure
 
 ```
-lib/content/index.ts            pure helpers: companiesWithCounts, topicsWithCounts, tagsWithCounts, seriesNav, relatedPosts, featuredPosts, memoized listPosts wrapper
-lib/content/vocab.ts            VOCAB_ROOT env default
-lib/content/schema.ts           RedirectsSchema, AboutPage? (none; MDX only)
-components/post-card.tsx        card: monogram (brand colour), company, title, one key number, read time, topic chip
-components/post-list.tsx        ul of PostCard
-components/page-intro.tsx       h1 + dek
-components/section-heading.tsx  mono label + h2
-components/monogram.tsx         letter mark in brand colour
+lib/content/index.ts            (done) companiesWithCounts, topicsWithCounts, tagsWithCounts, seriesNav(post, vocab, posts, locale), relatedPosts, featuredPosts
+lib/content/load.ts             memoized listPosts (cache in load.ts; dev bypass)
+lib/content/vocab.ts            VOCAB_ROOT; featured.json loaded; dev bypass
+lib/content/schema.ts           FeaturedSchema
+lib/content/validate.ts         featured slugs exist; series slugs exist both ways (series.json → posts, post → series lists it)
+lib/content/redirects.ts        alias-free: local zod schema, readRedirects(path), staticRoutes(posts, vocab), toNextRedirects()
+lib/metadata.ts                 (done) buildMetadata
+lib/mdx/compile.tsx             + compilePage(markdown, locale): remarkGfm + rehypeSections only
+components/monogram.tsx         rounded square 6px, hairline border, letter in `color` (brand) or ink
+components/post-card.tsx        .panel link: monogram, company (mono-label), title (700), key number (mono) + label, read time, topic chip
+components/post-list.tsx        ul of PostCard or empty-state <p>
+components/page-intro.tsx       h1 + dek (no label above)
+components/section-heading.tsx  h2 (headline style) with optional right-aligned mono "all →" link on the same row
+components/post/series-nav.tsx, components/post/related.tsx
 app/[locale]/page.tsx           home per IA
 app/[locale]/companies/page.tsx, [company]/page.tsx
 app/[locale]/topics/page.tsx, [topic]/page.tsx
 app/[locale]/tags/page.tsx, [tag]/page.tsx
 app/[locale]/series/[series]/page.tsx
 app/[locale]/about/page.tsx + content/pages/about.{vi,en}.mdx
-app/[locale]/not-found.tsx, app/not-found.tsx (styled, localized by path)
-next.config.ts                  redirects() from content/redirects.json
-lib/metadata.ts                 buildMetadata({locale, path, title, description}) shared helper
-dictionaries/{vi,en}.json       new keys: home.*, companies.*, topics.*, tags.*, series.*, about.*, notFound.*
-tests/content/index.test.ts, tests/ui/{home,companies,topics,tags,series,about,not-found}.test.tsx, tests/redirects.test.ts
+app/not-found.tsx               root, localized (vi default; client switch by pathname), imports globals.css, fonts, ThemeScript, Header twinMissing
+next.config.ts                  redirects() from lib/content/redirects.ts (relative import)
+components/header.tsx           aria-current="page" on the active nav item
+dictionaries/{vi,en}.json       new keys (Task 2)
 ```
 
 ---
 
-### Task 1: Helpers, memoized loader, VOCAB_ROOT, metadata helper
+### Task 1: Helpers, memoized loader, VOCAB_ROOT, metadata helper (done, commits 8883ac4 + 2604fd1)
 
-**Files:** `lib/content/index.ts`, `lib/content/load.ts` (memoize), `lib/content/vocab.ts` (`VOCAB_ROOT`), `lib/metadata.ts`, `lib/content/schema.ts` (`RedirectsSchema`). Test: `tests/content/index.test.ts`, `tests/metadata.test.ts`.
-
-**Interfaces:**
-- `listPosts(root)` memoized per root in a module Map (cleared by `_resetListPostsCache()` for tests).
-- `VOCAB_ROOT = process.env.VOCAB_ROOT ?? 'content'`; `loadVocab(root = VOCAB_ROOT)`.
-- `companiesWithCounts(posts, vocab, locale): Array<{ company: Company; count: number }>` (all vocab companies, count of posts with the locale).
-- `topicsWithCounts(posts, vocab, locale)`, `tagsWithCounts(posts, vocab, locale)` same shape with `topic`/`tag`.
-- `seriesNav(post, vocab, posts): { series?: Series & { key: string }; prev?: PostRecord; next?: PostRecord; index: number; total: number }`.
-- `relatedPosts(post, posts, locale, n = 3)`: same topic first (newest), then same company, excluding self, with the locale.
-- `featuredPosts(posts, vocabFeatured: string[], locale, n = 3)`: featured.json order, fallback newest.
-- `RedirectsSchema = z.array(z.object({ from: z.string().startsWith('/'), to: z.string().startsWith('/'), permanent: z.boolean().default(true) }))`.
-- `buildMetadata({ locale, path, title, description, type? }): Metadata` → metadataBase from SITE_URL, title, description, canonical `/${locale}${path}`, languages `{ vi, en, 'x-default': vi path }`, openGraph `{ locale: ll_CC, title, description, url, type }`.
-
-- [ ] Failing tests for every helper on the `good-post` fixture plus temp copies (counts, series nav with 1 and 3 posts, related ordering, featured fallback, redirects schema, buildMetadata shape).
-- [ ] Implement; `pnpm test`; commit.
+Delivered per revision 1; `seriesNav(post, vocab, posts, locale)` returns `{ index: -1, total: 0 }` when the post is not in a series or its slug is unlisted; validator checks the post's slug is listed in its series.
 
 ---
 
-### Task 2: Shared list UI and dictionary keys
+### Task 2: Loader follow-ups, shared list UI, dictionary keys
 
-**Files:** `components/{monogram,post-card,post-list,page-intro,section-heading}.tsx`, `dictionaries/{vi,en}.json`. Test: `tests/ui/components.test.tsx`, key-parity test extended.
+**Files:** `lib/content/load.ts`, `lib/content/vocab.ts`, `lib/content/schema.ts`, `lib/content/validate.ts`, `components/{monogram,post-card,post-list,page-intro,section-heading}.tsx`, `dictionaries/{vi,en}.json`. Tests: `tests/content/load.test.ts` (dev bypass), `tests/content/validate.test.ts` (featured, series both ways), `tests/ui/components.test.tsx`, key-parity test.
 
 **Interfaces:**
-- `Monogram({ name, color, size? })`: circle/rounded square with the first letter, `color` as border+text (brand colour allowed here only), `aria-hidden`.
-- `PostCard({ post, locale, company, dict })`: `.panel` link to the post; monogram + company name (mono-label), title (Inter 600, 2 lines max), first key number (mono) + label, read time, topic chip (hairline pill).
-- `PostList({ posts, locale, vocab, dict, emptyLabel })`: `<ul>` or empty state `<p class="text-muted">`.
-- `PageIntro({ title, dek })`, `SectionHeading({ label, title, href? })`.
-- Dictionary keys (both files): `home.startHere`, `home.latest`, `home.byCompany`, `home.byTopic`, `home.allPosts`; `companies.title`, `companies.dek`, `companies.postsCount` "{n} bài" / "{n} posts", `companies.empty`, `companies.blog` ("Blog kỹ thuật" / "Engineering blog"); `topics.title`, `topics.dek`, `topics.empty`; `tags.title`, `tags.dek`, `tags.empty`; `series.title`, `series.part` "Phần {i}/{n}" / "Part {i} of {n}", `series.prev`, `series.next`; `related.title` ("Đọc tiếp" / "Read next"); `about.title`, `about.dek`; `notFound.title`, `notFound.body`, `notFound.home`.
+- Cache bypass: both caches are skipped when `process.env.NODE_ENV !== 'production'`; tests set `NODE_ENV=production` (vitest sets `test`; use `vi.stubEnv`) for the memoization tests.
+- `FeaturedSchema = z.array(Slug)`; `Vocab.featured: string[]`; validator rule `featured` (error when a featured slug has no post). `post.json.featured` is ignored (documented in the spec's §5 note; schema field kept for now).
+- Validator rule `enum` (series): every slug in `series.json` exists as a post; every post with `series` is listed in it (second half already added in Task 1 fix round).
+- `Monogram({ name, color?, size? })`: rounded square (6px), 1px hairline border, bold letter in `color` (brand hex) when given else ink; `aria-hidden`.
+- `PostCard({ post, locale, company, topicLabel, dict })`: `.panel` link; monogram (brand colour letter) + company name (mono-label); title (Inter 700, clamp 2 lines); first key number (mono) + its label; read time; topic chip (strong hairline, 6px radius).
+- `PostList({ posts, locale, vocab, dict, emptyLabel })`: `<ul>` or `<p class="text-muted">`.
+- `PageIntro({ title, dek })`; `SectionHeading({ title, href?, hrefLabel? })`.
+- Dictionary keys (both files): `home.intro` (one sentence), `home.startHere`, `home.latest`, `home.byCompany`, `home.byTopic`, `home.all` ("Tất cả →" / "All →"); `companies.title`, `companies.dek`, `companies.postsOne` "{n} bài" / "{n} post", `companies.postsOther` "{n} bài" / "{n} posts", `companies.empty`, `companies.blog`; `topics.title`, `topics.dek`, `topics.shelf.distributed-systems|data|realtime|infra|reliability` (one-line deks), `topics.empty`; `tags.title`, `tags.dek`, `tags.empty`; `series.title`, `series.part` "Phần {i}/{n}" / "Part {i} of {n}", `series.prev`, `series.next`, `series.index` ("Xem cả loạt bài" / "View the series"); `related.title`; `about.title`, `about.dek`; `notFound.title`, `notFound.body`, `notFound.home`. Helper `plural(dict, n, oneKey, otherKey)` using `Intl.PluralRules(locale)`.
 
-- [ ] Failing tests: PostCard markup (monogram colour style, title, key number mono, read time), empty state, key parity.
+- [ ] Failing tests: dev bypass; featured and series rules; PostCard markup (brand colour on the letter only, title weight, chip classes); empty state; key parity; `plural` with n=1 and n=3 in en.
 - [ ] Implement; commit.
 
 ---
 
 ### Task 3: Home per IA
 
-**Files:** `app/[locale]/page.tsx`. Test: `tests/ui/home.test.tsx` (replace M1 list assertions).
+**Files:** `app/[locale]/page.tsx`. Test: `tests/ui/home.test.tsx` (replace M1 assertions).
 
-- Order: Header → `<main id="content">` → site name h1 + tagline → "Start here" (3 featured or newest) → "Latest" (6–8 cards) → "By company" (row of monogram + name links with counts) → "By topic" (chips with counts) → link to all posts? (no: latest covers it). Metadata via `buildMetadata` (fixes og:locale).
-- [ ] Failing tests: sections present in order; featured fallback; company row links to `/vi/companies/discord`; topic chips; og:locale `vi_VN`.
+- Order: Header → `<main id="content">` → h1 site name + tagline + `home.intro` → "Start here" (featured, fallback 3 newest) → "Latest" (6 newest excluding Start-here slugs; section hidden when empty) → "By company" (row of monogram (ink letter) + name + count, linking to company pages) → "By topic" (chips with counts). Metadata via `buildMetadata`.
+- [ ] Failing tests: order; no slug appears in both Start-here and Latest; Latest hidden when all posts are featured; company row links; topic chips; og:locale `vi_VN`; title `Hệ thống lớn`.
 - [ ] Implement; `pnpm build`; commit.
 
 ---
@@ -105,8 +102,8 @@ tests/content/index.test.ts, tests/ui/{home,companies,topics,tags,series,about,n
 
 **Files:** `app/[locale]/companies/page.tsx`, `app/[locale]/companies/[company]/page.tsx`. Tests: `tests/ui/companies.test.tsx`.
 
-- Index: PageIntro + grid of company cards (monogram, name, count, blog link `rel="noopener"`). Company page: PageIntro (name + "{n} posts" + blog link), PostList; `generateStaticParams` over vocab companies × locales; `notFound()` for unknown; empty state (Review Focus 1).
-- [ ] Failing tests incl. empty state in `en` for a company with vi-only posts (temp fixture with en draft).
+- Index: PageIntro + grid of company cards: monogram (brand letter), name (the only link, stretched with `after:absolute after:inset-0`), post count via `plural`, blog link OUTSIDE the name link with `rel="noopener noreferrer"` (no nested anchors). Company page: PageIntro (name; dek = count + blog link), PostList with `companies.empty`; `generateStaticParams` over vocab companies × locales; `notFound()` for unknown.
+- [ ] Failing tests incl. Review Focus 1 (en page for a company with vi-only posts shows `companies.empty` in English) and "no `<a>` inside `<a>`".
 - [ ] Implement; commit.
 
 ---
@@ -115,42 +112,46 @@ tests/content/index.test.ts, tests/ui/{home,companies,topics,tags,series,about,n
 
 **Files:** `app/[locale]/topics/page.tsx`, `app/[locale]/topics/[topic]/page.tsx`, `app/[locale]/tags/page.tsx`, `app/[locale]/tags/[tag]/page.tsx`. Tests: `tests/ui/topics.test.tsx`, `tests/ui/tags.test.tsx`.
 
-- Topic index: five shelves with counts and deks (dictionary `topics.dek.<slug>`). Topic page: PageIntro + PostList. Tags index: all tags with counts (mono counts), alphabetical; tag page: PageIntro + PostList; empty state (Review Focus 2). Static params from vocab.
+- Topic index: five shelves (`topics.shelf.<slug>` deks, counts). Topic page: PageIntro + PostList. Tags index: all tags with counts, sorted by the locale label (`localeCompare` with the locale). Tag page: PageIntro + PostList with `tags.empty` (Review Focus 2). Static params from vocab.
 - [ ] Failing tests; implement; commit.
 
 ---
 
-### Task 6: Series pages, prev/next, related posts
+### Task 6: Series pages, prev/next, related
 
-**Files:** `app/[locale]/series/[series]/page.tsx`, `components/post/series-nav.tsx`, `components/post/related.tsx`, `app/[locale]/posts/[slug]/page.tsx` (mount both). Tests: `tests/ui/series.test.tsx`, post-page test extended.
+**Files:** `app/[locale]/series/[series]/page.tsx`, `components/post/series-nav.tsx`, `components/post/related.tsx`, `app/[locale]/posts/[slug]/page.tsx`. Tests: `tests/ui/series.test.tsx`, post-page test extended.
 
-- Series page: PageIntro (vi/en title from series.json) + ordered list with "Part i of n". Post page: `SeriesNav` above Sources when in a series (prev/next links, part label); `Related` after Sources (up to 3 cards). Static params from vocab series.
-- [ ] Failing tests with a temp `series.json` via `VOCAB_ROOT` (3 posts; middle has prev+next; single-post series shows neither: Review Focus 3); related ordering.
-- [ ] Implement; commit.
+- Series page: PageIntro (title from series.json vi/en) + ordered list "Part i of n". Post page: after `Byline` mount `SeriesNav` ONLY when `seriesNav(...).index >= 0` (part label, link to `/${locale}/series/${key}` with `series.index`, prev/next), then `Related` (up to 3 PostCards; hidden when empty).
+- [ ] Failing tests with a temp `VOCAB_ROOT` series.json (3 posts: middle has prev+next; single-post series shows neither; unlisted slug → no block) and related ordering; the Discord fixture renders no Related (none exist).
+- [ ] Implement; commit. Note in RUNLOG: the series route is verified by the fixture test only (no real series in content yet).
 
 ---
 
 ### Task 7: About page
 
-**Files:** `content/pages/about.vi.mdx`, `content/pages/about.en.mdx`, `app/[locale]/about/page.tsx`, `lib/mdx/compile.tsx` (`compilePage(markdown, locale)` variant without post binding). Test: `tests/ui/about.test.tsx`.
+**Files:** `content/pages/about.vi.mdx`, `content/pages/about.en.mdx`, `app/[locale]/about/page.tsx`, `lib/mdx/compile.tsx` (`compilePage(markdown, locale)`: remarkGfm + rehypeSections only; no refs/mermaid). Test: `tests/ui/about.test.tsx`.
 
-- Content (both locales, equivalent): what the site is; the two-layer post anatomy; source policy (primary only, every number referenced); how posts are made (AI-drafted from sources, reviewed and edited by Ryan; pipeline never auto-merges); selection bar; contact/RSS placeholder lines pointing to the feed route (M3). Byline. No numbers that need refs.
-- [ ] Failing tests: page renders both locales, contains the AI/process paragraph, `<main id="content">`, metadata.
+- Content (both locales, equivalent): what the site is; the two-layer anatomy; source policy (primary only; every number referenced; the `[S1 §…]` convention shown as literal text); how posts are made (AI-drafted from sources, reviewed and edited by Ryan; pipeline never auto-merges); selection bar; the RSS line is plain text until M3 (no link). Byline. No numbers needing refs. The controller reviews the copy (owner delegation); flagged for Ryan in HANDOFF.
+- [ ] Failing tests: both locales render; a literal `[S1]` in the body stays text (no `href="#S1"`); `<main id="content">`; metadata.
 - [ ] Implement; commit.
 
 ---
 
-### Task 8: Redirects, localized 404, metadata sweep, nav
+### Task 8: Redirects, localized 404, header nav state
 
-**Files:** `next.config.ts`, `lib/content/redirects.ts`, `app/[locale]/not-found.tsx`, `app/not-found.tsx`, `components/header.tsx` (nav links now resolve; add Tags? no: keep companies/topics/about), `scripts/validate-content.ts` (redirect rule: `from` must not equal an existing static route; `to` must be a route or external URL). Tests: `tests/redirects.test.ts`, `tests/ui/not-found.test.tsx`.
+**Files:** `lib/content/redirects.ts`, `next.config.ts`, `lib/content/validate.ts` (rule `redirects`), `app/not-found.tsx` (replace), `components/header.tsx`. Tests: `tests/redirects.test.ts`, `tests/ui/not-found.test.tsx`.
 
-- `redirects()` in next.config reads and validates `content/redirects.json` (empty today) and returns Next redirect objects. Localized 404: Header + title/body/home link from the dictionary; root `app/not-found.tsx` infers locale from the first path segment (default vi) using `headers()`/pathname is unavailable in not-found: render vi with an `en` link.
-- [ ] Failing tests (Review Focus 4, 5); implement; `pnpm build`; commit.
+- `lib/content/redirects.ts`: relative imports only (no `@/` anywhere in its import chain); local zod schema `{ from: /^\//, to: /^\//, permanent?: boolean = true }`; `readRedirects(file = 'content/redirects.json')`; `staticRoutes(posts, vocab): Set<string>` (home, posts, companies, topics, tags, series, about × locales, plus `/`); `toNextRedirects(list)`; validator rule `redirects`: `from` must not be in `staticRoutes`, `to` must be internal (Review Focus 4).
+- `next.config.ts`: `async redirects() { return toNextRedirects(readRedirects()) }` via a relative import; `pnpm build` must pass.
+- `app/not-found.tsx` (root): imports `./globals.css`, the same `next/font` setup and `ThemeScript` as the locale layout; renders `<Header locale="vi" twinMissing />`-equivalent plus a small client component that reads `usePathname()` and shows the `en` strings when the first segment is `en` (both dictionaries' `notFound` strings passed as props); links to `/vi` and `/en`. Delete any `app/[locale]/not-found.tsx`.
+- Header: `aria-current="page"` on the nav item matching the first path segment after the locale (client-side via `usePathname` in a tiny `NavLink` component, or server-side by passing `section` from each page).
+- [ ] Failing tests: redirects schema/default; `from` on a static route rejected; `/vi/does-not-exist` and `/en/does-not-exist` render the root not-found with vi/en strings (mock `next/font/google` and `next/navigation`); nav `aria-current`.
+- [ ] Implement; `pnpm build`; commit.
 
 ---
 
 ### Task 9: Done-check, finish review, docs, merge
 
-- [ ] Done-when: `curl` every IA route for both locales on `pnpm start` (home, companies, companies/discord, topics, topics/data, tags, tags/cassandra, series index not required, about, a post) → all 200; `/vi/nope` → 404 with the localized page.
-- [ ] Impeccable: run `detect --json app components` once; capture home + companies/discord + topics/data at 1440 and 390 in both themes; finish review (fresh reviewer, degraded role) → one fix batch → verdict; documenter updates DESIGN.md if the system gained components (PostCard, Monogram, chips).
-- [ ] ROADMAP M2 done; RUNLOG; merge PR; verify production.
+- [ ] Done-when: on `pnpm start`, curl in both locales: home, `/companies`, `/companies/discord`, `/topics`, `/topics/data`, `/tags`, `/tags/cassandra`, `/about`, a post → all 200; `/vi/nope` and `/en/nope` → 404 with the localized page (grep for `notFound.title` text). Series: fixture test only (recorded).
+- [ ] Impeccable: `detect --json app components` once; capture home, `/companies/discord`, `/topics/data` at 1440 and 390 in both themes; finish review (fresh reviewer, degraded role) → one fix batch → verdict; documenter updates DESIGN.md with the new components (Monogram, PostCard, chip, SectionHeading).
+- [ ] ROADMAP M2 done; RUNLOG; merge PR #2; verify production routes.
