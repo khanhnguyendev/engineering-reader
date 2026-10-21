@@ -240,7 +240,7 @@ World
 - Light: a first-class twin from the same tokens: paper ground, the same grid at low opacity, the same single accent darkened for contrast, same hairline and panel roles. Light must look as intentional as dark.
 - Default theme follows `prefers-color-scheme`; a toggle persists the choice; a small inline script applies the stored theme before first paint.
 - Type: Inter for all text (Vietnamese subset), JetBrains Mono for numbers, references, and ASCII labels only. Body 16 to 18px, line-height 1.6 to 1.7. Title tracking no tighter than -2%.
-- Dividing blocks, three levels: hairlines for large regions; muted panels for TL;DR, each deep-layer H2 section, code, the rail; an accent border only on the "Cho team nhỏ" callout. A monospace divider "ĐỌC SÂU · n PHÚT" / "DEEP READ · n MIN" marks where the deep layer begins. No nested panels. No gradients, no glow, no second colour.
+- Dividing blocks, three levels: hairlines for large regions; muted panels for TL;DR, each deep-layer H2 section, code, the rail; an accent border only on the "Cho team nhỏ" callout. A monospace divider "ĐỌC SÂU · n PHÚT" / "DEEP READ · n MIN" marks where the deep layer begins. No nested panels: code blocks, diagrams and tables inside a section panel are set off by hairline rules, never bordered boxes. No gradients, no glow, no second colour.
 - Company colours appear only on logo marks on cards.
 - The chosen first-viewport sketch is `.impeccable/mocks/decision/pinned-neon-navy-carded.html` (phone, 390 wide). The direction contract lives in the surface brief; the build is audited against both.
 
