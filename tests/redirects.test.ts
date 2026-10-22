@@ -97,6 +97,12 @@ describe('statusCode redirects', () => {
     const [old] = toNextRedirects(RedirectsSchema.parse([{ from: '/a', to: '/b' }]));
     expect(old).toEqual({ source: '/a', destination: '/b', permanent: true });
   });
+  it('rejects an entry with both permanent and statusCode', () => {
+    const r = RedirectsSchema.safeParse([{ from: '/a', to: '/b', permanent: true, statusCode: 301 }]);
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0].message).toBe('use permanent or statusCode, not both');
+    expect(RedirectsSchema.safeParse([{ from: '/a', to: '/b', permanent: false }]).success).toBe(true);
+  });
   it('rejects an unsupported statusCode', () => {
     expect(RedirectsSchema.safeParse([{ from: '/a', to: '/b', statusCode: 200 }]).success).toBe(false);
   });
@@ -132,7 +138,7 @@ describe('validator rule redirects', () => {
     expect(run([{ from: '/x', to: '/\\evil.dev' }])).toHaveLength(1);
   });
   it('compares from case-insensitively against live routes', () => {
-    expect(run([{ from: '/VI/Companies/Discord', to: '/vi' }])).toHaveLength(1);
+    expect(run([{ from: '/VI/Companies/Discord', to: '/vi' }])).toEqual([expect.objectContaining({ message: expect.stringContaining('live route') })]);
   });
   it('rejects to equal to from', () => {
     expect(run([{ from: '/loop', to: '/loop' }]).map((f) => f.message)).toContainEqual(expect.stringContaining('points to itself'));

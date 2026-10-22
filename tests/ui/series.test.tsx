@@ -161,6 +161,7 @@ describe('series page', () => {
       canonical: '/en/series/scaling',
       languages: { vi: '/vi/series/scaling', en: '/en/series/scaling', 'x-default': '/vi/series/scaling' },
     });
+    expect(m.alternates?.languages).toEqual({ vi: '/vi/series/scaling', en: '/en/series/scaling', 'x-default': '/vi/series/scaling' });
     expect(m.openGraph).toMatchObject({ locale: 'en_GB', url: '/en/series/scaling' });
     expect(await generateMetadata({ params: Promise.resolve({ locale: 'en', series: 'nope' }) })).toEqual({});
   });

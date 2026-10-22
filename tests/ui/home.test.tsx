@@ -220,6 +220,7 @@ describe('home (vi)', () => {
       canonical: '/vi',
       languages: { vi: '/vi', en: '/en', 'x-default': '/vi' },
     });
+    expect(m.alternates?.languages).toEqual({ vi: '/vi', en: '/en', 'x-default': '/vi' });
     expect(m.openGraph).toMatchObject({ locale: 'vi_VN', url: '/vi', title: 'Hệ thống lớn' });
     const en = await generateMetadata({ params: Promise.resolve({ locale: 'en' }) });
     expect(en.openGraph).toMatchObject({ locale: 'en_GB' });

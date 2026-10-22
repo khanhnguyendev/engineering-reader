@@ -212,6 +212,7 @@ describe('company page', () => {
       canonical: '/en/companies/discord',
       languages: { vi: '/vi/companies/discord', en: '/en/companies/discord', 'x-default': '/vi/companies/discord' },
     });
+    expect(m.alternates?.languages).toEqual({ vi: '/vi/companies/discord', en: '/en/companies/discord', 'x-default': '/vi/companies/discord' });
     expect(await generateMetadata({ params: Promise.resolve({ locale: 'en', company: 'nope' }) })).toEqual({});
   });
 });

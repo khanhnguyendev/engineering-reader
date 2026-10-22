@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import path from 'node:path';
+import { listPosts } from '@/lib/content/load';
 import { endpointRoutes, pageEntries } from '@/lib/content/routes';
 import type { Vocab } from '@/lib/content/vocab';
 
@@ -44,6 +46,13 @@ describe('pageEntries', () => {
     for (const p of ['/about', '/companies', '/topics', '/tags', '/companies/empty-co', '/tags/unused', '/series/s1']) {
       expect(find(all, p), p).toBeDefined();
     }
+  });
+  it('runs over the real fixture posts with home in both locales', () => {
+    const real = listPosts(path.join(__dirname, 'fixtures', 'posts'));
+    expect(real.length).toBeGreaterThan(0);
+    const entries = pageEntries(real, vocab);
+    expect(find(entries, '')).toMatchObject({ path: '', locales: ['vi', 'en'] });
+    expect(find(entries, `/posts/${real[0].slug}`)).toBeDefined();
   });
   it('nonEmptyOnly drops unused pages and trims locales', () => {
     const ne = pageEntries(posts, vocab, { nonEmptyOnly: true });

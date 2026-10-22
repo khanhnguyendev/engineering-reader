@@ -20,7 +20,7 @@ export type RoutePost = {
 export type PageEntry = {
   /** No locale prefix; `''` is home. */
   path: string;
-  locales: Locale[];
+  locales: readonly Locale[];
   /** ISO date, posts only: `updatedAt ?? publishedAt`. */
   lastModified?: string;
 };

@@ -15,6 +15,7 @@ describe('buildMetadata', () => {
       canonical: '/vi/posts/x',
       languages: { vi: '/vi/posts/x', en: '/en/posts/x', 'x-default': '/vi/posts/x' },
     });
+    expect(m.alternates?.languages).toEqual({ vi: '/vi/posts/x', en: '/en/posts/x', 'x-default': '/vi/posts/x' });
     expect(m.openGraph).toMatchObject({ locale: 'vi_VN', title: 'T', description: 'D', url: '/vi/posts/x', type: 'website' });
   });
   it('handles home path and en locale and type', () => {

@@ -103,6 +103,7 @@ describe('about page', () => {
       canonical: '/vi/about',
       languages: { vi: '/vi/about', en: '/en/about', 'x-default': '/vi/about' },
     });
+    expect(vi_.alternates?.languages).toEqual({ vi: '/vi/about', en: '/en/about', 'x-default': '/vi/about' });
     expect(vi_.openGraph).toMatchObject({ locale: 'vi_VN', url: '/vi/about' });
     const en = await generateMetadata({ params: Promise.resolve({ locale: 'en' }) });
     expect(en.title).toBe('About · Hệ thống lớn');

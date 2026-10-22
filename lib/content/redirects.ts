@@ -13,7 +13,9 @@ export const RedirectsSchema = z.array(
     to: z.string().regex(/^\/(?![\/\\])[^\s\\]*$/, 'internal path only'),
     permanent: z.boolean().optional(),
     statusCode: z.union([z.literal(301), z.literal(302), z.literal(307), z.literal(308)]).optional(),
-  }).transform((r) => (r.statusCode === undefined ? { ...r, permanent: r.permanent ?? true } : r)),
+  })
+    .refine((r) => !(r.permanent !== undefined && r.statusCode !== undefined), 'use permanent or statusCode, not both')
+    .transform((r) => (r.statusCode === undefined ? { ...r, permanent: r.permanent ?? true } : r)),
 );
 export type Redirect = z.infer<typeof RedirectsSchema>[number];
 

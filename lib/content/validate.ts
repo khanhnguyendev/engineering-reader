@@ -276,16 +276,8 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
   return out;
 }
 
-/** Best-effort: route shape only needs these fields, and post.json errors are reported elsewhere. */
-function readRouteMeta(file: string): RoutePost['meta'] {
-  const fallback = { company: '', topic: '', tags: [], series: null, publishedAt: '', updatedAt: null };
-  try {
-    const m = JSON.parse(readFileSync(file, 'utf8')) as Partial<RoutePost['meta']>;
-    return { ...fallback, ...m };
-  } catch {
-    return fallback;
-  }
-}
+/** `staticRoutes` never reads post meta, so every post gets the same empty one. */
+const NO_META: RoutePost['meta'] = { company: '', topic: '', tags: [], series: null, publishedAt: '', updatedAt: null };
 
 function validateRedirects(root: string, vocab: Vocab): Finding[] {
   const file = path.join(path.dirname(root), 'redirects.json');
@@ -306,7 +298,7 @@ function validateRedirects(root: string, vocab: Vocab): Finding[] {
       if (!existsSync(path.join(root, name, 'post.json'))) continue;
       const locales: Partial<Record<Locale, true>> = {};
       for (const l of LOCALES) if (existsSync(path.join(root, name, `${l}.mdx`))) locales[l] = true;
-      posts.push({ slug: name, locales, meta: readRouteMeta(path.join(root, name, 'post.json')) });
+      posts.push({ slug: name, locales, meta: NO_META });
     }
   }
   const routes = staticRoutes(posts, vocab);
