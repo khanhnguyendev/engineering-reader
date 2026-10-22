@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-21T17:04:46.623Z",
+  "generatedAt": "2026-10-22T13:16:26.000Z",
   "title": "Design System: Engineering Reader",
   "extensions": {
     "colorMeta": {
@@ -382,7 +382,7 @@
     "typographyMeta": {
       "display": {
         "displayName": "Display",
-        "purpose": "Post title only, phone size; followed by the 1px accent rule."
+        "purpose": "Post title and every list-page H1 (PageIntro); followed by the 1px accent rule."
       },
       "display-lg": {
         "displayName": "Display (desktop)",
@@ -390,7 +390,7 @@
       },
       "headline": {
         "displayName": "Headline",
-        "purpose": "Section H2s, Lessons and Sources headings on phones."
+        "purpose": "Section H2s, list-page section headings, Lessons and Sources headings on phones."
       },
       "headline-lg": {
         "displayName": "Headline (desktop)",
@@ -402,7 +402,7 @@
       },
       "dek": {
         "displayName": "Dek",
-        "purpose": "One-line summary under the title rule; 19px from 1024px."
+        "purpose": "One-line summary under the title rule, posts and list pages; 19px from 1024px."
       },
       "body": {
         "displayName": "Body",
@@ -414,7 +414,7 @@
       },
       "meta": {
         "displayName": "Meta",
-        "purpose": "Breadcrumbs, byline, TOC links, source details."
+        "purpose": "Breadcrumbs, TOC links, source details, PostCard company and number label, chips."
       },
       "numeral": {
         "displayName": "Numeral",
@@ -427,6 +427,10 @@
       "ref": {
         "displayName": "Ref",
         "purpose": "Inline source references, relative to context size."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Supporting text one step under body: byline, series nav, shelf deks."
       }
     },
     "shadows": [],
@@ -477,6 +481,11 @@
     "callout": {
       "value": "background: color-mix(in srgb, var(--accent) 7%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-left: 3px solid var(--accent); border-radius: 10px",
       "purpose": "The single accent-bordered block per post."
+    },
+    "monogramMix": {
+      "name": "--monogram-mix",
+      "value": "85% dark, 70% light",
+      "purpose": "How much brand colour stays in a monogram letter; the rest mixes toward ink for contrast."
     }
   },
   "components": [
@@ -513,14 +522,6 @@
       "css": ".ds-divider { display: flex; align-items: center; gap: 12px; } .ds-divider-rule { height: 1px; flex: 1; background: var(--hairline-strong, rgba(148,197,180,0.34)); } .ds-divider-label { margin: 0; font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent, #6ee7b7); }"
     },
     {
-      "name": "Tag",
-      "kind": "chip",
-      "refersTo": "tag",
-      "description": "Outlined 6px tag for company, topic and case type.",
-      "html": "<ul class=\"ds-tags\"><li class=\"ds-tag\">Discord</li><li class=\"ds-tag\">Data</li><li class=\"ds-tag\">Migration</li></ul>",
-      "css": ".ds-tags { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; } .ds-tag { border: 1px solid var(--hairline-strong, rgba(148,197,180,0.34)); border-radius: 6px; padding: 3px 8px; font-family: Inter, system-ui, sans-serif; font-size: 12px; line-height: 1.35; color: var(--ink-2, #d4d9db); }"
-    },
-    {
       "name": "Outline Button (Share)",
       "kind": "button",
       "refersTo": "button-outline",
@@ -548,9 +549,41 @@
       "name": "Header Nav",
       "kind": "nav",
       "refersTo": "mono-label",
-      "description": "Brand, mono-label links, language switch; closed by a hairline.",
-      "html": "<header class=\"ds-hdr\"><a class=\"ds-brand\" href=\"#\">Engineering Reader</a><nav class=\"ds-nav\"><a href=\"#\">CÔNG TY</a><a href=\"#\">CHỦ ĐỀ</a><a href=\"#\">GIỚI THIỆU</a></nav><span class=\"ds-lang\"><span class=\"ds-lang-cur\">VI</span><span class=\"ds-lang-sep\">|</span><a href=\"#\">EN</a></span></header>",
-      "css": ".ds-hdr { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--hairline, rgba(148,197,180,0.17)); } .ds-brand { font-family: Inter, system-ui, sans-serif; font-weight: 600; color: var(--ink, #eef0f1); text-decoration: none; } .ds-nav { display: flex; gap: 24px; } .ds-nav a, .ds-lang a { font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted, #9aa5ad); text-decoration: none; } .ds-nav a:hover, .ds-lang a:hover { color: var(--ink, #eef0f1); } .ds-nav a:focus-visible, .ds-lang a:focus-visible { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; } .ds-lang { display: flex; gap: 8px; font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; } .ds-lang-cur { color: var(--ink, #eef0f1); } .ds-lang-sep { color: var(--muted, #9aa5ad); }"
+      "description": "Brand, mono-label links (current section in ink with aria-current), language switch; closed by a hairline.",
+      "html": "<header class=\"ds-hdr\"><a class=\"ds-brand\" href=\"#\">Engineering Reader</a><nav class=\"ds-nav\"><a href=\"#\">CÔNG TY</a><a href=\"#\" aria-current=\"page\" class=\"ds-cur\">CHỦ ĐỀ</a><a href=\"#\">GIỚI THIỆU</a></nav><span class=\"ds-lang\"><span class=\"ds-lang-cur\">VI</span><span class=\"ds-lang-sep\">|</span><a href=\"#\">EN</a></span></header>",
+      "css": ".ds-hdr { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--hairline, rgba(148,197,180,0.17)); } .ds-brand { font-family: Inter, system-ui, sans-serif; font-weight: 600; color: var(--ink, #eef0f1); text-decoration: none; } .ds-nav { display: flex; gap: 24px; } .ds-nav a, .ds-lang a { font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted, #9aa5ad); text-decoration: none; } .ds-nav a:hover, .ds-lang a:hover { color: var(--ink, #eef0f1); } .ds-nav a:focus-visible, .ds-lang a:focus-visible { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; } .ds-lang { display: flex; gap: 8px; font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; } .ds-lang-cur { color: var(--ink, #eef0f1); } .ds-lang-sep { color: var(--muted, #9aa5ad); } .ds-nav a.ds-cur { color: var(--ink, #eef0f1); }"
+    },
+    {
+      "name": "Chips",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "One strong-hairline 6px base, three variants: plain, link with count (hover panel-2), muted non-link for a zero count.",
+      "html": "<ul class=\"ds-chips\"><li class=\"ds-chip\">Data</li><li><a class=\"ds-chip\" href=\"#\">Discord <span>4</span></a></li><li class=\"ds-chip ds-chip-muted\">Security <span>0</span></li></ul>",
+      "css": ".ds-chip { display: inline-flex; align-items: baseline; gap: 8px; border: 1px solid var(--hairline-strong, rgba(148,197,180,0.34)); border-radius: 6px; padding: 3px 8px; font-family: Inter, system-ui, sans-serif; font-size: 12px; line-height: 1.35; color: var(--ink-2, #d4d9db); text-decoration: none; transition: background-color 0.15s, color 0.15s; } a.ds-chip:hover { background: var(--panel-2, rgba(255,255,255,0.04)); color: var(--ink, #eef0f1); } a.ds-chip:focus-visible { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; } .ds-chip-muted { color: var(--muted, #9aa5ad); } .ds-chips { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; flex-wrap: wrap; }"
+    },
+    {
+      "name": "Monogram",
+      "kind": "custom",
+      "refersTo": "monogram",
+      "description": "Company mark: 6px rounded square, hairline border, brand colour on the letter only, mixed toward ink by --monogram-mix.",
+      "html": "<span class=\"ds-mono ds-mono-brand\">D</span> <span class=\"ds-mono\">S</span>",
+      "css": ".ds-mono { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-sizing: border-box; border: 1px solid var(--hairline, rgba(148,197,180,0.17)); border-radius: 6px; background: var(--panel, rgba(255,255,255,0.025)); color: var(--ink, #eef0f1); font-family: Inter, system-ui, sans-serif; font-size: 16px; font-weight: 700; line-height: 1; } .ds-mono-brand { color: color-mix(in oklab, #5865f2 85%, var(--ink, #eef0f1)); }"
+    },
+    {
+      "name": "Post Card",
+      "kind": "card",
+      "refersTo": "post-card",
+      "description": "A case in a list; whole panel is the link. Title, lead number, footer with monogram, company, topic chip and reading time. No eyebrow.",
+      "html": "<a class=\"ds-pc\" href=\"#\"><h3 class=\"ds-pc-t\">How Discord stores trillions of messages</h3><span class=\"ds-pc-n\">12 nodes</span><span class=\"ds-pc-l\">Cassandra cluster after the move</span><span class=\"ds-pc-f\"><span class=\"ds-pc-co\"><span class=\"ds-mono ds-mono-sm\">D</span><span>Discord</span><span class=\"ds-pc-dot\">·</span><span class=\"ds-chip\">Data</span></span><span class=\"ds-pc-m\">8 min</span></span></a>",
+      "css": ".ds-pc { display: flex; flex-direction: column; gap: 12px; max-width: 360px; padding: 16px; background: var(--panel, rgba(255,255,255,0.025)); border: 1px solid var(--hairline, rgba(148,197,180,0.17)); border-radius: 10px; color: var(--ink, #eef0f1); text-decoration: none; font-family: Inter, system-ui, sans-serif; transition: background-color 0.15s, border-color 0.15s; } .ds-pc:hover { background: var(--panel-2, rgba(255,255,255,0.04)); border-color: var(--hairline-strong, rgba(148,197,180,0.34)); } .ds-pc:focus-visible { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; } .ds-pc-t { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.35; letter-spacing: -0.02em; } .ds-pc-n { font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 18px; font-weight: 600; letter-spacing: -0.02em; } .ds-pc-l { font-size: 13px; color: var(--muted, #9aa5ad); line-height: 1.45; } .ds-pc-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; } .ds-pc-co { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2, #d4d9db); } .ds-pc-dot { color: var(--muted, #9aa5ad); } .ds-pc-m { font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 12px; color: var(--muted, #9aa5ad); } .ds-mono { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; box-sizing: border-box; border: 1px solid var(--hairline, rgba(148,197,180,0.17)); border-radius: 6px; font-size: 12px; font-weight: 700; line-height: 1; color: var(--ink, #eef0f1); } .ds-chip { border: 1px solid var(--hairline-strong, rgba(148,197,180,0.34)); border-radius: 6px; padding: 3px 8px; font-size: 12px; line-height: 1.35; color: var(--ink-2, #d4d9db); }"
+    },
+    {
+      "name": "Page Intro",
+      "kind": "custom",
+      "refersTo": "page-intro",
+      "description": "List-page head: H1, one 1px accent rule, ink-2 dek. No eyebrow.",
+      "html": "<header class=\"ds-pi\"><h1>Companies</h1><div class=\"ds-pi-rule\"></div><p>Who the cases come from.</p></header>",
+      "css": ".ds-pi { max-width: 720px; font-family: Inter, system-ui, sans-serif; } .ds-pi h1 { margin: 0 0 12px; font-size: 25px; font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; text-wrap: balance; color: var(--ink, #eef0f1); } .ds-pi-rule { height: 1px; margin-bottom: 16px; background: var(--accent, #6ee7b7); } .ds-pi p { margin: 0; font-size: 16px; line-height: 1.6; color: var(--ink-2, #d4d9db); }"
     }
   ],
   "narrative": {
@@ -567,7 +600,7 @@
     "rules": [
       {
         "name": "The One Accent Rule",
-        "body": "The page has exactly one accent hue per theme. Company colours appear only on logo marks; no secondary or status hues enter the reading surface.",
+        "body": "The page has exactly one accent hue per theme. Company colours appear only on the monogram letter (mixed toward ink); no secondary or status hues enter the reading surface.",
         "section": "colors"
       },
       {
@@ -579,6 +612,11 @@
         "name": "The Accent-Means-Signal Rule",
         "body": "The accent marks what is cited, current, focused or the one action for the reader. It is never a background fill for a panel or a decorative wash.",
         "section": "colors"
+      },
+      {
+        "name": "The Ramp-Is-Closed Rule",
+        "body": "Sizes come from the ramp above: 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 24, 25, 26, 40px. A new surface picks a step; it does not add one.",
+        "section": "typography"
       },
       {
         "name": "The Mono-Is-Measured Rule",
@@ -626,7 +664,11 @@
       "Do keep the accent to signals: the title rule, refs, the active TOC item, the divider label, focus, selection, progress and the one callout.",
       "Do set numbers, dates, reading time, locators, refs and short uppercase labels in JetBrains Mono; set everything else in Inter.",
       "Do separate figures inside a panel with a hairline above and below (12px vertical padding, 16px margin).",
-      "Do use the 10px radius for every container and outlined control unless it is a tag (6px).",
+      "Do use the 10px radius for every container and outlined control unless it is a chip or a company monogram (6px).",
+      "Do build every chip from the one strong-hairline base: plain, link with count, or muted for a zero count that is not a link.",
+      "Do open every list page with PageIntro (H1, one accent rule, ink-2 dek) and put a card's company in its footer.",
+      "Do put a company's brand colour on the monogram letter only, mixed toward ink by `--monogram-mix`.",
+      "Do mark the current header item with `aria-current=\"page\"` and ink.",
       "Do render the top layer, the mono deep-read divider, then the deep layer, in that order."
     ],
     "donts": [
@@ -635,7 +677,10 @@
       "Don't put a panel, bordered code block, diagram box or table box inside another panel.",
       "Don't give any block other than the one callout an accent border.",
       "Don't set headings, sentences or paragraphs in mono.",
-      "Don't place eyebrow or kicker labels above titles; the tag row is the only element between breadcrumb and title."
+      "Don't place eyebrow or kicker labels above titles or card titles; the tag row is the only element between breadcrumb and a post title, and the company row lives in the card footer.",
+      "Don't tint a monogram border or fill with a brand colour, or let a brand colour touch anything but the monogram letter.",
+      "Don't link a chip that has nothing to open; a zero-count chip is the muted, non-link variant.",
+      "Don't add a font size outside the ramp, or a fourth chip look."
     ]
   }
 }
