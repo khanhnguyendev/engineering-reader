@@ -64,7 +64,7 @@ export default async function Page({ params }: { params: Params }) {
         <div className="max-w-[720px]">
           <PageIntro
             title={series[locale]}
-            dek={plural(locale, posts.length, dict.list.postsOne, dict.list.postsOther)}
+            dek={posts.length ? plural(locale, posts.length, dict.list.postsOne, dict.list.postsOther) : undefined}
           />
         </div>
         {posts.length === 0 ? (

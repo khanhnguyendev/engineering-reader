@@ -36,7 +36,7 @@ export default async function Page({ params }: { params: Params }) {
   if (!isLocale(locale)) notFound();
 
   const dict = getDictionary(locale);
-  const { content } = await compilePage(readAbout(locale), locale);
+  const { content } = await compilePage(readAbout(locale), locale, dict.post.permalink);
 
   return (
     <>
@@ -49,6 +49,7 @@ export default async function Page({ params }: { params: Params }) {
         <article className="max-w-[720px]">
           <PageIntro title={dict.about.title} dek={dict.about.dek} />
           <div className={BODY}>{content}</div>
+          <p className="mt-6 text-ink-2">{dict.about.rss}</p>
           <Byline text={dict.post.byline} />
         </article>
       </main>

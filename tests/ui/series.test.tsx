@@ -122,6 +122,7 @@ describe('series page', () => {
     const s = site(POSTS.map((p) => ({ ...p, enDraft: true })));
     const en = await renderSeries(s, 'en');
     expect(en.querySelector('ol')).toBeNull();
+    expect(en.querySelector('main header p')).toBeNull();
     expect(en.querySelector('main p.text-muted')!.textContent).toBe('No posts in this series yet.');
     const vi_ = await renderSeries(s, 'vi');
     expect(vi_.querySelectorAll('ol > li')).toHaveLength(3);

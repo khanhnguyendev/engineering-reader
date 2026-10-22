@@ -45,9 +45,9 @@ export async function compilePostBody(
 /** A static page body (about): GFM and section anatomy only, so `[S1]` stays literal text. */
 export async function compilePage(
   markdown: string,
-  locale: Locale,
+  _locale: Locale,
+  permalinkLabel?: string,
 ): Promise<{ content: ReactElement; headings: Heading[] }> {
-  void locale;
   const headings: Heading[] = [];
   const { content } = await compileMDX({
     source: markdown,
@@ -55,7 +55,7 @@ export async function compilePage(
     options: {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [[rehypeSections, { headings }]],
+        rehypePlugins: [[rehypeSections, { headings, permalinkLabel }]],
       },
     },
   });

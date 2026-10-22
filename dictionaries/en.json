@@ -100,7 +100,8 @@
   },
   "about": {
     "title": "About",
-    "dek": "Who writes this, how the posts are made and why."
+    "dek": "Who writes this, how the posts are made and why.",
+    "rss": "RSS feeds per language are coming."
   },
   "notFound": {
     "title": "Page not found",

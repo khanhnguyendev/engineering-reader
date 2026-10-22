@@ -100,7 +100,8 @@
   },
   "about": {
     "title": "Giới thiệu",
-    "dek": "Ai viết trang này, các bài được làm ra như thế nào và vì sao."
+    "dek": "Ai viết trang này, các bài được làm ra như thế nào và vì sao.",
+    "rss": "RSS cho từng ngôn ngữ sắp có."
   },
   "notFound": {
     "title": "Không tìm thấy trang",
