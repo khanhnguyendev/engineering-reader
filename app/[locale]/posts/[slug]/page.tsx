@@ -58,6 +58,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     type: "article",
     locales: LOCALES.filter((l) => hasLocale(post, l)),
     image: `/og/${locale}/${slug}.png`,
+    markdown: `/${locale}/posts/${slug}.md`,
     publishedTime: post.meta.publishedAt,
     modifiedTime: post.meta.updatedAt ?? undefined,
   });

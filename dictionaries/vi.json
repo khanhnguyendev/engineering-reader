@@ -113,5 +113,9 @@
     "title": "Hệ thống lớn: bài mới",
     "description": "Bài học từ hệ thống lớn, cho team nhỏ",
     "readMore": "Đọc toàn bài"
+  },
+  "llms": {
+    "intro": "Case study về hệ thống lớn, kể lại từ nguồn kỹ thuật gốc, mỗi bài có lớp đọc nhanh và lớp đọc sâu.",
+    "section": "Tiếng Việt"
   }
 }

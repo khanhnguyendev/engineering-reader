@@ -113,5 +113,9 @@
     "title": "Hệ thống lớn: new posts",
     "description": "Lessons from big systems, for small teams",
     "readMore": "Read the full post"
+  },
+  "llms": {
+    "intro": "Case studies of large systems, retold from primary engineering sources, each with a quick top layer and a deep layer.",
+    "section": "English"
   }
 }

@@ -158,6 +158,8 @@ describe('buildFeed edge cases', () => {
     expect(d.querySelector('parsererror')).toBeNull();
     expect(items(d)).toHaveLength(0);
     expect(d.querySelector('lastBuildDate')).toBeNull();
+    expect(d.querySelector('channel > title')!.textContent).toBe('Hệ thống lớn: bài mới');
+    expect(d.querySelector('channel > link')!.textContent).toBe(`${SITE}/vi`);
   });
 
   it('throws on an invalid publishedAt rather than emitting "Invalid Date"', async () => {
@@ -170,7 +172,7 @@ describe('feed route', () => {
     const root = mkdtempSync(path.join(tmpdir(), 'feed-'));
     try {
       mkdirSync(path.join(root, 'posts'));
-      cpSync('tests/fixtures/posts/good-post', path.join(root, 'posts', 'good-post'), { recursive: true });
+      cpSync(path.join(__dirname, 'fixtures', 'posts', 'good-post'), path.join(root, 'posts', 'good-post'), { recursive: true });
       writeFileSync(path.join(root, 'tags.json'), '[]');
       vi.resetModules();
       vi.stubEnv('CONTENT_ROOT', path.join(root, 'posts'));
@@ -186,7 +188,7 @@ describe('feed route', () => {
       const feed = parse(await res.text());
       expect(feed.querySelector('parsererror')).toBeNull();
       expect(items(feed)).toHaveLength(1);
-      expect(items(feed)[0].querySelector('link')!.textContent!.startsWith(`${SITE}/vi/posts/`)).toBe(true);
+      expect(items(feed)[0].querySelector('link')!.textContent).toBe(`${SITE}/vi/posts/good-post`);
       const bad = await route.GET(new Request(`${SITE}/fr/feed.xml`), { params: Promise.resolve({ locale: 'fr' }) });
       expect(bad.status).toBe(404);
     } finally {

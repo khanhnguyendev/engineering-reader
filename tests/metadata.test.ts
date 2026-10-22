@@ -60,4 +60,12 @@ describe('buildMetadata', () => {
     const en = buildMetadata({ locale: 'en', path: '/about', title: 'T', description: 'D', locales: ['en'] });
     expect(en.alternates?.languages).toEqual({ en: '/en/about' });
   });
+
+  it('adds a text/markdown alternate only when markdown is given', () => {
+    const m = buildMetadata({ locale: 'vi', path: '/posts/x', title: 'T', description: 'D', markdown: '/vi/posts/x.md' });
+    expect(m.alternates?.types?.['text/markdown']).toBe('/vi/posts/x.md');
+    expect(m.alternates?.types?.['application/rss+xml']).toBeDefined();
+    const n = buildMetadata({ locale: 'vi', path: '/posts/x', title: 'T', description: 'D' });
+    expect(n.alternates?.types?.['text/markdown']).toBeUndefined();
+  });
 });

@@ -4,7 +4,11 @@ import type { Locale } from './i18n';
 
 const HEADLINE_MAX = 110;
 
-const clip = (s: string) => (s.length > HEADLINE_MAX ? `${s.slice(0, HEADLINE_MAX - 1).trimEnd()}…` : s);
+// Cut on code points so a surrogate pair is never split.
+const clip = (s: string) => {
+  const cps = Array.from(s);
+  return cps.length > HEADLINE_MAX ? `${cps.slice(0, HEADLINE_MAX - 1).join('').trimEnd()}…` : s;
+};
 
 /** schema.org Article for one post in one locale; every URL is absolute from `siteUrl`. */
 export function articleJsonLd(

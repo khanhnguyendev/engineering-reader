@@ -100,6 +100,20 @@ describe('articleJsonLd', () => {
   });
 });
 
+describe('headline trim by code points', () => {
+  it('keeps at most 110 code points for a Vietnamese title', () => {
+    const h = (articleJsonLd(post({ title: 'ế'.repeat(120) }), 'vi', vocab, dict, SITE) as LD).headline as string;
+    expect(Array.from(h).length).toBeLessThanOrEqual(110);
+    expect(h.endsWith('…')).toBe(true);
+  });
+  it('never leaves a lone surrogate when an emoji sits at the cut', () => {
+    const title = `${'a'.repeat(108)}😀${'b'.repeat(20)}`;
+    const h = (articleJsonLd(post({ title }), 'vi', vocab, dict, SITE) as LD).headline as string;
+    expect(h).toBe(`${'a'.repeat(108)}😀…`);
+    expect(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(h)).toBe(false);
+  });
+});
+
 describe('JsonLd', () => {
   it('cannot be terminated early by </script> in the data', () => {
     const data = articleJsonLd(post({ summary: '</script><script>alert(1)</script>' }), 'vi', vocab, dict, SITE);
@@ -110,5 +124,12 @@ describe('JsonLd', () => {
     expect(scripts[0].getAttribute('type')).toBe('application/ld+json');
     expect(JSON.parse(scripts[0].textContent!)).toEqual(data);
     expect(html).not.toContain('</script><script>');
+  });
+
+  it('does not emit an HTML comment opener from the data', () => {
+    const data = articleJsonLd(post({ summary: '<!-- <script>' }), 'vi', vocab, dict, SITE);
+    const html = renderToStaticMarkup(JsonLd({ data }));
+    expect(html).not.toContain('<!--');
+    expect(JSON.parse(new DOMParser().parseFromString(html, 'text/html').querySelector('script')!.textContent!)).toEqual(data);
   });
 });

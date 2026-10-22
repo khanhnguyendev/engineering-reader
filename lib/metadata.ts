@@ -13,6 +13,7 @@ export function buildMetadata({
   image,
   publishedTime,
   modifiedTime,
+  markdown,
 }: {
   locale: Locale;
   path: string;
@@ -24,6 +25,8 @@ export function buildMetadata({
   image?: string;
   publishedTime?: string;
   modifiedTime?: string;
+  /** Path of the post's Markdown twin, advertised as an alternate. */
+  markdown?: string;
 }): Metadata {
   if (path === '/') path = '';
   const languages: Record<string, string> = {};
@@ -40,6 +43,7 @@ export function buildMetadata({
       languages,
       types: {
         'application/rss+xml': [{ url: `/${locale}/feed.xml`, title: getDictionary(locale).feed.title }],
+        ...(markdown ? { 'text/markdown': markdown } : {}),
       },
     },
     openGraph: {
