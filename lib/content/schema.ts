@@ -99,6 +99,9 @@ export const SeriesSchema = z.record(
   z.object({ slugs: z.array(z.string()), ...LabelShape }),
 );
 export const SourceHostsSchema = z.array(z.string().min(1));
+export const FeaturedSchema = z.array(Slug);
+
+export { RedirectsSchema, type Redirect } from './redirects';
 
 export type PostJson = z.infer<typeof PostJsonSchema>;
 export type LocaleFrontmatter = z.infer<typeof LocaleFrontmatterSchema>;

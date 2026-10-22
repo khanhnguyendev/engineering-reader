@@ -1,9 +1,11 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { LOCALES } from '@/lib/i18n';
+import { ZodError } from 'zod';
+import { LOCALES, type Locale } from '@/lib/i18n';
 import { parsePost, readRawPost, type RawPost, type ZodIssueWithFile } from '@/lib/content/load';
 import { hostOf } from '@/lib/content/normalize-url';
 import type { Vocab } from '@/lib/content/vocab';
+import { readRedirects, staticRoutes } from './redirects';
 
 export type Finding = {
   level: 'error' | 'warn';
@@ -144,6 +146,8 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
   }
   if (meta.series !== null && !Object.hasOwn(vocab.series, meta.series)) {
     add('error', 'enum', `series "${meta.series}" is not in series.json`, 'post.json');
+  } else if (meta.series !== null && !vocab.series[meta.series].slugs.includes(meta.slug)) {
+    add('error', 'enum', `slug "${meta.slug}" is not listed in series "${meta.series}" in series.json`, 'post.json');
   }
 
   // labels
@@ -271,6 +275,40 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
   return out;
 }
 
+function validateRedirects(root: string, vocab: Vocab): Finding[] {
+  const file = path.join(path.dirname(root), 'redirects.json');
+  if (!existsSync(file)) return [];
+  const err = (message: string): Finding => ({ level: 'error', rule: 'redirects', slug: 'redirects', file: 'redirects.json', message });
+  let list;
+  try {
+    list = readRedirects(file);
+  } catch (e) {
+    if (e instanceof ZodError) {
+      return e.issues.map((i) => err(`${i.path.join('.')}: ${i.message}`));
+    }
+    return [err(e instanceof Error ? e.message : String(e))];
+  }
+  const posts: { slug: string; locales: Partial<Record<Locale, true>> }[] = [];
+  if (existsSync(root)) {
+    for (const name of readdirSync(root)) {
+      if (!existsSync(path.join(root, name, 'post.json'))) continue;
+      const locales: Partial<Record<Locale, true>> = {};
+      for (const l of LOCALES) if (existsSync(path.join(root, name, `${l}.mdx`))) locales[l] = true;
+      posts.push({ slug: name, locales });
+    }
+  }
+  const routes = staticRoutes(posts, vocab);
+  const live = new Set([...routes].map((r) => r.toLowerCase()));
+  const out: Finding[] = [];
+  for (const r of list) {
+    if (live.has(r.from.toLowerCase())) out.push(err(`redirect from "${r.from}" is a live route`));
+    if (r.to === r.from) out.push(err(`redirect from "${r.from}" points to itself`));
+    const target = r.to.split(/[?#]/)[0];
+    if (!routes.has(target)) out.push(err(`redirect to "${r.to}" is not a live route`));
+  }
+  return out;
+}
+
 const LEVEL_ORDER = { error: 0, warn: 1 } as const;
 
 export function validateAll(
@@ -293,6 +331,27 @@ export function validateAll(
       findings.push(...validatePost(readRawPost(dir), vocab, opts));
     }
   }
+  const hasPost = (slug: string) => existsSync(path.join(root, slug, 'post.json'));
+  // featured.json drives the home "start here" row; post.json.featured is ignored.
+  const featuredSeen = new Set<string>();
+  for (const slug of vocab.featured) {
+    if (featuredSeen.has(slug)) {
+      findings.push({ level: 'error', rule: 'featured', slug, file: 'featured.json', message: `featured slug ${slug} is listed more than once` });
+      continue;
+    }
+    featuredSeen.add(slug);
+    if (!hasPost(slug)) {
+      findings.push({ level: 'error', rule: 'featured', slug, file: 'featured.json', message: `featured slug ${slug} has no post` });
+    }
+  }
+  for (const [key, s] of Object.entries(vocab.series)) {
+    for (const slug of s.slugs) {
+      if (!hasPost(slug)) {
+        findings.push({ level: 'error', rule: 'enum', slug, file: 'series.json', message: `series "${key}" lists slug "${slug}", which has no post` });
+      }
+    }
+  }
+  findings.push(...validateRedirects(root, vocab));
   findings.sort(
     (a, b) => a.slug.localeCompare(b.slug) || LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level],
   );

@@ -19,3 +19,14 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-21 M1/T14 post page to the direction contract (+ Task 12 carry-overs) — e468223
 - 2026-10-21 M1/T15 home plain list, analytics — 6be1967
 - 2026-10-22 M1/T16 finish review ship (2 fix rounds), DESIGN.md — e9111c9
+- 2026-10-22 M0+M1 merged to main (PR #1 squash); production verification pending
+- 2026-10-22 M1 done-when verified: three posts 200 on https://engineering-reader.vercel.app; finish review ship
+- 2026-10-22 M2/T1 helpers, memoized loaders, metadata builder — 2604fd1
+- 2026-10-22 M2/T2 loader follow-ups, list UI components, dictionary keys — f6f5a5f
+- 2026-10-22 M2/T3–T5 home per IA, companies, topics, tags — 58d0b75
+- 2026-10-22 M2/T6 series pages, prev/next, related (+ T3–T5 carried minors) (series route verified by the fixture test only; no real series in content yet) — f72bfe7
+- 2026-10-22 M2/T7 about page from MDX (+ T6 carried minors) — ccc9e9b
+- 2026-10-22 M2/T8 redirects module, localized 404, header nav state — 4e612ec
+- 2026-10-22 M2/T9 done-when: 18 IA routes 200 in vi+en under pnpm start, / → 308 /vi, /vi/nope and /en/nope → 404 localized with header
+- 2026-10-22 M2/T9 finish review (home, company, topic, about, 404): fix → 2 rounds → ship — 58253d7, 868a199, 63cb697
+- 2026-10-22 M2/T9 DESIGN.md + design.json record M2 components — eb750a5

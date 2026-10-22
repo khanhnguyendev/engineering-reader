@@ -125,7 +125,23 @@ export function parsePost(raw: RawPost): { post?: PostRecord; issues: ZodIssueWi
   return { post: { slug: raw.slug, dir: raw.dir, meta: metaResult.data, locales }, issues };
 }
 
-export function listPosts(root: string = CONTENT_ROOT): PostRecord[] {
+const listPostsCache = new Map<string, readonly PostRecord[]>();
+
+export function _resetListPostsCache(): void {
+  listPostsCache.clear();
+}
+
+/** Memoized per root in production; `next dev` re-reads so content edits show up. */
+export function listPosts(root: string = CONTENT_ROOT): readonly PostRecord[] {
+  const memo = process.env.NODE_ENV === 'production';
+  const cached = memo ? listPostsCache.get(root) : undefined;
+  if (cached) return cached;
+  const posts = Object.freeze(loadPosts(root));
+  if (memo) listPostsCache.set(root, posts);
+  return posts;
+}
+
+function loadPosts(root: string): PostRecord[] {
   if (!existsSync(root)) return [];
   const posts: PostRecord[] = [];
   const lines: string[] = [];

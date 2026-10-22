@@ -59,6 +59,16 @@ describe('validatePost', () => {
     expect(rules(run(d))).toContain('enum');
   });
 
+  it('enum: post slug missing from its series slugs', () => {
+    const d = fresh();
+    editJson(d, (j) => (j.series = 's'));
+    const v = { ...vocab, series: { s: { slugs: ['other'], vi: 'S', en: 'S' } } };
+    const fs = validatePost(readRawPost(d), v, { today: TODAY });
+    expect(errs(fs).filter((f) => f.rule === 'enum' && /not listed in series/.test(f.message))).toHaveLength(1);
+    const ok = { ...vocab, series: { s: { slugs: ['good-post'], vi: 'S', en: 'S' } } };
+    expect(errs(validatePost(readRawPost(d), ok, { today: TODAY }))).toEqual([]);
+  });
+
   it('locator: talk without locator', () => {
     const d = fresh();
     editJson(d, (j) => {
@@ -285,5 +295,48 @@ describe('validateAll', () => {
   });
   it('empty or missing root is ok', () => {
     expect(validateAll(path.join(tmp, 'nope'), vocab, { today: TODAY }).ok).toBe(true);
+  });
+
+  it('featured: a featured slug with no post folder is an error', () => {
+    const root = path.join(tmp, 'featured');
+    mkdirSync(root);
+    cpSync(GOOD, path.join(root, 'good-post'), { recursive: true });
+    const ok = validateAll(root, { ...vocab, featured: ['good-post'] }, { today: TODAY });
+    expect(ok.findings.filter((f) => f.rule === 'featured')).toEqual([]);
+    const bad = validateAll(root, { ...vocab, featured: ['good-post', 'ghost'] }, { today: TODAY });
+    expect(bad.ok).toBe(false);
+    const fs = bad.findings.filter((f) => f.rule === 'featured');
+    expect(fs).toHaveLength(1);
+    expect(fs[0]).toMatchObject({ level: 'error', slug: 'ghost', message: 'featured slug ghost has no post' });
+  });
+
+  it('featured: a slug listed twice in featured.json is an error', () => {
+    const root = path.join(tmp, 'featured-dup');
+    mkdirSync(root);
+    cpSync(GOOD, path.join(root, 'good-post'), { recursive: true });
+    const r = validateAll(root, { ...vocab, featured: ['good-post', 'good-post'] }, { today: TODAY });
+    expect(r.ok).toBe(false);
+    const fs = r.findings.filter((f) => f.rule === 'featured');
+    expect(fs).toHaveLength(1);
+    expect(fs[0]).toMatchObject({
+      level: 'error',
+      slug: 'good-post',
+      file: 'featured.json',
+      message: 'featured slug good-post is listed more than once',
+    });
+  });
+
+  it('enum: every slug listed in series.json must exist as a post folder', () => {
+    const root = path.join(tmp, 'series');
+    mkdirSync(root);
+    cpSync(GOOD, path.join(root, 'good-post'), { recursive: true });
+    const series = { s: { slugs: ['good-post', 'ghost'], vi: 'S', en: 'S' } };
+    const r = validateAll(root, { ...vocab, series }, { today: TODAY });
+    expect(r.ok).toBe(false);
+    const fs = r.findings.filter((f) => f.rule === 'enum' && f.slug === 'ghost');
+    expect(fs).toHaveLength(1);
+    expect(fs[0].message).toMatch(/series "s".*ghost/);
+    const ok = validateAll(root, { ...vocab, series: { s: { slugs: ['good-post'], vi: 'S', en: 'S' } } }, { today: TODAY });
+    expect(ok.findings.filter((f) => f.rule === 'enum')).toEqual([]);
   });
 });

@@ -1,19 +1,7 @@
-import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeScript } from "@/components/theme-script";
 import { Analytics } from "@vercel/analytics/next";
+import { fontVariables } from "../fonts";
 import "../globals.css";
-
-const inter = Inter({
-  subsets: ["latin", "vietnamese"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin", "latin-ext", "vietnamese"],
-  variable: "--font-jetbrains",
-  display: "swap",
-});
 
 export const dynamicParams = false;
 
@@ -32,7 +20,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${jetbrains.variable}`}
+      className={fontVariables}
       suppressHydrationWarning
     >
       <head>

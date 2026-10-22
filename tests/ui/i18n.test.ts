@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fmt, otherLocale, switchHref } from "@/lib/i18n";
+import { fmt, otherLocale, plural, switchHref } from "@/lib/i18n";
 import { getDictionary } from "@/lib/dictionaries";
 
 // "server-only" is resolved by Next's bundler; under vitest it is an empty module.
@@ -18,6 +18,56 @@ describe("dictionaries", () => {
     const en = keyPaths(getDictionary("en")).sort();
     expect(vi_.length).toBeGreaterThan(20);
     expect(en).toEqual(vi_);
+  });
+
+  it("carry the M2 wayfinding keys in both locales", () => {
+    const required = [
+      "home.intro", "home.startHere", "home.latest", "home.byCompany", "home.byTopic", "home.all",
+      "companies.title", "companies.dek",
+      "companies.empty", "companies.blog",
+      "topics.title", "topics.dek", "topics.empty",
+      "topics.shelf.distributed-systems", "topics.shelf.data", "topics.shelf.realtime",
+      "topics.shelf.infra", "topics.shelf.reliability",
+      "tags.title", "tags.dek", "tags.empty", "list.posts", "list.postsOne", "list.postsOther",
+      "series.title", "series.part", "series.prev", "series.next", "series.index",
+      "related.title", "about.title", "about.dek",
+      "notFound.title", "notFound.body", "notFound.home",
+    ];
+    for (const l of ["vi", "en"] as const) {
+      const keys = new Set(keyPaths(getDictionary(l)));
+      for (const k of required) expect(keys, `${l}: ${k}`).toContain(k);
+    }
+    for (const l of ["vi", "en"] as const) {
+      expect(Object.keys(getDictionary(l).companies)).not.toContain("postsOne");
+      expect(Object.keys(getDictionary(l).companies)).not.toContain("postsOther");
+    }
+    expect(getDictionary("en").series.part).toBe("Part {i} of {n}");
+    expect(getDictionary("vi").series.part).toBe("Phần {i}/{n}");
+    expect(getDictionary("en").home.all).toBe("All →");
+    expect(getDictionary("vi").home.all).toBe("Tất cả →");
+  });
+});
+
+describe("plural", () => {
+  it("picks one/other by Intl.PluralRules in en", () => {
+    const d = getDictionary("en").list;
+    expect(plural("en", 1, d.postsOne, d.postsOther)).toBe("1 post");
+    expect(plural("en", 3, d.postsOne, d.postsOther)).toBe("3 posts");
+  });
+  it("probes the selected form: en 1 is one, en 0 and 2 are other", () => {
+    expect(plural("en", 1, "ONE", "OTHER")).toBe("ONE");
+    expect(plural("en", 0, "ONE", "OTHER")).toBe("OTHER");
+    expect(plural("en", 2, "ONE", "OTHER")).toBe("OTHER");
+  });
+  it("probes the selected form: vi is always other", () => {
+    expect(plural("vi", 1, "ONE", "OTHER")).toBe("OTHER");
+    expect(plural("vi", 0, "ONE", "OTHER")).toBe("OTHER");
+    expect(plural("vi", 2, "ONE", "OTHER")).toBe("OTHER");
+  });
+  it("uses the other form for every n in vi", () => {
+    const d = getDictionary("vi").list;
+    expect(plural("vi", 1, d.postsOne, d.postsOther)).toBe("1 bài");
+    expect(plural("vi", 3, d.postsOne, d.postsOther)).toBe("3 bài");
   });
 });
 

@@ -87,6 +87,10 @@ describe('post page (vi)', () => {
     expect(html).toContain('>Bài học<');
   });
 
+  it('renders no Related heading when the single fixture has nothing related', () => {
+    expect(html).not.toContain('Bài liên quan');
+  });
+
   it('marks the small-team block as the callout', () => {
     expect(html).toContain('class="callout');
   });

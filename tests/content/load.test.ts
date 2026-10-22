@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -9,7 +9,9 @@ import {
   listPostsBy,
   getPost,
   hasLocale,
+  _resetListPostsCache,
 } from '@/lib/content/load';
+import { loadVocab, _resetVocabCache } from '@/lib/content/vocab';
 
 const FIXTURES = path.resolve(import.meta.dirname, '../fixtures/posts');
 const GOOD = path.join(FIXTURES, 'good-post');
@@ -145,5 +147,87 @@ describe('listPosts / listPostsBy / getPost', () => {
     cpSync(GOOD, path.join(bad, 'bad-post'), { recursive: true });
     writeFileSync(path.join(bad, 'bad-post', 'post.json'), '{ nope');
     expect(() => listPosts(bad)).toThrow(/bad-post\/post\.json/);
+  });
+});
+
+describe('memoization', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    _resetListPostsCache();
+    _resetVocabCache();
+  });
+
+  it('listPosts is memoized per root until reset, and frozen', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const r = path.join(tmp, 'memo');
+    cpSync(GOOD, path.join(r, 'good-post'), { recursive: true });
+    _resetListPostsCache();
+    const first = listPosts(r);
+    expect(listPosts(r)).toBe(first);
+    expect(Object.isFrozen(first)).toBe(true);
+    const dir = path.join(r, 'second-post');
+    cpSync(GOOD, dir, { recursive: true });
+    const f = path.join(dir, 'post.json');
+    writeFileSync(f, JSON.stringify({ ...JSON.parse(readFileSync(f, 'utf8')), slug: 'second-post' }));
+    expect(listPosts(r)).toHaveLength(1);
+    _resetListPostsCache();
+    expect(listPosts(r)).toHaveLength(2);
+  });
+
+  it('loadVocab is memoized per root until reset', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const r = path.join(tmp, 'memo-vocab');
+    cpSync(path.resolve(import.meta.dirname, '../../content'), r, {
+      recursive: true,
+      filter: (src) => !src.includes(`${path.sep}posts`),
+    });
+    _resetVocabCache();
+    const first = loadVocab(r);
+    expect(loadVocab(r)).toBe(first);
+    writeFileSync(path.join(r, 'series.json'), JSON.stringify({ s: { slugs: ['a'], vi: 'x', en: 'y' } }));
+    expect(loadVocab(r)).toBe(first);
+    _resetVocabCache();
+    expect(Object.keys(loadVocab(r).series)).toEqual(['s']);
+  });
+
+  it('listPosts bypasses the cache outside production', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    const r = path.join(tmp, 'dev-bypass');
+    cpSync(GOOD, path.join(r, 'good-post'), { recursive: true });
+    _resetListPostsCache();
+    const first = listPosts(r);
+    expect(first).toHaveLength(1);
+    const dir = path.join(r, 'second-post');
+    cpSync(GOOD, dir, { recursive: true });
+    const f = path.join(dir, 'post.json');
+    writeFileSync(f, JSON.stringify({ ...JSON.parse(readFileSync(f, 'utf8')), slug: 'second-post' }));
+    expect(listPosts(r)).toHaveLength(2);
+  });
+
+  it('loadVocab bypasses the cache outside production', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    const r = path.join(tmp, 'dev-bypass-vocab');
+    cpSync(path.resolve(import.meta.dirname, '../../content'), r, {
+      recursive: true,
+      filter: (src) => !src.includes(`${path.sep}posts`),
+    });
+    _resetVocabCache();
+    const first = loadVocab(r);
+    writeFileSync(path.join(r, 'series.json'), JSON.stringify({ s: { slugs: ['a'], vi: 'x', en: 'y' } }));
+    const second = loadVocab(r);
+    expect(second).not.toBe(first);
+    expect(Object.keys(second.series)).toEqual(['s']);
+  });
+
+  it('loadVocab reads featured.json', () => {
+    const r = path.join(tmp, 'featured-vocab');
+    cpSync(path.resolve(import.meta.dirname, '../../content'), r, {
+      recursive: true,
+      filter: (src) => !src.includes(`${path.sep}posts`),
+    });
+    writeFileSync(path.join(r, 'featured.json'), JSON.stringify(['good-post']));
+    expect(loadVocab(r).featured).toEqual(['good-post']);
+    writeFileSync(path.join(r, 'featured.json'), JSON.stringify(['Not A Slug']));
+    expect(() => loadVocab(r)).toThrow();
   });
 });

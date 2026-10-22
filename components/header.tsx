@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NavLink } from "@/components/nav-link";
 import { LangSwitch } from "@/components/lang-switch";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getDictionary } from "@/lib/dictionaries";
@@ -13,9 +14,9 @@ export function Header({
 }) {
   const dict = getDictionary(locale);
   const nav = [
-    { href: `/${locale}/companies`, label: dict.nav.companies },
-    { href: `/${locale}/topics`, label: dict.nav.topics },
-    { href: `/${locale}/about`, label: dict.nav.about },
+    { section: "companies", label: dict.nav.companies },
+    { section: "topics", label: dict.nav.topics },
+    { section: "about", label: dict.nav.about },
   ];
   return (
     <header className="border-b border-hairline">
@@ -31,9 +32,9 @@ export function Header({
         </Link>
         <nav aria-label={dict.nav.label} className="order-last flex w-full items-center gap-5 sm:order-none sm:w-auto sm:gap-6">
           {nav.map((n) => (
-            <Link key={n.href} href={n.href} className="mono-label text-muted hover:text-ink">
+            <NavLink key={n.section} href={`/${locale}/${n.section}`} locale={locale} section={n.section}>
               {n.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
         <div className="flex shrink-0 items-center gap-3 sm:gap-4">
