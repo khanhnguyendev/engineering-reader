@@ -31,3 +31,11 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-22 M2/T9 finish review (home, company, topic, about, 404): fix → 2 rounds → ship — 58253d7, 868a199, 63cb697
 - 2026-10-22 M2/T9 DESIGN.md + design.json record M2 components — eb750a5
 - 2026-10-22 M2 merged (PR #2 squash ee34509); production verified: 18 IA routes 200 in vi+en, / → 308 /vi, 404s localized — https://engineering-reader.vercel.app
+- 2026-10-22 M3/T1 root-404 nav hydrates without aria-current mismatch (pathless Header) — 62f9a17
+- 2026-10-22 M3/T2 route registry, buildMetadata (twitter, OG image, article times, rss alternate), post page on buildMetadata, redirects statusCode — 32850e6
+- 2026-10-22 M3/T3 OG cards per locale (next/og, Inter + JetBrains Mono TTFs, 3-line title clamp) — 79ec841
+- 2026-10-22 M3/T4 RSS per locale, /feed.xml 301, About feed link — 4a1b9dc
+- 2026-10-22 M3/T5 JSON-LD Article with citations — 4b05737
+- 2026-10-22 M3/T6 .md route, llms.txt, markdown alternate; build-tracing fix (read-redirects.ts) — b742f3c
+- 2026-10-22 M3/T7 sitemap with hreflang alternates, robots — 9d599c7
+- 2026-10-22 M3 final review fixes: listing-page hreflang matches sitemap, draft redirect targets, language-neutral key-number values — 5a4c90a
