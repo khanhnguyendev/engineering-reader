@@ -93,6 +93,8 @@ describe('tags index', () => {
     );
     expect(chips[2].textContent).toContain('Cassandra');
     expect(chips[2].textContent).toContain('2');
+    expect(chips[2].querySelector('span[aria-hidden="true"]')!.textContent).toBe('2');
+    expect(chips[2].querySelector('.sr-only')!.textContent).toBe('2 bài');
     expect(chips[0].textContent).toContain('0');
     for (const c of ['border', 'border-hairline-strong', 'rounded-md']) {
       expect(chips[0].className.split(' ')).toContain(c);

@@ -67,23 +67,27 @@ export default async function Page({ params }: { params: Params }) {
             dek={plural(locale, posts.length, dict.list.postsOne, dict.list.postsOther)}
           />
         </div>
-        <ol className="flex max-w-[720px] flex-col gap-3">
-          {posts.map((post, i) => (
-            <li key={post.slug}>
-              <Link
-                href={`/${locale}/posts/${post.slug}`}
-                className="panel flex flex-col gap-1 p-4 transition-colors duration-150 hover:border-hairline-strong hover:bg-panel-2 lg:p-6"
-              >
-                <span className="mono-label text-muted">
-                  {fmt(dict.series.part, { i: i + 1, n: posts.length })}
-                </span>
-                <span className="text-[17px] font-bold leading-[1.35] text-ink">
-                  {post.locales[locale]?.frontmatter.title}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ol>
+        {posts.length === 0 ? (
+          <p className="text-muted">{dict.series.empty}</p>
+        ) : (
+          <ol className="flex max-w-[720px] flex-col gap-3">
+            {posts.map((post, i) => (
+              <li key={post.slug}>
+                <Link
+                  href={`/${locale}/posts/${post.slug}`}
+                  className="panel flex flex-col gap-1 p-4 transition-colors duration-150 hover:border-hairline-strong hover:bg-panel-2 lg:p-6"
+                >
+                  <span className="text-[17px] font-bold leading-[1.35] text-ink">
+                    {post.locales[locale]?.frontmatter.title}
+                  </span>
+                  <span className="mono-label text-muted">
+                    {fmt(dict.series.part, { i: i + 1, n: posts.length })}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        )}
       </main>
     </>
   );

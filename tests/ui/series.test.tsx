@@ -81,6 +81,11 @@ describe('series page', () => {
       '/vi/posts/s2',
       '/vi/posts/s3',
     ]);
+    for (const li of items) {
+      const title = li.querySelector('a > span:first-child')!;
+      expect(title.className).toContain('font-bold');
+      expect(title.nextElementSibling!.classList.contains('mono-label')).toBe(true);
+    }
     expect(items.map((li) => li.querySelector('.mono-label')!.textContent)).toEqual([
       'Phần 1/3',
       'Phần 2/3',
@@ -113,6 +118,21 @@ describe('series page', () => {
     ]);
   });
 
+  it('shows the localized empty state, not "0 posts" over an empty list, when no post exists in the locale', async () => {
+    const s = site(POSTS.map((p) => ({ ...p, enDraft: true })));
+    const en = await renderSeries(s, 'en');
+    expect(en.querySelector('ol')).toBeNull();
+    expect(en.querySelector('main p.text-muted')!.textContent).toBe('No posts in this series yet.');
+    const vi_ = await renderSeries(s, 'vi');
+    expect(vi_.querySelectorAll('ol > li')).toHaveLength(3);
+    expect(vi_.textContent).not.toContain('Chưa có bài nào');
+    expect((await renderSeries(s, 'vi', 'solo')).querySelector('main p.text-muted')!.textContent).toBe(
+      'Chưa có bài nào trong loạt này.',
+    );
+  });
+
+  // Deliberate tripwire on the live content: when the first real series ships, change `[]` to its
+  // { locale, series } pairs (and ensure its posts exist in content/posts).
   it('has no static params when series.json is empty (the live content today)', async () => {
     vi.resetModules();
     vi.stubEnv('VOCAB_ROOT', 'content');

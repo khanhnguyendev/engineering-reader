@@ -4,7 +4,8 @@ import { Header } from "@/components/header";
 import { PageIntro } from "@/components/page-intro";
 import { PostList } from "@/components/post-list";
 import { SectionHeading } from "@/components/section-heading";
-import { hasLocale, listPosts } from "@/lib/content/load";
+import { companiesWithCounts } from "@/lib/content/index";
+import { listPosts } from "@/lib/content/load";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
 import { isLocale, LOCALES, plural } from "@/lib/i18n";
@@ -23,10 +24,11 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { locale, company: slug } = await params;
   if (!isLocale(locale)) return {};
-  const company = loadVocab().companies.find((c) => c.slug === slug);
-  if (!company) return {};
+  const vocab = loadVocab();
+  const entry = companiesWithCounts(listPosts(), vocab, locale).find((e) => e.company.slug === slug);
+  if (!entry) return {};
+  const { company, count } = entry;
   const dict = getDictionary(locale);
-  const count = listPosts().filter((p) => p.meta.company === company.slug && hasLocale(p, locale)).length;
   return buildMetadata({
     locale,
     path: `/companies/${company.slug}`,
@@ -39,12 +41,13 @@ export default async function Page({ params }: { params: Params }) {
   const { locale, company: slug } = await params;
   if (!isLocale(locale)) notFound();
   const vocab = loadVocab();
-  const company = vocab.companies.find((c) => c.slug === slug);
-  if (!company) notFound();
+  const allPosts = listPosts();
+  const entry = companiesWithCounts(allPosts, vocab, locale).find((e) => e.company.slug === slug);
+  if (!entry) notFound();
+  const { company, count } = entry;
 
   const dict = getDictionary(locale);
-  const posts = listPosts().filter((p) => p.meta.company === company.slug);
-  const count = posts.filter((p) => hasLocale(p, locale)).length;
+  const posts = allPosts.filter((p) => p.meta.company === company.slug);
 
   return (
     <>

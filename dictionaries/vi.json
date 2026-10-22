@@ -92,7 +92,8 @@
     "part": "Phần {i}/{n}",
     "prev": "Bài trước",
     "next": "Bài sau",
-    "index": "Xem cả loạt bài"
+    "index": "Xem cả loạt bài",
+    "empty": "Chưa có bài nào trong loạt này."
   },
   "related": {
     "title": "Bài liên quan"

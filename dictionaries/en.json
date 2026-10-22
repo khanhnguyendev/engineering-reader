@@ -92,7 +92,8 @@
     "part": "Part {i} of {n}",
     "prev": "Previous",
     "next": "Next",
-    "index": "View the series"
+    "index": "View the series",
+    "empty": "No posts in this series yet."
   },
   "related": {
     "title": "Related cases"

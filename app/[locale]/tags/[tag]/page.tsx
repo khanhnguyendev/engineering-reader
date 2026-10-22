@@ -4,7 +4,8 @@ import { Header } from "@/components/header";
 import { PageIntro } from "@/components/page-intro";
 import { PostList } from "@/components/post-list";
 import { SectionHeading } from "@/components/section-heading";
-import { hasLocale, listPosts } from "@/lib/content/load";
+import { tagsWithCounts } from "@/lib/content/index";
+import { listPosts } from "@/lib/content/load";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
 import { isLocale, LOCALES, plural } from "@/lib/i18n";
@@ -21,10 +22,10 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { locale, tag: slug } = await params;
   if (!isLocale(locale)) return {};
-  const tag = loadVocab().tags.find((t) => t.slug === slug);
-  if (!tag) return {};
+  const entry = tagsWithCounts(listPosts(), loadVocab(), locale).find((e) => e.tag.slug === slug);
+  if (!entry) return {};
+  const { tag, count } = entry;
   const dict = getDictionary(locale);
-  const count = listPosts().filter((p) => p.meta.tags.includes(tag.slug) && hasLocale(p, locale)).length;
   return buildMetadata({
     locale,
     path: `/tags/${tag.slug}`,
@@ -37,12 +38,13 @@ export default async function Page({ params }: { params: Params }) {
   const { locale, tag: slug } = await params;
   if (!isLocale(locale)) notFound();
   const vocab = loadVocab();
-  const tag = vocab.tags.find((t) => t.slug === slug);
-  if (!tag) notFound();
+  const allPosts = listPosts();
+  const entry = tagsWithCounts(allPosts, vocab, locale).find((e) => e.tag.slug === slug);
+  if (!entry) notFound();
+  const { tag, count } = entry;
 
   const dict = getDictionary(locale);
-  const posts = listPosts().filter((p) => p.meta.tags.includes(tag.slug));
-  const count = posts.filter((p) => hasLocale(p, locale)).length;
+  const posts = allPosts.filter((p) => p.meta.tags.includes(tag.slug));
 
   return (
     <>
