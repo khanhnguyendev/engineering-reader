@@ -112,7 +112,9 @@ describe('SearchBox', () => {
     expect(rows[0].querySelector('p.mono-label')).toBeNull();
     expect(rows[0].className).not.toContain('hover:bg-panel-2');
     expect(link.className).toContain('focus-visible:outline-none');
-    expect(rows[0].className).toContain('has-[a:focus-visible]:outline');
+    expect(rows[0].className).not.toContain('rounded');
+    expect(link.className).toContain('focus-visible:after:outline-[var(--accent)]');
+    expect(link.className).toContain('after:rounded-panel');
   });
 
   it('falls back to an ink monogram for an unknown companyId', async () => {

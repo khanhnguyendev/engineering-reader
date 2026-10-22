@@ -145,11 +145,11 @@ export function SearchBox({
             return (
               <li
                 key={r.url}
-                className="relative flex flex-col gap-3 rounded-panel border-t border-hairline py-4 has-[a:focus-visible]:outline has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-4 has-[a:focus-visible]:outline-[var(--accent)] lg:py-5"
+                className="relative flex flex-col gap-3 border-t border-hairline py-4 lg:py-5"
               >
                 <a
                   href={r.url}
-                  className="text-[17px] font-bold leading-[1.35] tracking-[-0.02em] text-balance text-ink underline decoration-transparent underline-offset-4 transition-colors duration-150 after:absolute after:inset-0 hover:decoration-accent focus-visible:outline-none"
+                  className="text-[17px] font-bold leading-[1.35] tracking-[-0.02em] text-balance text-ink underline decoration-transparent underline-offset-4 transition-colors duration-150 after:absolute after:-inset-x-2 after:inset-y-0 after:rounded-panel hover:decoration-accent focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-[var(--accent)]"
                 >
                   {r.title}
                 </a>
