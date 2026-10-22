@@ -208,10 +208,11 @@ describe('company page', () => {
     const m = await generateMetadata({ params: Promise.resolve({ locale: 'en', company: 'discord' }) });
     expect(m.title).toBe('Discord · Hệ thống lớn');
     expect(m.description).toBe('Discord: 2 posts');
-    expect(m.alternates).toEqual({
+    expect(m.alternates).toMatchObject({
       canonical: '/en/companies/discord',
       languages: { vi: '/vi/companies/discord', en: '/en/companies/discord', 'x-default': '/vi/companies/discord' },
     });
+    expect(m.alternates?.languages).toEqual({ vi: '/vi/companies/discord', en: '/en/companies/discord', 'x-default': '/vi/companies/discord' });
     expect(await generateMetadata({ params: Promise.resolve({ locale: 'en', company: 'nope' }) })).toEqual({});
   });
 });

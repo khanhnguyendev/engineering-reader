@@ -3,7 +3,7 @@
 Not a gate. M2 Wayfinding is complete; the run continues with M3.
 
 ## State
-- `main`: M0+M1 (PR #1) and M2 (PR #2). Production: https://engineering-reader.vercel.app.
+- `main`: M0+M1 (PR #1) and M2 (PR #2, ee34509), both verified on production: https://engineering-reader.vercel.app.
 - M2 delivered home per IA, companies, topics, tags, series (fixture-tested only; no real series yet), about, redirects module, localized 404, header nav state. Finish review: ship. DESIGN.md records the new components.
 - Run ledger archived at `docs/runs/2026-10-22-m2-ledger.md`. Rulings: `docs/decisions.md`.
 

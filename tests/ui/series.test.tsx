@@ -157,10 +157,11 @@ describe('series page', () => {
     const m = await generateMetadata({ params: Promise.resolve({ locale: 'en', series: 'scaling' }) });
     expect(m.title).toBe('Scaling up · Hệ thống lớn');
     expect(m.description).toBe('Scaling up: 2 posts');
-    expect(m.alternates).toEqual({
+    expect(m.alternates).toMatchObject({
       canonical: '/en/series/scaling',
       languages: { vi: '/vi/series/scaling', en: '/en/series/scaling', 'x-default': '/vi/series/scaling' },
     });
+    expect(m.alternates?.languages).toEqual({ vi: '/vi/series/scaling', en: '/en/series/scaling', 'x-default': '/vi/series/scaling' });
     expect(m.openGraph).toMatchObject({ locale: 'en_GB', url: '/en/series/scaling' });
     expect(await generateMetadata({ params: Promise.resolve({ locale: 'en', series: 'nope' }) })).toEqual({});
   });

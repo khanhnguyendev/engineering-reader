@@ -5,7 +5,9 @@ import { LOCALES, type Locale } from '@/lib/i18n';
 import { parsePost, readRawPost, type RawPost, type ZodIssueWithFile } from '@/lib/content/load';
 import { hostOf } from '@/lib/content/normalize-url';
 import type { Vocab } from '@/lib/content/vocab';
-import { readRedirects, staticRoutes } from './redirects';
+import { readRedirects } from './read-redirects';
+import { staticRoutes } from './redirects';
+import type { RoutePost } from './routes';
 
 export type Finding = {
   level: 'error' | 'warn';
@@ -275,6 +277,9 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
   return out;
 }
 
+/** `staticRoutes` never reads post meta, so every post gets the same empty one. */
+const NO_META: RoutePost['meta'] = { company: '', topic: '', tags: [], series: null, publishedAt: '', updatedAt: null };
+
 function validateRedirects(root: string, vocab: Vocab): Finding[] {
   const file = path.join(path.dirname(root), 'redirects.json');
   if (!existsSync(file)) return [];
@@ -288,13 +293,15 @@ function validateRedirects(root: string, vocab: Vocab): Finding[] {
     }
     return [err(e instanceof Error ? e.message : String(e))];
   }
-  const posts: { slug: string; locales: Partial<Record<Locale, true>> }[] = [];
+  const posts: RoutePost[] = [];
   if (existsSync(root)) {
     for (const name of readdirSync(root)) {
       if (!existsSync(path.join(root, name, 'post.json'))) continue;
       const locales: Partial<Record<Locale, true>> = {};
-      for (const l of LOCALES) if (existsSync(path.join(root, name, `${l}.mdx`))) locales[l] = true;
-      posts.push({ slug: name, locales });
+      const raw = readRawPost(path.join(root, name));
+      // A draft locale 404s at runtime, so it is not a live redirect target.
+      for (const l of LOCALES) if (raw.locales[l] && !raw.locales[l]!.draft) locales[l] = true;
+      posts.push({ slug: name, locales, meta: NO_META });
     }
   }
   const routes = staticRoutes(posts, vocab);

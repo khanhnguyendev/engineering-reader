@@ -11,17 +11,21 @@ export function NavLink({
   href,
   locale,
   section,
+  serverPath,
   children,
 }: {
   href: string;
   locale: string;
   section: string;
+  /** Overrides the path used for the server render and the hydration pass; `""` marks nothing current. `undefined` uses `usePathname()`. */
+  serverPath?: string;
   children: React.ReactNode;
 }) {
-  // On a prerendered 404 the server path is /_not-found while the browser path is the real URL;
-  // hydrate with the server value, then switch to the browser value.
-  const serverPath = usePathname();
-  const path = useSyncExternalStore(noop, () => window.location.pathname, () => serverPath);
+  // On a prerendered 404 the server path is /_not-found while the browser path is the real URL
+  // (the client router is seeded from window.location), so pathless callers pass serverPath="".
+  // Hydrate with the server value, then switch to the browser value.
+  const routerPath = usePathname();
+  const path = useSyncExternalStore(noop, () => window.location.pathname, () => serverPath ?? routerPath);
   const [, pathLocale, pathSection] = path.split("/");
   const active = pathLocale === locale && pathSection === section;
   return (

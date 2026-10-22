@@ -20,7 +20,7 @@ export default function NotFound() {
         <ThemeScript />
       </head>
       <body>
-        <Header locale="vi" twinMissing />
+        <Header locale="vi" twinMissing pathless />
         <main id="content" tabIndex={-1}>
           <NotFoundBody vi={vi} en={en} siteNameEn={getDictionary("en").site.name} />
         </main>

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { LOCALES } from '@/lib/i18n';
+import { LOCALES } from '../i18n';
 
 export const TOPICS = ['distributed-systems', 'data', 'realtime', 'infra', 'reliability'] as const;
 export const CASE_TYPES = ['migration', 'incident', 'design-decision', 'scaling'] as const;

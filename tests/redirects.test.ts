@@ -2,7 +2,8 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { readRedirects, RedirectsSchema, staticRoutes, toNextRedirects } from '@/lib/content/redirects';
+import { RedirectsSchema, staticRoutes, toNextRedirects } from '@/lib/content/redirects';
+import { readRedirects } from '@/lib/content/read-redirects';
 import { validateAll } from '@/lib/content/validate';
 import type { Vocab } from '@/lib/content/vocab';
 
@@ -19,9 +20,10 @@ const vocab: Vocab = {
   sourceHosts: [],
   featured: [],
 };
+const m = { company: 'discord', topic: 'data', tags: [], series: null, publishedAt: '2026-10-01', updatedAt: null };
 const posts = [
-  { slug: 'both', locales: { vi: {}, en: {} } },
-  { slug: 'vi-only', locales: { vi: {} } },
+  { slug: 'both', locales: { vi: {}, en: {} }, meta: m },
+  { slug: 'vi-only', locales: { vi: {} }, meta: m },
 ];
 
 /** A temp site: <site>/posts is the content root, <site>/redirects.json beside it. */
@@ -68,7 +70,7 @@ describe('readRedirects', () => {
     expect(readRedirects(path.join(dir, 'redirects.json'))).toEqual([{ from: '/old', to: '/vi', permanent: false }]);
   });
   it('reads the committed content/redirects.json by default', () => {
-    expect(readRedirects()).toEqual([]);
+    expect(readRedirects()).toEqual([{ from: '/feed.xml', to: '/vi/feed.xml', statusCode: 301 }]);
   });
 });
 
@@ -85,6 +87,30 @@ describe('staticRoutes', () => {
   it('lists a post only in the locales it has', () => {
     expect(routes.has('/vi/posts/vi-only')).toBe(true);
     expect(routes.has('/en/posts/vi-only')).toBe(false);
+  });
+});
+
+describe('statusCode redirects', () => {
+  it('maps statusCode instead of permanent, never both', () => {
+    const [out] = toNextRedirects(RedirectsSchema.parse([{ from: '/feed.xml', to: '/vi/feed.xml', statusCode: 301 }]));
+    expect(out).toEqual({ source: '/feed.xml', destination: '/vi/feed.xml', statusCode: 301 });
+    expect('permanent' in out).toBe(false);
+    const [old] = toNextRedirects(RedirectsSchema.parse([{ from: '/a', to: '/b' }]));
+    expect(old).toEqual({ source: '/a', destination: '/b', permanent: true });
+  });
+  it('rejects an entry with both permanent and statusCode', () => {
+    const r = RedirectsSchema.safeParse([{ from: '/a', to: '/b', permanent: true, statusCode: 301 }]);
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0].message).toBe('use permanent or statusCode, not both');
+    expect(RedirectsSchema.safeParse([{ from: '/a', to: '/b', permanent: false }]).success).toBe(true);
+  });
+  it('rejects an unsupported statusCode', () => {
+    expect(RedirectsSchema.safeParse([{ from: '/a', to: '/b', statusCode: 200 }]).success).toBe(false);
+  });
+  it('validates /feed.xml -> /vi/feed.xml but rejects /vi/feed.xml as a from', () => {
+    const run = (json: unknown) => validateAll(path.join(site(json), 'posts'), vocab, { today: '2026-10-22' }).findings.filter((f) => f.rule === 'redirects');
+    expect(run([{ from: '/feed.xml', to: '/vi/feed.xml', statusCode: 301 }])).toEqual([]);
+    expect(run([{ from: '/vi/feed.xml', to: '/vi' }])).toHaveLength(1);
   });
 });
 
@@ -113,7 +139,7 @@ describe('validator rule redirects', () => {
     expect(run([{ from: '/x', to: '/\\evil.dev' }])).toHaveLength(1);
   });
   it('compares from case-insensitively against live routes', () => {
-    expect(run([{ from: '/VI/Companies/Discord', to: '/vi' }])).toHaveLength(1);
+    expect(run([{ from: '/VI/Companies/Discord', to: '/vi' }])).toEqual([expect.objectContaining({ message: 'redirect from "/VI/Companies/Discord" is a live route' })]);
   });
   it('rejects to equal to from', () => {
     expect(run([{ from: '/loop', to: '/loop' }]).map((f) => f.message)).toContainEqual(expect.stringContaining('points to itself'));
@@ -122,6 +148,16 @@ describe('validator rule redirects', () => {
     expect(run([{ from: '/x', to: '/vi/nowhere' }])).toHaveLength(1);
     expect(run([{ from: '/x', to: '/vi/companies/discord?a=1#h' }])).toEqual([]);
     expect(run([{ from: '/x', to: '/vi/topics/data#top' }])).toEqual([]);
+  });
+  it('treats a draft locale as absent: a redirect to it is not a live route', () => {
+    const dir = site([{ from: '/old', to: '/en/posts/drafty' }]);
+    const post = path.join(dir, 'posts', 'drafty');
+    mkdirSync(post);
+    writeFileSync(path.join(post, 'post.json'), '{}');
+    writeFileSync(path.join(post, 'vi.mdx'), '---\ntitle: V\n---\nbody\n');
+    writeFileSync(path.join(post, 'en.mdx'), '---\ntitle: E\ndraft: true\n---\nbody\n');
+    const f = validateAll(path.join(dir, 'posts'), vocab, { today: '2026-10-22' }).findings.filter((x) => x.rule === 'redirects');
+    expect(f.map((x) => x.message)).toEqual(['redirect to "/en/posts/drafty" is not a live route']);
   });
   it('reports malformed JSON as one finding', () => {
     const dir = mkdtempSync(path.join(tmp, 's-'));

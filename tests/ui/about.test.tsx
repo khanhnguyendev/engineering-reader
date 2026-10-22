@@ -65,12 +65,14 @@ describe('about page', () => {
     const labels = [...vi_.querySelectorAll('a.h2-anchor')].map((a) => a.getAttribute('aria-label'));
     expect(labels).toEqual(['Liên kết đến mục này', 'Liên kết đến mục này']);
     expect(vi_.innerHTML).not.toContain('Link to this section');
-    const rss = [...vi_.querySelectorAll('main p')].find((p) => p.textContent === 'RSS cho từng ngôn ngữ sắp có.')!;
+    const rss = [...vi_.querySelectorAll('main p')].find((p) => p.querySelector('a[href="/vi/feed.xml"]'))!;
     expect(rss.closest('section')).toBeNull();
-    expect(rss.querySelector('a')).toBeNull();
+    expect(rss.textContent).toBe('Theo dõi bài mới qua RSS: Nguồn RSS tiếng Việt');
     const en = await render('en');
+    const enRss = [...en.querySelectorAll('main p')].find((p) => p.querySelector('a[href="/en/feed.xml"]'))!;
+    expect(enRss.closest('section')).toBeNull();
+    expect(enRss.textContent).toBe('Follow new posts by RSS: English RSS feed');
     expect(en.querySelector('a.h2-anchor')!.getAttribute('aria-label')).toBe('Link to this section');
-    expect(en.querySelector('main')!.textContent).toContain('RSS feeds per language are coming.');
   });
 
   it('keeps [S1] as literal text: no ref plugin runs on pages', async () => {
@@ -97,10 +99,11 @@ describe('about page', () => {
     const vi_ = await generateMetadata({ params: Promise.resolve({ locale: 'vi' }) });
     expect(vi_.title).toBe('Giới thiệu · Hệ thống lớn');
     expect(vi_.description).toMatch(/^Ai viết trang này/);
-    expect(vi_.alternates).toEqual({
+    expect(vi_.alternates).toMatchObject({
       canonical: '/vi/about',
       languages: { vi: '/vi/about', en: '/en/about', 'x-default': '/vi/about' },
     });
+    expect(vi_.alternates?.languages).toEqual({ vi: '/vi/about', en: '/en/about', 'x-default': '/vi/about' });
     expect(vi_.openGraph).toMatchObject({ locale: 'vi_VN', url: '/vi/about' });
     const en = await generateMetadata({ params: Promise.resolve({ locale: 'en' }) });
     expect(en.title).toBe('About · Hệ thống lớn');

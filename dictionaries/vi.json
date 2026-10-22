@@ -101,11 +101,21 @@
   "about": {
     "title": "Giới thiệu",
     "dek": "Ai viết trang này, các bài được làm ra như thế nào và vì sao.",
-    "rss": "RSS cho từng ngôn ngữ sắp có."
+    "rss": "Theo dõi bài mới qua RSS:",
+    "rssLink": "Nguồn RSS tiếng Việt"
   },
   "notFound": {
     "title": "Không tìm thấy trang",
     "body": "Trang này không tồn tại hoặc đã được chuyển đi.",
     "home": "Về trang chủ"
+  },
+  "feed": {
+    "title": "Hệ thống lớn: bài mới",
+    "description": "Bài học từ hệ thống lớn, cho team nhỏ",
+    "readMore": "Đọc toàn bài"
+  },
+  "llms": {
+    "intro": "Case study về hệ thống lớn, kể lại từ nguồn kỹ thuật gốc, mỗi bài có lớp đọc nhanh và lớp đọc sâu.",
+    "section": "Tiếng Việt"
   }
 }

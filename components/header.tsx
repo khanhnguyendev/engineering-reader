@@ -8,9 +8,12 @@ import type { Locale } from "@/lib/i18n";
 export function Header({
   locale,
   twinMissing,
+  pathless,
 }: {
   locale: Locale;
   twinMissing?: boolean;
+  /** True where the server cannot know the URL (the root 404): no nav item is current until the browser path is read. */
+  pathless?: boolean;
 }) {
   const dict = getDictionary(locale);
   const nav = [
@@ -32,7 +35,7 @@ export function Header({
         </Link>
         <nav aria-label={dict.nav.label} className="order-last flex w-full items-center gap-5 sm:order-none sm:w-auto sm:gap-6">
           {nav.map((n) => (
-            <NavLink key={n.section} href={`/${locale}/${n.section}`} locale={locale} section={n.section}>
+            <NavLink key={n.section} href={`/${locale}/${n.section}`} locale={locale} section={n.section} serverPath={pathless ? "" : undefined}>
               {n.label}
             </NavLink>
           ))}

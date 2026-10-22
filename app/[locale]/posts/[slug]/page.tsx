@@ -8,6 +8,7 @@ import { Toc } from "@/components/toc";
 import { Avatar } from "@/components/post/avatar";
 import { BODY } from "@/components/post/body-classes";
 import { Byline } from "@/components/post/byline";
+import { JsonLd } from "@/components/post/json-ld";
 import { DeepDivider } from "@/components/post/deep-divider";
 import { KeyNumbers } from "@/components/post/key-numbers";
 import { Lessons } from "@/components/post/lessons";
@@ -24,6 +25,8 @@ import { CONTENT_ROOT, getPost, hasLocale, listPosts } from "@/lib/content/load"
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
 import { fmt, isLocale, LOCALES, otherLocale } from "@/lib/i18n";
+import { buildMetadata } from "@/lib/metadata";
+import { articleJsonLd } from "@/lib/json-ld";
 import { compilePostBody } from "@/lib/mdx/compile";
 import { SITE_URL } from "@/lib/site";
 
@@ -46,25 +49,19 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const post = getPost(CONTENT_ROOT, slug);
   const doc = post?.locales[locale];
   if (!post || !doc) return {};
-  const path = (l: string) => `/${l}/posts/${slug}`;
-  const languages: Record<string, string> = {};
-  for (const l of LOCALES) if (hasLocale(post, l)) languages[l] = path(l);
-  if (hasLocale(post, "vi")) languages["x-default"] = path("vi");
   const { title, summary } = doc.frontmatter;
-  return {
-    metadataBase: new URL(SITE_URL),
+  return buildMetadata({
+    locale,
+    path: `/posts/${slug}`,
     title,
     description: summary,
-    alternates: { canonical: path(locale), languages },
-    openGraph: {
-      type: "article",
-      title,
-      description: summary,
-      url: path(locale),
-      locale: locale === "vi" ? "vi_VN" : "en_GB",
-      publishedTime: post.meta.publishedAt,
-    },
-  };
+    type: "article",
+    locales: LOCALES.filter((l) => hasLocale(post, l)),
+    image: `/og/${locale}/${slug}.png`,
+    markdown: `/${locale}/posts/${slug}.md`,
+    publishedTime: post.meta.publishedAt,
+    modifiedTime: post.meta.updatedAt ?? undefined,
+  });
 }
 
 export default async function Page({ params }: { params: Params }) {
@@ -97,6 +94,7 @@ export default async function Page({ params }: { params: Params }) {
         className="mx-auto max-w-[1200px] px-4 pb-24 focus:outline-none pt-5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,720px)_260px] lg:justify-between lg:gap-10 lg:pt-10"
       >
         <article className="min-w-0">
+          <JsonLd data={articleJsonLd(post, locale, vocab, dict, SITE_URL)} />
           {twinMissing && <MissingLocaleNote text={dict.post.missingLocale} />}
 
           <nav aria-label={dict.post.breadcrumb} className="mb-3 text-[13px] text-muted">

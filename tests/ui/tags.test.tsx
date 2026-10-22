@@ -130,6 +130,15 @@ describe('tags index', () => {
 });
 
 describe('tag page', () => {
+  it('advertises only the locales that have posts as hreflang alternates', async () => {
+    const s = site([{ slug: 'p1', tags: ['cassandra', 'a-zeta'] }]);
+    rmSync(path.join(s.postsDir, 'p1', 'en.mdx'));
+    stub(s);
+    const { generateMetadata } = await import('@/app/[locale]/tags/[tag]/page');
+    const m = await generateMetadata({ params: Promise.resolve({ locale: 'vi', tag: 'cassandra' }) });
+    expect(m.alternates?.languages).toEqual({ vi: '/vi/tags/cassandra', 'x-default': '/vi/tags/cassandra' });
+  });
+
   it('renders the intro with label and count, then the posts under an h2', async () => {
     const host = await renderTag(site(SITE), 'vi', 'cassandra');
     const main = host.querySelector('main#content')!;

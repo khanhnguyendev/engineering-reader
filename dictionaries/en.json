@@ -101,11 +101,21 @@
   "about": {
     "title": "About",
     "dek": "Who writes this, how the posts are made and why.",
-    "rss": "RSS feeds per language are coming."
+    "rss": "Follow new posts by RSS:",
+    "rssLink": "English RSS feed"
   },
   "notFound": {
     "title": "Page not found",
     "body": "This page does not exist or has moved.",
     "home": "Back to the home page"
+  },
+  "feed": {
+    "title": "Hệ thống lớn: new posts",
+    "description": "Lessons from big systems, for small teams",
+    "readMore": "Read the full post"
+  },
+  "llms": {
+    "intro": "Case studies of large systems, retold from primary engineering sources, each with a quick top layer and a deep layer.",
+    "section": "English"
   }
 }

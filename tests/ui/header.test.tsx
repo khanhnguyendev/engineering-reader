@@ -4,6 +4,7 @@ import { renderToStaticMarkup, renderToString } from 'react-dom/server';
 import { act } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { Header } from '@/components/header';
+import { getDictionary } from '@/lib/dictionaries';
 
 vi.mock('server-only', () => ({}));
 const state = { pathname: '/vi/companies/discord' };
@@ -44,21 +45,36 @@ describe('header nav state', () => {
   it('marks nothing on tags, series, posts and home', () => {
     for (const p of ['/vi/tags/x', '/vi/series/s', '/vi/posts/p', '/vi']) expect(current(p)).toEqual([]);
   });
-  it('hydrates without a recoverable error when the server path differs from the client path', async () => {
+  it('still marks companies on a normal page (not pathless)', () => {
+    state.pathname = '/vi/companies';
+    const host = document.createElement('div');
+    host.innerHTML = renderToStaticMarkup(<Header locale="vi" />);
+    expect([...host.querySelectorAll('nav a[aria-current="page"]')].map((a) => a.textContent)).toEqual([
+      getDictionary('vi').nav.companies,
+    ]);
+  });
+  it('hydrates the pathless 404 header with no mismatch, then marks the browser path', async () => {
     state.pathname = '/_not-found';
-    const el = <Header locale="vi" />;
+    const el = <Header locale="vi" twinMissing pathless />;
     const container = document.createElement('div');
     container.innerHTML = renderToString(el);
     document.body.appendChild(container);
     expect(container.querySelectorAll('nav a[aria-current="page"]')).toHaveLength(0);
+    state.pathname = '/vi/companies/nope';
     window.history.pushState({}, '', '/vi/companies/nope');
     (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
     const onRecoverableError = vi.fn();
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     let root!: ReturnType<typeof hydrateRoot>;
-    await act(async () => {
-      root = hydrateRoot(container, el, { onRecoverableError });
-    });
-    expect(onRecoverableError).not.toHaveBeenCalled();
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, el, { onRecoverableError });
+      });
+      expect(consoleError).not.toHaveBeenCalled();
+      expect(onRecoverableError).not.toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
+    }
     expect([...container.querySelectorAll('nav a[aria-current="page"]')].map((a) => a.getAttribute('href'))).toEqual(['/vi/companies']);
     await act(async () => root.unmount());
     container.remove();

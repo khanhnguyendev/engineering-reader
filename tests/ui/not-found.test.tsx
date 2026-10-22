@@ -46,6 +46,10 @@ describe('root not-found', () => {
     expect(vi1.querySelector('main#content > div')!.getAttribute('lang')).toBe('vi');
     expect([...vi1.querySelectorAll('main#content a')].map((a) => a.getAttribute('lang'))).toEqual(['vi', 'en']);
   });
+  it('marks no nav item current on the real 404 even when the router path is a nav section', async () => {
+    const { doc } = await render('/vi/companies/nope');
+    expect(doc.querySelectorAll('header nav a[aria-current="page"]')).toHaveLength(0);
+  });
   it('exports the vi title with the site name as metadata', async () => {
     const { metadata } = await import('@/app/not-found');
     expect(metadata.title).toBe(`${vi_.notFound.title} · ${vi_.site.name}`);
@@ -65,13 +69,20 @@ describe('root not-found', () => {
     window.history.pushState({}, '', '/en/nope');
     (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
     const onRecoverableError = vi.fn();
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     let root!: ReturnType<typeof hydrateRoot>;
-    await act(async () => {
-      root = hydrateRoot(container, el, { onRecoverableError });
-    });
-    expect(onRecoverableError).not.toHaveBeenCalled();
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, el, { onRecoverableError });
+      });
+      expect(consoleError).not.toHaveBeenCalled();
+      expect(onRecoverableError).not.toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
+    }
     expect(container.querySelector('h1')!.textContent).toBe(en_.notFound.title);
     expect(document.title).toBe(`${en_.notFound.title} · ${en_.site.name}`);
+    expect(container.querySelector('div')!.getAttribute('lang')).toBe('en');
     await act(async () => root.unmount());
     container.remove();
   });
