@@ -1,6 +1,7 @@
 import type { PostRecord } from './content/load';
 import type { Vocab } from './content/vocab';
 import type { Locale } from './i18n';
+import { isoAtPublication } from './dates';
 
 const HEADLINE_MAX = 110;
 
@@ -27,8 +28,8 @@ export function articleJsonLd(
     headline: clip(fm.title),
     description: fm.summary,
     inLanguage: locale,
-    datePublished: meta.publishedAt,
-    dateModified: meta.updatedAt ?? meta.publishedAt,
+    datePublished: isoAtPublication(meta.publishedAt),
+    dateModified: isoAtPublication(meta.updatedAt ?? meta.publishedAt),
     mainEntityOfPage: `${siteUrl}/${locale}/posts/${post.slug}`,
     image: [`${siteUrl}/og/${locale}/${post.slug}.png`],
     author: { '@type': 'Person', name: 'Ryan', url: `${siteUrl}/${locale}/about` },

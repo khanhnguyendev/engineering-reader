@@ -47,7 +47,7 @@ describe('post page metadata', () => {
     const md = await mod.generateMetadata({ params: Promise.resolve({ locale: 'vi', slug: 'good-post' }) });
     expect(md.openGraph).toMatchObject({
       type: 'article',
-      publishedTime: meta.publishedAt,
+      publishedTime: `${meta.publishedAt}T00:00:00+07:00`,
       images: [{ url: '/og/vi/good-post.png', width: 1200, height: 630 }],
     });
     expect(md.openGraph).not.toHaveProperty('modifiedTime');

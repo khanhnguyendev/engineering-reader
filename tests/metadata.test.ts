@@ -6,6 +6,11 @@ import { buildMetadata } from '@/lib/metadata';
 import { SITE_URL } from '@/lib/site';
 
 describe('buildMetadata', () => {
+  it.each(['vi', 'en'] as const)('sets og:site_name from the dictionary (%s)', (locale) => {
+    const m = buildMetadata({ locale, path: '/x', title: 'T', description: 'D' });
+    expect(m.openGraph).toMatchObject({ siteName: 'Hệ thống lớn' });
+  });
+
   it('builds canonical, languages and openGraph', () => {
     const m = buildMetadata({ locale: 'vi', path: '/posts/x', title: 'T', description: 'D' });
     expect(m.metadataBase).toEqual(new URL(SITE_URL));
