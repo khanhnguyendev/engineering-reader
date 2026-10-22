@@ -7,6 +7,7 @@ export function PageIntro({ title, dek, children }: { title: string; dek?: strin
       <h1 className="mb-3 text-[25px] leading-[1.25] text-balance text-ink lg:mb-4 lg:text-[40px] lg:leading-[1.18]">
         {title}
       </h1>
+      <div aria-hidden="true" className="mb-4 h-px bg-accent lg:mb-5" />
       {dek && <p className="text-[16px] leading-[1.6] text-ink-2 lg:text-[19px]">{dek}</p>}
       {children}
     </header>

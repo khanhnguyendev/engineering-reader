@@ -11,17 +11,19 @@ export function PostList({
   vocab,
   dict,
   emptyLabel,
+  cols = 2,
 }: {
   posts: readonly PostRecord[];
   locale: Locale;
   vocab: Vocab;
   dict: Dictionary;
   emptyLabel: string;
+  cols?: 2 | 3;
 }) {
   const shown = posts.filter((p) => hasLocale(p, locale));
   if (shown.length === 0) return <p className="text-muted">{emptyLabel}</p>;
   return (
-    <ul className="grid gap-4 sm:grid-cols-2">
+    <ul className={`grid gap-4 sm:grid-cols-2 ${cols === 3 ? "lg:grid-cols-3" : "lg:grid-cols-2"}`}>
       {shown.map((post) => (
         <PostCard
           key={post.slug}

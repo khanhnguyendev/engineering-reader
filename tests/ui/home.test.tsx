@@ -137,16 +137,46 @@ describe('home (vi)', () => {
 
   it('renders topic chips with counts linking to topic pages', async () => {
     const { host } = await render(site(TEN));
-    const chips = [...section(host, 'Theo chủ đề')!.querySelectorAll('a')];
+    const sec = section(host, 'Theo chủ đề')!;
+    const all = [...sec.querySelectorAll('li > *')] as HTMLElement[];
+    expect(all).toHaveLength(5);
+    const chips = [...sec.querySelectorAll('a')];
     expect(chips.map((a) => a.getAttribute('href'))).toEqual(
-      ['distributed-systems', 'data', 'realtime', 'infra', 'reliability'].map((t) => `/vi/topics/${t}`),
+      ['data', 'reliability'].map((t) => `/vi/topics/${t}`),
     );
-    expect(chips[1].textContent).toContain('Dữ liệu');
-    expect(chips[1].textContent).toContain('5');
-    expect(chips[2].textContent).toContain('0');
+    expect(all[1].textContent).toContain('Dữ liệu');
+    expect(all[1].textContent).toContain('5');
+    expect(all[2].textContent).toContain('0');
     for (const c of ['border', 'border-hairline-strong', 'rounded-md']) {
       expect(chips[0].className.split(' ')).toContain(c);
     }
+  });
+
+  it('renders zero-count topics as muted non-link chips', async () => {
+    const { host } = await render(site(TEN));
+    const all = [...section(host, 'Theo chủ đề')!.querySelectorAll('li > *')] as HTMLElement[];
+    const zero = all.filter((e) => e.tagName !== 'A');
+    expect(zero).toHaveLength(3);
+    for (const z of zero) {
+      expect(z.tagName).toBe('SPAN');
+      expect(z.className.split(' ')).toContain('text-muted');
+      expect(z.className.split(' ')).toContain('border-hairline-strong');
+      expect(z.querySelector('.sr-only')).not.toBeNull();
+    }
+  });
+
+  it('uses the tagline as the only h1, above the intro', async () => {
+    const { host } = await render(site(TEN));
+    const h1s = host.querySelectorAll('h1');
+    expect(h1s).toHaveLength(1);
+    expect(h1s[0].textContent).toBe('Bài học từ hệ thống lớn, cho team nhỏ');
+    expect(h1s[0].closest('header')!.textContent).toContain('Các case study từ blog kỹ thuật');
+  });
+
+  it('gives start here three columns at lg and latest two', async () => {
+    const { host } = await render(site(TEN));
+    expect(section(host, 'Bắt đầu từ đây')!.querySelector('ul')!.className).toContain('lg:grid-cols-3');
+    expect(section(host, 'Mới nhất')!.querySelector('ul')!.className).toContain('lg:grid-cols-2');
   });
 
   it('gives bare counts sr-only plural text, hiding the digit from readers', async () => {

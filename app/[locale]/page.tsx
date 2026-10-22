@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CHIP_LINK } from "@/components/chip";
+import { CHIP, CHIP_LINK } from "@/components/chip";
 import { Header } from "@/components/header";
 import { Monogram } from "@/components/monogram";
+import { PageIntro } from "@/components/page-intro";
 import { PostList } from "@/components/post-list";
 import { SectionHeading } from "@/components/section-heading";
 import { companiesWithCounts, featuredPosts, topicsWithCounts } from "@/lib/content/index";
@@ -48,20 +49,14 @@ export default async function Page({ params }: { params: Params }) {
         tabIndex={-1}
         className="mx-auto max-w-[1200px] px-4 pb-24 pt-8 focus:outline-none sm:px-6 lg:pt-14"
       >
-        <header className="max-w-[720px]">
-          <h1 className="text-[28px] leading-[1.2] text-balance text-ink lg:text-[40px] lg:leading-[1.18]">
-            {dict.site.name}
-          </h1>
-          <p className="mt-2 text-[17px] font-semibold leading-[1.5] text-ink lg:text-[20px]">
-            {dict.site.tagline}
-          </p>
-          <p className="mt-3 text-[16px] leading-[1.6] text-ink-2 lg:text-[19px]">{dict.home.intro}</p>
-        </header>
+        <div className="max-w-[720px]">
+          <PageIntro title={dict.site.tagline} dek={dict.home.intro} />
+        </div>
 
         {start.length > 0 && (
           <section className="mt-10 lg:mt-14">
             <SectionHeading title={dict.home.startHere} />
-            <PostList posts={start} locale={locale} vocab={vocab} dict={dict} emptyLabel="" />
+            <PostList posts={start} locale={locale} vocab={vocab} dict={dict} emptyLabel="" cols={3} />
           </section>
         )}
 
@@ -103,16 +98,23 @@ export default async function Page({ params }: { params: Params }) {
             <ul className="flex flex-wrap gap-2">
               {topics.map(({ topic, count }) => (
                 <li key={topic.slug}>
-                  <Link
-                    href={`/${locale}/topics/${topic.slug}`}
-                    className={CHIP_LINK}
-                  >
-                    {topic[locale]}
-                    <span className="font-mono text-xs text-muted">
-                      <span aria-hidden="true">{count}</span>
-                <span className="sr-only">{plural(locale, count, dict.list.postsOne, dict.list.postsOther)}</span>
+                  {count > 0 ? (
+                    <Link href={`/${locale}/topics/${topic.slug}`} className={CHIP_LINK}>
+                      {topic[locale]}
+                      <span className="font-mono text-xs text-muted">
+                        <span aria-hidden="true">{count}</span>
+                        <span className="sr-only">{plural(locale, count, dict.list.postsOne, dict.list.postsOther)}</span>
+                      </span>
+                    </Link>
+                  ) : (
+                    <span className={`${CHIP} text-muted`}>
+                      {topic[locale]}
+                      <span className="font-mono text-xs">
+                        <span aria-hidden="true">{count}</span>
+                        <span className="sr-only">{plural(locale, count, dict.list.postsOne, dict.list.postsOther)}</span>
+                      </span>
                     </span>
-                  </Link>
+                  )}
                 </li>
               ))}
             </ul>

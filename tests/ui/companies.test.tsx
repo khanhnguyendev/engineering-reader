@@ -132,7 +132,7 @@ describe('companies index', () => {
     expect(viCards[2].textContent).toContain('1 bài');
     const mark = viCards[0].querySelector('[aria-hidden="true"]') as HTMLElement;
     expect(mark.textContent).toBe('D');
-    expect(mark.style.color).toBe('rgb(88, 101, 242)');
+    expect(mark.getAttribute('style')).toContain('#5865F2');
     expect(viCards[0].innerHTML.match(/#5865F2|rgb\(88, ?101, ?242\)/gi)).toHaveLength(1);
     const en = [...(await renderIndex(s, 'en')).host.querySelectorAll('main li')];
     expect(en[0].textContent).toContain('2 posts');

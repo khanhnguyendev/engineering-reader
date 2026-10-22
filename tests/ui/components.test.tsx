@@ -54,7 +54,7 @@ describe('Monogram', () => {
     expect(el.className).toContain('bg-panel');
     expect(el.className).not.toContain('rounded-full');
     expect(el.textContent).toBe('D');
-    expect(el.style.color).toBe('rgb(88, 101, 242)');
+    expect(el.getAttribute('style')).toContain('color-mix(in oklab, #5865F2 70%, var(--ink))');
     expect(el.style.borderColor).toBe('');
     expect(el.style.width).toBe('32px');
   });
@@ -86,18 +86,26 @@ describe('PostCard', () => {
     expect(html.match(/#5865F2|rgb\(88, ?101, ?242\)/gi)).toHaveLength(1);
     const mark = a.querySelector('[aria-hidden="true"]') as HTMLElement;
     expect(mark.textContent).toBe('D');
-    expect(mark.style.color).toBe('rgb(88, 101, 242)');
-    const name = [...a.querySelectorAll('.mono-label')].find((e) => e.textContent === 'Discord');
-    expect(name).toBeDefined();
+    expect(mark.getAttribute('style')).toContain('#5865F2');
   });
 
-  it('sets the title bold and clamped to two lines', () => {
+  it('puts nothing above the title: h3 first, then company in the footer row', () => {
+    expect(a.firstElementChild!.tagName).toBe('H3');
+    const name = [...a.querySelectorAll('span')].find((e) => e.textContent === 'Discord') as HTMLElement;
+    expect(name).toBeDefined();
+    expect(name.className).toContain('text-ink-2');
+    expect(name.className).not.toContain('mono-label');
+    const h3 = a.querySelector('h3')!;
+    expect(h3.compareDocumentPosition(name) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('sets the title bold and not clamped', () => {
     const title = [...a.querySelectorAll('*')].find(
       (e) => e.textContent === post.locales.vi!.frontmatter.title,
     ) as HTMLElement;
     expect(title).toBeDefined();
     expect(title.className).toContain('font-bold');
-    expect(title.className).toContain('line-clamp-2');
+    expect(title.className).not.toContain('line-clamp');
   });
 
   it('shows the first key number in mono with its label, and the read time', () => {
@@ -124,11 +132,18 @@ describe('PostList', () => {
     );
     const ul = dom(html).firstElementChild as HTMLElement;
     expect(ul.tagName).toBe('UL');
-    expect(ul.className).toBe('grid gap-4 sm:grid-cols-2');
+    expect(ul.className).toBe('grid gap-4 sm:grid-cols-2 lg:grid-cols-2');
     expect(ul.querySelectorAll('li')).toHaveLength(1);
     expect(ul.textContent).toContain('Discord');
     expect(ul.textContent).toContain('Data');
     expect(ul.querySelector('a')!.getAttribute('href')).toBe('/en/posts/good-post');
+  });
+
+  it('uses three columns at lg when cols is 3', () => {
+    const html = renderToStaticMarkup(
+      <PostList posts={[post]} locale="en" vocab={vocab} dict={getDictionary('en')} emptyLabel="None" cols={3} />,
+    );
+    expect((dom(html).firstElementChild as HTMLElement).className).toBe('grid gap-4 sm:grid-cols-2 lg:grid-cols-3');
   });
 
   it('renders the empty label as muted text when there are no posts', () => {

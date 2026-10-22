@@ -31,11 +31,7 @@ export function PostCard({
         href={`/${locale}/posts/${post.slug}`}
         className="panel flex w-full flex-col gap-3 p-4 transition-colors duration-150 hover:border-hairline-strong hover:bg-panel-2 lg:p-6"
       >
-        <span className="flex items-center gap-2">
-          <Monogram name={name} color={company?.brandColor} size={24} />
-          <span className="mono-label text-muted">{name}</span>
-        </span>
-        <h3 className="line-clamp-2 text-[17px] font-bold leading-[1.35] tracking-[-0.02em] text-balance text-ink">
+        <h3 className="text-[17px] font-bold leading-[1.35] tracking-[-0.02em] text-balance text-ink">
           {fm.title}
         </h3>
         {first && (
@@ -49,10 +45,13 @@ export function PostCard({
           </span>
         )}
         <span className="mt-auto flex items-center justify-between gap-3 pt-1">
-          <span className={CHIP}>
-            {topicLabel}
+          <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
+            <Monogram name={name} color={company?.brandColor} size={24} />
+            <span className="text-[13px] leading-[1.45] text-ink-2">{name}</span>
+            <span aria-hidden="true" className="text-[13px] text-muted">·</span>
+            <span className={CHIP}>{topicLabel}</span>
           </span>
-          <span className="font-mono text-xs text-muted">
+          <span className="shrink-0 font-mono text-xs text-muted">
             {fmt(dict.post.readMinutes, { n: doc.readingTime.whole })}
           </span>
         </span>
