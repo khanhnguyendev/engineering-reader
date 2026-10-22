@@ -39,3 +39,5 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-22 M3/T6 .md route, llms.txt, markdown alternate; build-tracing fix (read-redirects.ts) — b742f3c
 - 2026-10-22 M3/T7 sitemap with hreflang alternates, robots — 9d599c7
 - 2026-10-22 M3 final review fixes: listing-page hreflang matches sitemap, draft redirect targets, language-neutral key-number values — 5a4c90a
+- 2026-10-22 M3 merged (PR #3 squash 8301bfa); production: feeds, /feed.xml 301, sitemap, robots, llms.txt, OG PNGs, .md routes live; Rich Results Test 1 valid Article on /vi/posts/discord-cassandra-to-scylladb and /en/posts/netflix-microservices-mastering-chaos; opengraph.xyz reads 1200×630 card + summary_large_image
+- 2026-10-22 M3 follow-up: og:site_name, JSON-LD/OG article times with +07:00 — a60ca85
