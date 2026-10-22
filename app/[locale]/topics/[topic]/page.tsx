@@ -5,6 +5,7 @@ import { PageIntro } from "@/components/page-intro";
 import { PostList } from "@/components/post-list";
 import { SectionHeading } from "@/components/section-heading";
 import { listPosts } from "@/lib/content/load";
+import { localesFor } from "@/lib/content/routes";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary, shelfDek } from "@/lib/dictionaries";
 import { isLocale, LOCALES } from "@/lib/i18n";
@@ -27,6 +28,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return buildMetadata({
     locale,
     path: `/topics/${topic.slug}`,
+    locales: localesFor(`/topics/${topic.slug}`, listPosts(), loadVocab()),
     title: `${topic[locale]} · ${dict.site.name}`,
     description: shelfDek(dict, topic.slug),
   });

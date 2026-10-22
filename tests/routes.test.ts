@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import path from 'node:path';
 import { LOCALES } from '@/lib/i18n';
 import { listPosts } from '@/lib/content/load';
-import { endpointRoutes, pageEntries } from '@/lib/content/routes';
+import { endpointRoutes, localesFor, pageEntries } from '@/lib/content/routes';
 import type { Vocab } from '@/lib/content/vocab';
 
 const vocab: Vocab = {
@@ -83,5 +83,15 @@ describe('endpointRoutes', () => {
   });
   it('includes the root endpoints', () => {
     for (const p of ['/llms.txt', '/sitemap.xml', '/robots.txt', '/feed.xml']) expect(r).toContain(p);
+  });
+});
+
+describe('localesFor', () => {
+  it('returns only the locales with posts for that path', () => {
+    expect(localesFor('/tags/kafka', posts, vocab)).toEqual(['vi', 'en']);
+    expect(localesFor('/series/s1', posts, vocab)).toEqual(['vi']);
+  });
+  it('is [] for a path with no posts in any locale', () => {
+    expect(localesFor('/tags/unused', posts, vocab)).toEqual([]);
   });
 });

@@ -63,6 +63,11 @@ export function pageEntries(
   return out;
 }
 
+/** The locales a page path is advertised in: those the sitemap lists, `[]` when it has no posts. */
+export function localesFor(path: string, posts: readonly RoutePost[], vocab: Vocab): readonly Locale[] {
+  return pageEntries(posts, vocab, { nonEmptyOnly: true }).find((e) => e.path === path)?.locales ?? [];
+}
+
 /** Non-page URLs the site serves (feeds, markdown, OG cards, root files). */
 export function endpointRoutes(posts: readonly RoutePost[]): string[] {
   const out: string[] = [];

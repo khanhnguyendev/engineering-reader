@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { PageIntro } from "@/components/page-intro";
 import { hasLocale, listPosts, type PostRecord } from "@/lib/content/load";
+import { localesFor } from "@/lib/content/routes";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
 import { fmt, isLocale, LOCALES, plural, type Locale } from "@/lib/i18n";
@@ -38,6 +39,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return buildMetadata({
     locale,
     path: `/series/${key}`,
+    locales: localesFor(`/series/${key}`, listPosts(), loadVocab()),
     title: `${series[locale]} · ${dict.site.name}`,
     description: `${series[locale]}: ${plural(locale, count, dict.list.postsOne, dict.list.postsOther)}`,
   });

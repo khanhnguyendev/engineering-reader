@@ -298,7 +298,9 @@ function validateRedirects(root: string, vocab: Vocab): Finding[] {
     for (const name of readdirSync(root)) {
       if (!existsSync(path.join(root, name, 'post.json'))) continue;
       const locales: Partial<Record<Locale, true>> = {};
-      for (const l of LOCALES) if (existsSync(path.join(root, name, `${l}.mdx`))) locales[l] = true;
+      const raw = readRawPost(path.join(root, name));
+      // A draft locale 404s at runtime, so it is not a live redirect target.
+      for (const l of LOCALES) if (raw.locales[l] && !raw.locales[l]!.draft) locales[l] = true;
       posts.push({ slug: name, locales, meta: NO_META });
     }
   }

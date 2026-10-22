@@ -6,6 +6,7 @@ import { PostList } from "@/components/post-list";
 import { SectionHeading } from "@/components/section-heading";
 import { companiesWithCounts } from "@/lib/content/index";
 import { listPosts } from "@/lib/content/load";
+import { localesFor } from "@/lib/content/routes";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
 import { isLocale, LOCALES, plural } from "@/lib/i18n";
@@ -32,6 +33,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return buildMetadata({
     locale,
     path: `/companies/${company.slug}`,
+    locales: localesFor(`/companies/${company.slug}`, listPosts(), loadVocab()),
     title: `${company.name} · ${dict.site.name}`,
     description: `${company.name}: ${plural(locale, count, dict.list.postsOne, dict.list.postsOther)}`,
   });

@@ -6,6 +6,7 @@ import { PostList } from "@/components/post-list";
 import { SectionHeading } from "@/components/section-heading";
 import { tagsWithCounts } from "@/lib/content/index";
 import { listPosts } from "@/lib/content/load";
+import { localesFor } from "@/lib/content/routes";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
 import { isLocale, LOCALES, plural } from "@/lib/i18n";
@@ -29,6 +30,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return buildMetadata({
     locale,
     path: `/tags/${tag.slug}`,
+    locales: localesFor(`/tags/${tag.slug}`, listPosts(), loadVocab()),
     title: `${tag[locale]} · ${dict.site.name}`,
     description: `${tag[locale]}: ${plural(locale, count, dict.list.postsOne, dict.list.postsOther)}`,
   });

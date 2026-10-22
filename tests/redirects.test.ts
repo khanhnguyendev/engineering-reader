@@ -149,6 +149,16 @@ describe('validator rule redirects', () => {
     expect(run([{ from: '/x', to: '/vi/companies/discord?a=1#h' }])).toEqual([]);
     expect(run([{ from: '/x', to: '/vi/topics/data#top' }])).toEqual([]);
   });
+  it('treats a draft locale as absent: a redirect to it is not a live route', () => {
+    const dir = site([{ from: '/old', to: '/en/posts/drafty' }]);
+    const post = path.join(dir, 'posts', 'drafty');
+    mkdirSync(post);
+    writeFileSync(path.join(post, 'post.json'), '{}');
+    writeFileSync(path.join(post, 'vi.mdx'), '---\ntitle: V\n---\nbody\n');
+    writeFileSync(path.join(post, 'en.mdx'), '---\ntitle: E\ndraft: true\n---\nbody\n');
+    const f = validateAll(path.join(dir, 'posts'), vocab, { today: '2026-10-22' }).findings.filter((x) => x.rule === 'redirects');
+    expect(f.map((x) => x.message)).toEqual(['redirect to "/en/posts/drafty" is not a live route']);
+  });
   it('reports malformed JSON as one finding', () => {
     const dir = mkdtempSync(path.join(tmp, 's-'));
     mkdirSync(path.join(dir, 'posts'));
