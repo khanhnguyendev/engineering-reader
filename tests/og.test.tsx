@@ -99,6 +99,29 @@ describe('OgCard', () => {
   });
 });
 
+/** Find the first element whose children include the given text. */
+function findByText(node: ReactNode, text: string): ReactElement<{ style: Record<string, unknown>; children?: ReactNode }> | undefined {
+  if (node == null || typeof node !== 'object') return undefined;
+  if (Array.isArray(node)) return node.map((n) => findByText(n, text)).find(Boolean);
+  const el = node as ReactElement<{ style: Record<string, unknown>; children?: ReactNode }>;
+  if (el.props.children === text) return el;
+  return findByText(el.props.children, text);
+}
+
+describe('OgCard title', () => {
+  it('is 56px up to the threshold and 48px past it, always clamped to 3 lines', async () => {
+    stub();
+    const { OgCard, LONG_TITLE_CHARS } = await import('@/lib/og/card');
+    for (const [len, size] of [[LONG_TITLE_CHARS, 56], [LONG_TITLE_CHARS + 1, 48], [200, 48]] as const) {
+      const title = 'a'.repeat(len);
+      const t = findByText(OgCard({ ...POST, locale: 'vi', title }), title);
+      expect(t?.props.style.fontSize).toBe(size);
+      expect(t?.props.style.lineClamp).toBe(3);
+      expect(t?.props.style.display).toBe('block');
+    }
+  });
+});
+
 describe('loadOgFonts', () => {
   it('reads static TTFs from assets/og', async () => {
     const { loadOgFonts } = await import('@/lib/og/card');
@@ -142,6 +165,35 @@ describe('og route', () => {
     expect(res.headers.get('content-type')).toBe('image/png');
     const buf = new Uint8Array(await res.arrayBuffer());
     expect([...buf.slice(0, 8)]).toEqual([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const ihdr = new DataView(buf.buffer, buf.byteOffset + 16, 8);
+    expect([ihdr.getUint32(0), ihdr.getUint32(4)]).toEqual([1200, 630]);
+  }, 30_000);
+
+  it('GET renders a 200-char Vietnamese title without throwing', async () => {
+    stub();
+    const dir = path.join(tmp, 'posts', 'long');
+    cpSync(GOOD, dir, { recursive: true });
+    writeFileSync(path.join(dir, 'post.json'), JSON.stringify({ ...META, slug: 'long' }));
+    const vi = path.join(dir, 'vi.mdx');
+    const long = 'Một data center ở Oregon mất điện, control plane chập chờn '.repeat(4).slice(0, 200);
+    writeFileSync(vi, readFileSync(vi, 'utf8').replace(/^title: .*$/m, `title: "${long}"`));
+    const { GET } = await import('@/app/og/[locale]/[card]/route');
+    const res = await GET(new Request('http://x'), { params: Promise.resolve({ locale: 'vi', card: 'long.png' }) });
+    expect(res.status).toBe(200);
+    const buf = new Uint8Array(await res.arrayBuffer());
+    expect([...buf.slice(1, 4)]).toEqual([0x50, 0x4e, 0x47]);
+  }, 30_000);
+
+  it('a post slugged "site" gets no card and does not shadow the site card', async () => {
+    stub();
+    const dir = path.join(tmp, 'posts', 'site');
+    cpSync(GOOD, dir, { recursive: true });
+    writeFileSync(path.join(dir, 'post.json'), JSON.stringify({ ...META, slug: 'site' }));
+    const { generateStaticParams, GET } = await import('@/app/og/[locale]/[card]/route');
+    const sites = generateStaticParams().filter((p) => p.card === 'site.png');
+    expect(sites).toHaveLength(2);
+    const res = await GET(new Request('http://x'), { params: Promise.resolve({ locale: 'vi', card: 'site.png' }) });
+    expect(res.status).toBe(200);
   }, 30_000);
 
   it('GET 404s for unknown slug, missing locale, bad locale and bad suffix', async () => {

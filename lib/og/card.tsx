@@ -55,7 +55,7 @@ export type OgCardProps = {
 };
 
 /** Rough line count for the 56px title in the 992px text column. */
-const LONG_TITLE_CHARS = 90;
+export const LONG_TITLE_CHARS = 60;
 
 export function OgCard(p: OgCardProps) {
   const post = p.kind === 'post';
@@ -111,9 +111,10 @@ export function OgCard(p: OgCardProps) {
             </div>
             <div
               style={{
-                display: 'flex',
+                display: 'block',
                 marginTop: 28,
                 fontSize: titleSize,
+                lineClamp: 3,
                 fontWeight: 700,
                 lineHeight: 1.15,
                 letterSpacing: '-0.02em',

@@ -14,7 +14,8 @@ export function generateStaticParams() {
   const posts = listPosts(CONTENT_ROOT);
   return LOCALES.flatMap((locale) => [
     { locale, card: 'site.png' },
-    ...posts.filter((p) => hasLocale(p, locale)).map((p) => ({ locale, card: `${p.slug}.png` })),
+    // A post slugged `site` would collide with the site card, so it gets none.
+    ...posts.filter((p) => p.slug !== 'site' && hasLocale(p, locale)).map((p) => ({ locale, card: `${p.slug}.png` })),
   ]);
 }
 
