@@ -35,6 +35,7 @@ describe('search page', () => {
     const m = await generateMetadata({ params: Promise.resolve({ locale: 'vi' }) });
     expect(m.robots).toEqual({ index: false, follow: true });
     expect(m.alternates?.canonical).toBe('/vi/search');
+    expect(m.alternates?.languages).toEqual({ vi: '/vi/search', en: '/en/search', 'x-default': '/vi/search' });
   });
   it('is static over both locales', async () => {
     const { generateStaticParams, dynamicParams } = await mod();
