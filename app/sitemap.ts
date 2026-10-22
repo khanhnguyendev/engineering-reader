@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       out.push({
         url: url(l),
         ...(entry.lastModified ? { lastModified: entry.lastModified } : {}),
-        alternates: { languages },
+        alternates: { languages: { ...languages } },
       });
     }
   }

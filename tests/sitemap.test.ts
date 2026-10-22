@@ -22,6 +22,11 @@ async function load() {
   const j = JSON.parse(readFileSync(path.join(viOnly, 'post.json'), 'utf8'));
   writeFileSync(path.join(viOnly, 'post.json'), JSON.stringify({ ...j, slug: 'vi-only' }));
   rmSync(path.join(viOnly, 'en.mdx'));
+  const enOnly = path.join(posts, 'en-only');
+  cpSync(good, enOnly, { recursive: true });
+  const j2 = JSON.parse(readFileSync(path.join(enOnly, 'post.json'), 'utf8'));
+  writeFileSync(path.join(enOnly, 'post.json'), JSON.stringify({ ...j2, slug: 'en-only' }));
+  rmSync(path.join(enOnly, 'vi.mdx'));
   for (const f of VOCAB_FILES) cpSync(path.join(process.cwd(), 'content', `${f}.json`), path.join(vocabDir, `${f}.json`));
   const tags = JSON.parse(readFileSync(path.join(vocabDir, 'tags.json'), 'utf8'));
   writeFileSync(
@@ -65,6 +70,18 @@ describe('sitemap', () => {
       const both = entries.filter((e) => e.url === `${SITE}/en/posts/good-post`);
       expect(both).toHaveLength(1);
       expect(Object.keys(both[0].alternates?.languages ?? {}).sort()).toEqual(['en', 'vi', 'x-default']);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('gives an en-only post an en entry with only an en alternate and no x-default', async () => {
+    const { root, entries } = await load();
+    try {
+      const en = entries.filter((e) => e.url === `${SITE}/en/posts/en-only`);
+      expect(en).toHaveLength(1);
+      expect(en[0].alternates?.languages).toEqual({ en: `${SITE}/en/posts/en-only` });
+      expect(entries.filter((e) => e.url === `${SITE}/vi/posts/en-only`)).toHaveLength(0);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
