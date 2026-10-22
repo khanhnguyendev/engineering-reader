@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-22T13:16:26.000Z",
+  "generatedAt": "2026-10-22T14:00:00.000Z",
   "title": "Design System: Engineering Reader",
   "extensions": {
     "colorMeta": {
@@ -549,8 +549,8 @@
       "name": "Header Nav",
       "kind": "nav",
       "refersTo": "mono-label",
-      "description": "Brand, mono-label links (current section in ink with aria-current), language switch; closed by a hairline.",
-      "html": "<header class=\"ds-hdr\"><a class=\"ds-brand\" href=\"#\">Engineering Reader</a><nav class=\"ds-nav\"><a href=\"#\">CÔNG TY</a><a href=\"#\" aria-current=\"page\" class=\"ds-cur\">CHỦ ĐỀ</a><a href=\"#\">GIỚI THIỆU</a></nav><span class=\"ds-lang\"><span class=\"ds-lang-cur\">VI</span><span class=\"ds-lang-sep\">|</span><a href=\"#\">EN</a></span></header>",
+      "description": "Brand, four mono-label links (companies, topics, about, search; current section in ink with aria-current), language switch; closed by a hairline.",
+      "html": "<header class=\"ds-hdr\"><a class=\"ds-brand\" href=\"#\">Engineering Reader</a><nav class=\"ds-nav\"><a href=\"#\">CÔNG TY</a><a href=\"#\" aria-current=\"page\" class=\"ds-cur\">CHỦ ĐỀ</a><a href=\"#\">GIỚI THIỆU</a><a href=\"#\">TÌM KIẾM</a></nav><span class=\"ds-lang\"><span class=\"ds-lang-cur\">VI</span><span class=\"ds-lang-sep\">|</span><a href=\"#\">EN</a></span></header>",
       "css": ".ds-hdr { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--hairline, rgba(148,197,180,0.17)); } .ds-brand { font-family: Inter, system-ui, sans-serif; font-weight: 600; color: var(--ink, #eef0f1); text-decoration: none; } .ds-nav { display: flex; gap: 24px; } .ds-nav a, .ds-lang a { font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted, #9aa5ad); text-decoration: none; } .ds-nav a:hover, .ds-lang a:hover { color: var(--ink, #eef0f1); } .ds-nav a:focus-visible, .ds-lang a:focus-visible { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; } .ds-lang { display: flex; gap: 8px; font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; } .ds-lang-cur { color: var(--ink, #eef0f1); } .ds-lang-sep { color: var(--muted, #9aa5ad); } .ds-nav a.ds-cur { color: var(--ink, #eef0f1); }"
     },
     {
@@ -584,6 +584,22 @@
       "description": "List-page head: H1, one 1px accent rule, ink-2 dek. No eyebrow.",
       "html": "<header class=\"ds-pi\"><h1>Companies</h1><div class=\"ds-pi-rule\"></div><p>Who the cases come from.</p></header>",
       "css": ".ds-pi { max-width: 720px; font-family: Inter, system-ui, sans-serif; } .ds-pi h1 { margin: 0 0 12px; font-size: 25px; font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; text-wrap: balance; color: var(--ink, #eef0f1); } .ds-pi-rule { height: 1px; margin-bottom: 16px; background: var(--accent, #6ee7b7); } .ds-pi p { margin: 0; font-size: 16px; line-height: 1.6; color: var(--ink-2, #d4d9db); }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "search-input",
+      "description": "Search field: panel fill, strong hairline, 10px radius, 17px ink text, muted placeholder, accent caret, accent focus ring.",
+      "html": "<input class=\"ds-si\" type=\"search\" placeholder=\"Search the cases\">",
+      "css": ".ds-si { box-sizing: border-box; width: 100%; max-width: 480px; padding: 12px 16px; background: var(--panel, rgba(255,255,255,0.025)); border: 1px solid var(--hairline-strong, rgba(148,197,180,0.34)); border-radius: 10px; font-family: Inter, system-ui, sans-serif; font-size: 17px; line-height: 1.4; color: var(--ink, #eef0f1); caret-color: var(--accent, #6ee7b7); } .ds-si::placeholder { color: var(--muted, #9aa5ad); } .ds-si::-webkit-search-cancel-button { appearance: none; } .ds-si:focus-visible { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; }"
+    },
+    {
+      "name": "Search Result Row",
+      "kind": "custom",
+      "refersTo": "search-result-row",
+      "description": "Hairline result row: title link stretched over the row, lead key number, ink-2 summary, monogram and company footer. No excerpt, no hover fill.",
+      "html": "<div class=\"ds-sr\"><a class=\"ds-sr-t\" href=\"#\">How Discord stores trillions of messages</a><span class=\"ds-sr-k\"><span class=\"ds-sr-n\">12 nodes</span><span class=\"ds-sr-l\">Cassandra cluster after the move</span></span><p class=\"ds-sr-s\">Moving from Cassandra to ScyllaDB to end hot partitions.</p><span class=\"ds-sr-f\"><span class=\"ds-sr-m\">D</span><span class=\"ds-sr-c\">Discord</span></span></div>",
+      "css": ".ds-sr { position: relative; display: flex; flex-direction: column; gap: 12px; max-width: 480px; padding: 16px 0; border-top: 1px solid var(--hairline, rgba(148,197,180,0.17)); border-bottom: 1px solid var(--hairline, rgba(148,197,180,0.17)); font-family: Inter, system-ui, sans-serif; } .ds-sr-t { font-size: 17px; font-weight: 700; line-height: 1.35; letter-spacing: -0.02em; color: var(--ink, #eef0f1); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 4px; transition: text-decoration-color 0.15s; } .ds-sr-t::after { content: \"\"; position: absolute; top: 0; bottom: 0; left: -8px; right: -8px; border-radius: 10px; } .ds-sr-t:hover { text-decoration-color: var(--accent, #6ee7b7); } .ds-sr-t:focus-visible { outline: none; } .ds-sr-t:focus-visible::after { outline: 2px solid var(--accent, #6ee7b7); outline-offset: 2px; } .ds-sr-k { display: flex; flex-direction: column; gap: 2px; } .ds-sr-n { font-family: \"JetBrains Mono\", ui-monospace, monospace; font-size: 18px; font-weight: 600; line-height: 1.3; letter-spacing: -0.02em; color: var(--ink, #eef0f1); } .ds-sr-l { font-size: 13px; line-height: 1.45; color: var(--muted, #9aa5ad); } .ds-sr-s { margin: 0; max-width: 65ch; font-size: 15px; line-height: 1.55; color: var(--ink-2, #d4d9db); } .ds-sr-f { display: flex; align-items: center; gap: 8px; } .ds-sr-m { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; box-sizing: border-box; border: 1px solid var(--hairline, rgba(148,197,180,0.17)); border-radius: 6px; font-size: 12px; font-weight: 700; line-height: 1; color: var(--ink, #eef0f1); } .ds-sr-c { font-size: 13px; line-height: 1.45; color: var(--ink-2, #d4d9db); }"
     }
   ],
   "narrative": {
