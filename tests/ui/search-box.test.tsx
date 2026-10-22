@@ -30,11 +30,11 @@ let root: Root;
 
 const COMPANIES = [{ slug: 'discord', name: 'Discord', brandColor: '#5865f2' }];
 const TOPICS = [
-  { slug: 'databases', label: 'Cơ sở dữ liệu' },
-  { slug: 'incidents', label: 'Sự cố' },
-  { slug: 'scaling', label: 'Mở rộng' },
-  { slug: 'ai', label: 'AI' },
-  { slug: 'infra', label: 'Hạ tầng' },
+  { slug: 'databases', label: 'Cơ sở dữ liệu', count: 3 },
+  { slug: 'incidents', label: 'Sự cố', count: 1 },
+  { slug: 'scaling', label: 'Mở rộng', count: 0 },
+  { slug: 'ai', label: 'AI', count: 2 },
+  { slug: 'infra', label: 'Hạ tầng', count: 5 },
 ];
 
 async function mount(locale: 'vi' | 'en' = 'vi') {
@@ -128,16 +128,54 @@ describe('SearchBox', () => {
     expect(mono.style.color).toBe('');
   });
 
-  it('shows five topic links and the browse lead-in while idle, hides them once searching', async () => {
+  it('shows linked topic chips with counts, a muted non-link for zero, and hides them once searching', async () => {
     mockLoad.mockResolvedValue(fake(ROWS));
     await mount();
     const browse = host.querySelector('[data-search-browse]')!;
     expect(browse.textContent).toContain(vi_dict.search.browse);
-    const hrefs = [...browse.querySelectorAll('a')].map((a) => a.getAttribute('href'));
-    expect(hrefs).toEqual(TOPICS.map((t) => `/vi/topics/${t.slug}`));
-    expect([...browse.querySelectorAll('a')].map((a) => a.textContent)).toEqual(TOPICS.map((t) => t.label));
+    expect(browse.querySelectorAll('li')).toHaveLength(TOPICS.length);
+    const anchors = [...browse.querySelectorAll('a')];
+    expect(anchors.map((a) => a.getAttribute('href'))).toEqual(
+      TOPICS.filter((t) => t.count > 0).map((t) => `/vi/topics/${t.slug}`),
+    );
+    expect(anchors[0].textContent).toContain('Cơ sở dữ liệu');
+    expect(anchors[0].querySelector('[aria-hidden="true"]')!.textContent).toBe('3');
+    expect(anchors[0].querySelector('.sr-only')!.textContent).toBe('3 bài');
+    const zero = [...browse.querySelectorAll('li')].find((li) => li.textContent!.includes('Mở rộng'))!;
+    expect(zero.querySelector('a')).toBeNull();
+    expect(zero.querySelector('span')!.className).toContain('text-muted');
     await type('du lieu');
     expect(host.querySelector('[data-search-browse]')).toBeNull();
+  });
+
+  it('keeps the live region empty and unspaced while idle, and announces on the first search', async () => {
+    mockLoad.mockResolvedValue(fake(ROWS));
+    await mount();
+    const live = host.querySelector('[aria-live="polite"]')!;
+    expect(live.textContent).toBe('');
+    expect(live.className).not.toContain('min-h');
+    expect(host.querySelector('[data-search-browse]')!.className).toContain('mt-3');
+    await type('du lieu');
+    expect(host.querySelector('[aria-live="polite"]')!.textContent).toBe('2 kết quả');
+  });
+
+  it('renders no key-number block when keyValue is empty', async () => {
+    const rows = [{ url: '/vi/posts/c.html', meta: { title: 'Không số', summary: 'Tóm tắt.', company: 'Discord', companyId: 'discord', keyValue: '', keyLabel: '' } }];
+    mockLoad.mockResolvedValue(fake(rows));
+    await mount();
+    await type('du lieu');
+    const li = host.querySelector('ol[data-search-results] > li')!;
+    expect(li.querySelector('.font-mono')).toBeNull();
+    expect(li.textContent).not.toContain('tin nhắn mỗi ngày');
+  });
+
+  it('styles the input caret and removes the native cancel glyph', async () => {
+    mockLoad.mockResolvedValue(fake(ROWS));
+    await mount();
+    const input = host.querySelector<HTMLInputElement>('input')!;
+    expect(input.type).toBe('search');
+    expect(input.className).toContain('caret-[var(--accent)]');
+    expect(input.className).toContain('[&::-webkit-search-cancel-button]:appearance-none');
   });
 
   it('labels the input and uses the placeholder from the dictionary', async () => {

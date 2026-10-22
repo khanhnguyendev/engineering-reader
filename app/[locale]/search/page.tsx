@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { PageIntro } from "@/components/page-intro";
 import { SearchBox } from "@/components/search/search-box";
+import { topicsWithCounts } from "@/lib/content/index";
+import { listPosts } from "@/lib/content/load";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
 import { isLocale, LOCALES } from "@/lib/i18n";
@@ -50,7 +52,11 @@ export default async function Page({ params }: { params: Params }) {
             locale={locale}
             dict={dict}
             companies={vocab.companies.map((c) => ({ slug: c.slug, name: c.name, brandColor: c.brandColor }))}
-            topics={vocab.topics.map((t) => ({ slug: t.slug, label: t[locale] }))}
+            topics={topicsWithCounts(listPosts(), vocab, locale).map(({ topic, count }) => ({
+              slug: topic.slug,
+              label: topic[locale],
+              count,
+            }))}
           />
         </div>
       </main>

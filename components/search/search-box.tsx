@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { CHIP_LINK } from "@/components/chip";
+import { CHIP_LINK, CHIP_MUTED } from "@/components/chip";
 import { Monogram } from "@/components/monogram";
 import { loadPagefind } from "@/components/search/load-pagefind";
 import type { Dictionary } from "@/lib/dictionaries";
@@ -19,7 +19,7 @@ type Row = {
   keyLabel: string;
 };
 type CompanyRef = { slug: string; name: string; brandColor?: string };
-type TopicRef = { slug: string; label: string };
+type TopicRef = { slug: string; label: string; count: number };
 
 const DEBOUNCE_MS = 200;
 const MAX_ROWS = 10;
@@ -121,20 +121,36 @@ export function SearchBox({
         spellCheck={false}
         className="w-full rounded-panel border border-hairline-strong bg-panel px-4 py-3 text-[17px] leading-[1.4] text-ink caret-[var(--accent)] placeholder:text-muted [&::-webkit-search-cancel-button]:appearance-none"
       />
-      <p aria-live="polite" className="mono-label mt-4 min-h-[1.5em] text-muted">
+      <p aria-live="polite" className={view === "idle" ? "" : "mono-label mt-4 min-h-[1.5em] text-muted"}>
         {message[view]}
       </p>
       {view === "idle" && topics.length > 0 && (
-        <div data-search-browse className="mt-6">
+        <div data-search-browse className="mt-3">
           <p className="text-[15px] leading-[1.55] text-ink-2">{t.browse}</p>
           <ul className="mt-3 flex flex-wrap gap-2">
-            {topics.map((tp) => (
-              <li key={tp.slug}>
-                <a href={`/${locale}/topics/${tp.slug}`} className={CHIP_LINK}>
-                  {tp.label}
-                </a>
-              </li>
-            ))}
+            {topics.map((tp) => {
+              const n = (
+                <span className="font-mono text-xs">
+                  <span aria-hidden="true">{tp.count}</span>
+                  <span className="sr-only">{plural(locale, tp.count, dict.list.postsOne, dict.list.postsOther)}</span>
+                </span>
+              );
+              return (
+                <li key={tp.slug}>
+                  {tp.count > 0 ? (
+                    <a href={`/${locale}/topics/${tp.slug}`} className={CHIP_LINK}>
+                      {tp.label}
+                      <span className="text-muted">{n}</span>
+                    </a>
+                  ) : (
+                    <span className={CHIP_MUTED}>
+                      {tp.label}
+                      {n}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
