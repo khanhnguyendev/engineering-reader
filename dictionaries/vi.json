@@ -129,6 +129,7 @@
     "countOther": "{n} kết quả",
     "empty": "Không có bài nào khớp.",
     "unavailable": "Tìm kiếm chỉ có trên bản build.",
-    "error": "Không tải được tìm kiếm. Thử tải lại trang."
+    "error": "Không tải được tìm kiếm. Thử tải lại trang.",
+    "browse": "Hoặc duyệt theo chủ đề:"
   }
 }

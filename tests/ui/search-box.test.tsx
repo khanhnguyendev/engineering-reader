@@ -14,8 +14,8 @@ vi.mock('@/components/search/load-pagefind', () => ({ loadPagefind: vi.fn() }));
 const mockLoad = vi.mocked(loadPagefind);
 
 const ROWS = [
-  { url: '/vi/posts/a.html', meta: { title: 'Dữ liệu của Discord', summary: 'Chuyển kho tin nhắn sang ScyllaDB.', company: 'Discord' } },
-  { url: '/vi/posts/b.html', meta: { title: 'Sự cố ở Cloudflare', summary: 'Một cấu hình sai làm sập mạng.', company: 'Cloudflare' } },
+  { url: '/vi/posts/a.html', meta: { title: 'Dữ liệu của Discord', summary: 'Chuyển kho tin nhắn sang ScyllaDB.', company: 'Discord', companyId: 'discord', keyValue: '4 tỷ', keyLabel: 'tin nhắn mỗi ngày' } },
+  { url: '/vi/posts/b.html', meta: { title: 'Sự cố ở Cloudflare', summary: 'Một cấu hình sai làm sập mạng.', company: 'Cloudflare', companyId: 'nowhere', keyValue: '27 phút', keyLabel: 'thời gian sập' } },
 ];
 
 function fake(rows: typeof ROWS, search = vi.fn()) {
@@ -28,13 +28,22 @@ function fake(rows: typeof ROWS, search = vi.fn()) {
 let host: HTMLDivElement;
 let root: Root;
 
+const COMPANIES = [{ slug: 'discord', name: 'Discord', brandColor: '#5865f2' }];
+const TOPICS = [
+  { slug: 'databases', label: 'Cơ sở dữ liệu' },
+  { slug: 'incidents', label: 'Sự cố' },
+  { slug: 'scaling', label: 'Mở rộng' },
+  { slug: 'ai', label: 'AI' },
+  { slug: 'infra', label: 'Hạ tầng' },
+];
+
 async function mount(locale: 'vi' | 'en' = 'vi') {
   host = document.createElement('div');
   document.body.appendChild(host);
   root = createRoot(host);
   const dict = (locale === 'vi' ? vi_dict : en_dict) as typeof vi_dict;
   await act(async () => {
-    root.render(<SearchBox locale={locale} dict={dict} />);
+    root.render(<SearchBox locale={locale} dict={dict} companies={COMPANIES} topics={TOPICS} />);
   });
 }
 
@@ -84,6 +93,49 @@ describe('SearchBox', () => {
     expect(host.innerHTML).not.toContain('<mark');
     expect(host.textContent).not.toContain('du lieu <mark>');
     expect(host.querySelector('[aria-live="polite"]')!.textContent).toBe('2 kết quả');
+  });
+
+  it('renders a bold title, the lead key number, a monogram and the company name per row', async () => {
+    mockLoad.mockResolvedValue(fake(ROWS));
+    await mount();
+    await type('du lieu');
+    const rows = host.querySelectorAll('ol[data-search-results] > li');
+    const link = rows[0].querySelector('a')!;
+    expect(link.className).toContain('font-bold');
+    expect(rows[0].textContent).toContain('4 tỷ');
+    expect(rows[0].textContent).toContain('tin nhắn mỗi ngày');
+    expect(rows[0].querySelector('.font-mono')!.textContent).toBe('4 tỷ');
+    const mono = rows[0].querySelector<HTMLElement>('[aria-hidden]')!;
+    expect(mono.textContent).toBe('D');
+    expect(mono.style.color).toContain('#5865f2');
+    expect(rows[0].textContent).toContain('Discord');
+    expect(rows[0].querySelector('p.mono-label')).toBeNull();
+    expect(rows[0].className).not.toContain('hover:bg-panel-2');
+    expect(link.className).toContain('focus-visible:outline-none');
+    expect(rows[0].className).toContain('has-[a:focus-visible]:outline');
+  });
+
+  it('falls back to an ink monogram for an unknown companyId', async () => {
+    mockLoad.mockResolvedValue(fake(ROWS));
+    await mount();
+    await type('du lieu');
+    const rows = host.querySelectorAll('ol[data-search-results] > li');
+    const mono = rows[1].querySelector<HTMLElement>('[aria-hidden]')!;
+    expect(mono.textContent).toBe('C');
+    expect(mono.className).toContain('text-ink');
+    expect(mono.style.color).toBe('');
+  });
+
+  it('shows five topic links and the browse lead-in while idle, hides them once searching', async () => {
+    mockLoad.mockResolvedValue(fake(ROWS));
+    await mount();
+    const browse = host.querySelector('[data-search-browse]')!;
+    expect(browse.textContent).toContain(vi_dict.search.browse);
+    const hrefs = [...browse.querySelectorAll('a')].map((a) => a.getAttribute('href'));
+    expect(hrefs).toEqual(TOPICS.map((t) => `/vi/topics/${t.slug}`));
+    expect([...browse.querySelectorAll('a')].map((a) => a.textContent)).toEqual(TOPICS.map((t) => t.label));
+    await type('du lieu');
+    expect(host.querySelector('[data-search-browse]')).toBeNull();
   });
 
   it('labels the input and uses the placeholder from the dictionary', async () => {
@@ -164,6 +216,7 @@ describe('SearchBox', () => {
     const label = host.querySelector('label')!.textContent!;
     expect(strings).toContain(label);
     expect(host.querySelector('[aria-live="polite"]')!.textContent).toBe('');
+    expect(strings).toContain(host.querySelector('[data-search-browse] p')!.textContent);
     // no ASCII English from the en dictionary leaks into the vi render
     for (const s of [en_dict.search.label, en_dict.search.placeholder]) {
       expect(host.textContent).not.toContain(s);

@@ -129,6 +129,7 @@
     "countOther": "{n} results",
     "empty": "No posts match.",
     "unavailable": "Search is available on the built site only.",
-    "error": "Search failed to load. Try reloading the page."
+    "error": "Search failed to load. Try reloading the page.",
+    "browse": "Or browse by topic:"
   }
 }

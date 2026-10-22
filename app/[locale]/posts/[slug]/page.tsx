@@ -80,6 +80,7 @@ export default async function Page({ params }: { params: Params }) {
   const twinMissing = !hasLocale(post, otherLocale(locale));
   const company = vocab.companies.find((c) => c.slug === meta.company);
   const companyName = company?.name ?? meta.company;
+  const firstKey = meta.keyNumbers[0];
   const topic = vocab.topics.find((t) => t.slug === meta.topic)?.[locale] ?? meta.topic;
   const allPosts = listPosts();
   const nav = seriesNav(post, vocab, allPosts, locale);
@@ -100,6 +101,17 @@ export default async function Page({ params }: { params: Params }) {
           <span hidden data-pagefind-meta="title[data-meta-value]" data-meta-value={fm.title} />
           <span hidden data-pagefind-meta="summary[data-meta-value]" data-meta-value={fm.summary} />
           <span hidden data-pagefind-meta="company[data-meta-value]" data-meta-value={companyName} />
+          <span hidden data-pagefind-meta="companyId[data-meta-value]" data-meta-value={meta.company} />
+          {firstKey && (
+            <>
+              <span hidden data-pagefind-meta="keyValue[data-meta-value]" data-meta-value={firstKey.value} />
+              <span
+                hidden
+                data-pagefind-meta="keyLabel[data-meta-value]"
+                data-meta-value={fm.keyNumberLabels[firstKey.id] ?? firstKey.id}
+              />
+            </>
+          )}
           {/* Accent-folded copy so unaccented queries match; never rendered or announced. */}
           <span
             hidden

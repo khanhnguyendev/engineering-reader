@@ -1,20 +1,42 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { CHIP_LINK } from "@/components/chip";
+import { Monogram } from "@/components/monogram";
 import { loadPagefind } from "@/components/search/load-pagefind";
 import type { Dictionary } from "@/lib/dictionaries";
 import { toSitePath } from "@/lib/fold";
 import { plural, type Locale } from "@/lib/i18n";
 
 type State = "idle" | "loading" | "results" | "empty" | "unavailable" | "error";
-type Row = { url: string; title: string; summary: string; company: string };
+type Row = {
+  url: string;
+  title: string;
+  summary: string;
+  company: string;
+  companyId: string;
+  keyValue: string;
+  keyLabel: string;
+};
+type CompanyRef = { slug: string; name: string; brandColor?: string };
+type TopicRef = { slug: string; label: string };
 
 const DEBOUNCE_MS = 200;
 const MAX_ROWS = 10;
 const MIN_CHARS = 2;
 
 /** Search over the static Pagefind index. Rows come from result metadata, never from excerpts. */
-export function SearchBox({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function SearchBox({
+  locale,
+  dict,
+  companies,
+  topics,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+  companies: CompanyRef[];
+  topics: TopicRef[];
+}) {
   const t = dict.search;
   const id = useId();
   const [q, setQ] = useState("");
@@ -53,6 +75,9 @@ export function SearchBox({ locale, dict }: { locale: Locale; dict: Dictionary }
             title: d.meta.title ?? "",
             summary: d.meta.summary ?? "",
             company: d.meta.company ?? "",
+            companyId: d.meta.companyId ?? "",
+            keyValue: d.meta.keyValue ?? "",
+            keyLabel: d.meta.keyLabel ?? "",
           })),
         );
         setState(found.results.length === 0 ? "empty" : "results");
@@ -94,28 +119,56 @@ export function SearchBox({ locale, dict }: { locale: Locale; dict: Dictionary }
         placeholder={t.placeholder}
         autoComplete="off"
         spellCheck={false}
-        className="w-full rounded-panel border border-hairline-strong bg-panel px-4 py-3 text-[17px] leading-[1.4] text-ink placeholder:text-muted"
+        className="w-full rounded-panel border border-hairline-strong bg-panel px-4 py-3 text-[17px] leading-[1.4] text-ink caret-[var(--accent)] placeholder:text-muted [&::-webkit-search-cancel-button]:appearance-none"
       />
       <p aria-live="polite" className="mono-label mt-4 min-h-[1.5em] text-muted">
         {message[view]}
       </p>
+      {view === "idle" && topics.length > 0 && (
+        <div data-search-browse className="mt-6">
+          <p className="text-[15px] leading-[1.55] text-ink-2">{t.browse}</p>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {topics.map((tp) => (
+              <li key={tp.slug}>
+                <a href={`/${locale}/topics/${tp.slug}`} className={CHIP_LINK}>
+                  {tp.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {(view === "results" || (view === "loading" && rows.length > 0)) && (
         <ol data-search-results className="mt-2 border-b border-hairline">
-          {rows.map((r) => (
-            <li
-              key={r.url}
-              className="relative flex flex-col gap-1.5 border-t border-hairline py-4 transition-colors duration-150 hover:bg-panel-2 lg:py-5"
-            >
-              <a
-                href={r.url}
-                className="text-[17px] leading-[1.35] text-ink underline decoration-transparent underline-offset-4 transition-colors duration-150 after:absolute after:inset-0 hover:decoration-accent lg:text-[19px]"
+          {rows.map((r) => {
+            const brand = companies.find((c) => c.slug === r.companyId)?.brandColor;
+            return (
+              <li
+                key={r.url}
+                className="relative flex flex-col gap-3 rounded-panel border-t border-hairline py-4 has-[a:focus-visible]:outline has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-4 has-[a:focus-visible]:outline-[var(--accent)] lg:py-5"
               >
-                {r.title}
-              </a>
-              <p className="max-w-[65ch] text-[15px] leading-[1.55] text-ink-2">{r.summary}</p>
-              <p className="mono-label text-muted">{r.company}</p>
-            </li>
-          ))}
+                <a
+                  href={r.url}
+                  className="text-[17px] font-bold leading-[1.35] tracking-[-0.02em] text-balance text-ink underline decoration-transparent underline-offset-4 transition-colors duration-150 after:absolute after:inset-0 hover:decoration-accent focus-visible:outline-none"
+                >
+                  {r.title}
+                </a>
+                {r.keyValue && (
+                  <span className="flex flex-col gap-0.5">
+                    <span className="font-mono text-lg font-semibold leading-[1.3] tracking-[-0.02em] break-words text-ink">
+                      {r.keyValue}
+                    </span>
+                    <span className="text-[13px] leading-[1.45] text-muted">{r.keyLabel}</span>
+                  </span>
+                )}
+                <p className="max-w-[65ch] text-[15px] leading-[1.55] text-ink-2">{r.summary}</p>
+                <span className="flex items-center gap-2">
+                  <Monogram name={r.company} color={brand} size={24} />
+                  <span className="text-[13px] leading-[1.45] text-ink-2">{r.company}</span>
+                </span>
+              </li>
+            );
+          })}
         </ol>
       )}
     </div>

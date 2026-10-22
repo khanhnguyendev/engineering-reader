@@ -23,6 +23,19 @@ describe('search page', () => {
     expect(main.querySelector('[data-search-state]')).not.toBeNull();
     expect(main.querySelector('input')).not.toBeNull();
   });
+  it('holds the intro and box in a 720px measure and lists five topic links', async () => {
+    const { default: Page } = await mod();
+    const host = document.createElement('div');
+    host.innerHTML = renderToStaticMarkup(await Page({ params: Promise.resolve({ locale: 'vi' }) }));
+    const measure = host.querySelector('main#content > div')!;
+    expect(measure.className).toContain('max-w-[720px]');
+    expect(measure.querySelector('h1')).not.toBeNull();
+    expect(measure.querySelector('input')).not.toBeNull();
+    const links = [...measure.querySelectorAll('[data-search-browse] a')].map((a) => a.getAttribute('href'));
+    expect(links).toHaveLength(5);
+    for (const h of links) expect(h).toMatch(/^\/vi\/topics\/[a-z0-9-]+$/);
+    expect(measure.textContent).toContain('Hoặc duyệt theo chủ đề:');
+  });
   it('marks the search nav link current on /vi/search', async () => {
     const { default: Page } = await mod();
     const host = document.createElement('div');

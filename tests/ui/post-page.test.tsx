@@ -164,6 +164,22 @@ describe('post page (vi)', () => {
     expect(get('company').getAttribute('data-meta-value')).toBeTruthy();
   });
 
+  it('carries the company id and the lead key number as hidden meta elements', () => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const get = (k: string) => host.querySelector<HTMLElement>(`[data-pagefind-meta^="${k}["]`)!;
+    for (const k of ['companyId', 'keyValue', 'keyLabel']) {
+      const el = get(k);
+      expect(el, k).not.toBeNull();
+      expect(el.hasAttribute('hidden')).toBe(true);
+      expect(el.textContent).toBe('');
+      expect(el.getAttribute('data-pagefind-meta')).toBe(`${k}[data-meta-value]`);
+    }
+    expect(get('companyId').getAttribute('data-meta-value')).toBe('discord');
+    expect(get('keyValue').getAttribute('data-meta-value')).toBeTruthy();
+    expect(get('keyLabel').getAttribute('data-meta-value')).toBeTruthy();
+  });
+
   it('has one hidden, aria-hidden, empty folded span for indexing', () => {
     const host = document.createElement('div');
     host.innerHTML = html;

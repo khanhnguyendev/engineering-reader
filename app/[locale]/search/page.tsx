@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { PageIntro } from "@/components/page-intro";
 import { SearchBox } from "@/components/search/search-box";
+import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
 import { isLocale, LOCALES } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
@@ -33,6 +34,7 @@ export default async function Page({ params }: { params: Params }) {
   if (!isLocale(locale)) notFound();
 
   const dict = getDictionary(locale);
+  const vocab = loadVocab();
 
   return (
     <>
@@ -42,8 +44,15 @@ export default async function Page({ params }: { params: Params }) {
         tabIndex={-1}
         className="mx-auto max-w-[1200px] px-4 pb-24 pt-8 focus:outline-none sm:px-6 lg:pt-14"
       >
-        <PageIntro title={dict.search.title} dek={dict.search.dek} />
-        <SearchBox locale={locale} dict={dict} />
+        <div className="max-w-[720px]">
+          <PageIntro title={dict.search.title} dek={dict.search.dek} />
+          <SearchBox
+            locale={locale}
+            dict={dict}
+            companies={vocab.companies.map((c) => ({ slug: c.slug, name: c.name, brandColor: c.brandColor }))}
+            topics={vocab.topics.map((t) => ({ slug: t.slug, label: t[locale] }))}
+          />
+        </div>
       </main>
     </>
   );
