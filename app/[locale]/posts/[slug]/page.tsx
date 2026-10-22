@@ -28,6 +28,7 @@ import { fmt, isLocale, LOCALES, otherLocale } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 import { articleJsonLd } from "@/lib/json-ld";
 import { isoAtPublication } from "@/lib/dates";
+import { fold, plainText } from "@/lib/fold";
 import { compilePostBody } from "@/lib/mdx/compile";
 import { SITE_URL } from "@/lib/site";
 
@@ -94,8 +95,23 @@ export default async function Page({ params }: { params: Params }) {
         tabIndex={-1}
         className="mx-auto max-w-[1200px] px-4 pb-24 focus:outline-none pt-5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,720px)_260px] lg:justify-between lg:gap-10 lg:pt-10"
       >
-        <article className="min-w-0">
-          <JsonLd data={articleJsonLd(post, locale, vocab, dict, SITE_URL)} />
+        <article className="min-w-0" data-pagefind-body>
+          {/* Meta values live in attributes so commas stay exact and nothing is indexed twice. */}
+          <span hidden data-pagefind-meta="title[data-meta-value]" data-meta-value={fm.title} />
+          <span hidden data-pagefind-meta="summary[data-meta-value]" data-meta-value={fm.summary} />
+          <span hidden data-pagefind-meta="company[data-meta-value]" data-meta-value={companyName} />
+          {/* Accent-folded copy so unaccented queries match; never rendered or announced. */}
+          <span
+            hidden
+            aria-hidden="true"
+            data-pagefind-index-attrs="data-folded"
+            data-folded={fold(
+              `${fm.title} ${fm.summary} ${fm.tldr.join(" ")} ${plainText(doc.body)}`,
+            )}
+          />
+          <div data-pagefind-ignore>
+            <JsonLd data={articleJsonLd(post, locale, vocab, dict, SITE_URL)} />
+          </div>
           {twinMissing && <MissingLocaleNote text={dict.post.missingLocale} />}
 
           <nav aria-label={dict.post.breadcrumb} className="mb-3 text-[13px] text-muted">
@@ -143,25 +159,29 @@ export default async function Page({ params }: { params: Params }) {
           <SmallTeam heading={dict.post.smallTeam} items={fm.smallTeam} />
 
           <DeepDivider label={fmt(dict.post.deepRead, { n: doc.readingTime.deep })} />
-          <Toc label={dict.post.toc} headings={headings} variant="details" />
+          <div data-pagefind-ignore>
+            <Toc label={dict.post.toc} headings={headings} variant="details" />
+          </div>
           <div className={BODY}>{content}</div>
 
           {fm.lessons && <Lessons heading={dict.post.lessons} items={fm.lessons} />}
-          <Sources dict={dict} locale={locale} sources={meta.sources} />
-          <Byline text={dict.post.byline} />
-          {nav.series && nav.index >= 0 && (
-            <SeriesNav
-              locale={locale}
-              dict={dict}
-              seriesKey={nav.series.key}
-              title={nav.series[locale]}
-              index={nav.index}
-              total={nav.total}
-              prev={nav.prev}
-              next={nav.next}
-            />
-          )}
-          <Related posts={related} locale={locale} vocab={vocab} dict={dict} />
+          <div data-pagefind-ignore>
+            <Sources dict={dict} locale={locale} sources={meta.sources} />
+            <Byline text={dict.post.byline} />
+            {nav.series && nav.index >= 0 && (
+              <SeriesNav
+                locale={locale}
+                dict={dict}
+                seriesKey={nav.series.key}
+                title={nav.series[locale]}
+                index={nav.index}
+                total={nav.total}
+                prev={nav.prev}
+                next={nav.next}
+              />
+            )}
+            <Related posts={related} locale={locale} vocab={vocab} dict={dict} />
+          </div>
         </article>
 
         <aside className="hidden lg:block">

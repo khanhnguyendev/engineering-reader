@@ -64,7 +64,9 @@ describe('post page (vi)', () => {
 
   it('renders the top layer in order, then the divider, then the deep layer', () => {
     // the JSON-LD script repeats the summary text; order is about visible markup only
-    const visible = html.replace(/<script type="application\/ld\+json">[^]*?<\/script>/, '');
+    const visible = html
+      .replace(/<script type="application\/ld\+json">[^]*?<\/script>/, '')
+      .replace(/<span hidden[^>]*><\/span>/g, '');
     const at = (needle: string) => {
       const i = visible.indexOf(needle);
       expect(i, `missing: ${needle}`).toBeGreaterThanOrEqual(0);
@@ -118,6 +120,46 @@ describe('post page (vi)', () => {
     expect(ld.inLanguage).toBe('vi');
     expect(ld.citation).toHaveLength(meta.sources.length);
     expect(ld.image[0]).toMatch(/^https?:\/\/.+\/og\/vi\/good-post\.png$/);
+  });
+
+  it('marks the article as the single Pagefind body and ignores the non-prose blocks', () => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const bodies = host.querySelectorAll('[data-pagefind-body]');
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0].tagName).toBe('ARTICLE');
+    expect(host.querySelector('#post-sources')!.closest('[data-pagefind-ignore]')).not.toBeNull();
+    expect(host.querySelector('script[type="application/ld+json"]')!.closest('[data-pagefind-ignore]')).not.toBeNull();
+    expect(host.querySelector('#post-sources')!.closest('[data-pagefind-body]')).toBe(bodies[0]);
+  });
+
+  it('carries exact accented title, summary and company as hidden meta elements', () => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const get = (k: string) => host.querySelector<HTMLElement>(`[data-pagefind-meta^="${k}["]`)!;
+    for (const k of ['title', 'summary', 'company']) {
+      const el = get(k);
+      expect(el, k).not.toBeNull();
+      expect(el.hasAttribute('hidden')).toBe(true);
+      expect(el.textContent).toBe('');
+    }
+    expect(get('title').getAttribute('data-meta-value')).toBe(fm('title'));
+    expect(get('title').getAttribute('data-meta-value')).toMatch(/[^\x00-\x7f]/);
+    expect(get('summary').getAttribute('data-meta-value')).toBe(fm('summary'));
+    expect(get('company').getAttribute('data-meta-value')).toBeTruthy();
+  });
+
+  it('has one hidden, aria-hidden, empty folded span for indexing', () => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const spans = host.querySelectorAll('[data-folded]');
+    expect(spans).toHaveLength(1);
+    const span = spans[0];
+    expect(span.hasAttribute('hidden')).toBe(true);
+    expect(span.getAttribute('aria-hidden')).toBe('true');
+    expect(span.textContent).toBe('');
+    expect(span.getAttribute('data-pagefind-index-attrs')).toBe('data-folded');
+    expect(span.getAttribute('data-folded')).toContain('Discord chuyen kho tin nhan');
   });
 
   it('marks the small-team block as the callout', () => {
