@@ -41,3 +41,23 @@ export async function compilePostBody(
   });
   return { content, headings };
 }
+
+/** A static page body (about): GFM and section anatomy only, so `[S1]` stays literal text. */
+export async function compilePage(
+  markdown: string,
+  locale: Locale,
+): Promise<{ content: ReactElement; headings: Heading[] }> {
+  void locale;
+  const headings: Heading[] = [];
+  const { content } = await compileMDX({
+    source: markdown,
+    components: mdxComponents,
+    options: {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [[rehypeSections, { headings }]],
+      },
+    },
+  });
+  return { content, headings };
+}
