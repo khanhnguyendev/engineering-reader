@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import type { PostRecord } from '@/lib/content/load';
@@ -152,11 +152,25 @@ describe('buildFeed', () => {
   });
 });
 
+describe('buildFeed edge cases', () => {
+  it('an empty feed parses and has no lastBuildDate', async () => {
+    const d = parse(await build('vi', []));
+    expect(d.querySelector('parsererror')).toBeNull();
+    expect(items(d)).toHaveLength(0);
+    expect(d.querySelector('lastBuildDate')).toBeNull();
+  });
+
+  it('throws on an invalid publishedAt rather than emitting "Invalid Date"', async () => {
+    await expect(build('vi', [post('bad', 'not-a-date', ['vi'])])).rejects.toThrow('invalid date: not-a-date');
+  });
+});
+
 describe('feed route', () => {
   it('serves RSS with the right content type for a locale and 404s otherwise', async () => {
     const root = mkdtempSync(path.join(tmpdir(), 'feed-'));
     try {
       mkdirSync(path.join(root, 'posts'));
+      cpSync('tests/fixtures/posts/good-post', path.join(root, 'posts', 'good-post'), { recursive: true });
       writeFileSync(path.join(root, 'tags.json'), '[]');
       vi.resetModules();
       vi.stubEnv('CONTENT_ROOT', path.join(root, 'posts'));
@@ -169,7 +183,10 @@ describe('feed route', () => {
       expect(route.generateStaticParams()).toEqual([{ locale: 'vi' }, { locale: 'en' }]);
       const res = await route.GET(new Request(`${SITE}/vi/feed.xml`), { params: Promise.resolve({ locale: 'vi' }) });
       expect(res.headers.get('content-type')).toBe('application/rss+xml; charset=utf-8');
-      expect(parse(await res.text()).querySelector('parsererror')).toBeNull();
+      const feed = parse(await res.text());
+      expect(feed.querySelector('parsererror')).toBeNull();
+      expect(items(feed)).toHaveLength(1);
+      expect(items(feed)[0].querySelector('link')!.textContent!.startsWith(`${SITE}/vi/posts/`)).toBe(true);
       const bad = await route.GET(new Request(`${SITE}/fr/feed.xml`), { params: Promise.resolve({ locale: 'fr' }) });
       expect(bad.status).toBe(404);
     } finally {

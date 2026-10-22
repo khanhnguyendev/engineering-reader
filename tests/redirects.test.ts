@@ -138,7 +138,7 @@ describe('validator rule redirects', () => {
     expect(run([{ from: '/x', to: '/\\evil.dev' }])).toHaveLength(1);
   });
   it('compares from case-insensitively against live routes', () => {
-    expect(run([{ from: '/VI/Companies/Discord', to: '/vi' }])).toEqual([expect.objectContaining({ message: expect.stringContaining('live route') })]);
+    expect(run([{ from: '/VI/Companies/Discord', to: '/vi' }])).toEqual([expect.objectContaining({ message: 'redirect from "/VI/Companies/Discord" is a live route' })]);
   });
   it('rejects to equal to from', () => {
     expect(run([{ from: '/loop', to: '/loop' }]).map((f) => f.message)).toContainEqual(expect.stringContaining('points to itself'));

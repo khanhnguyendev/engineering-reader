@@ -11,7 +11,11 @@ export type FeedDict = {
   post: { tldr: string; smallTeam: string };
 };
 
-const rfc822 = (day: string) => new Date(`${day}T00:00:00Z`).toUTCString();
+const rfc822 = (day: string) => {
+  const d = new Date(`${day}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) throw new Error(`invalid date: ${day}`);
+  return d.toUTCString();
+};
 const list = (items: string[]) => `<ul>${items.map((i) => `<li>${x(i)}</li>`).join('')}</ul>`;
 
 /** RSS 2.0 for one locale: the newest posts, each as its top layer plus a link, never the deep layer. */

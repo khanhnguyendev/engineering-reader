@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import path from 'node:path';
+import { LOCALES } from '@/lib/i18n';
 import { listPosts } from '@/lib/content/load';
 import { endpointRoutes, pageEntries } from '@/lib/content/routes';
 import type { Vocab } from '@/lib/content/vocab';
@@ -52,7 +53,12 @@ describe('pageEntries', () => {
     expect(real.length).toBeGreaterThan(0);
     const entries = pageEntries(real, vocab);
     expect(find(entries, '')).toMatchObject({ path: '', locales: ['vi', 'en'] });
-    expect(find(entries, `/posts/${real[0].slug}`)).toBeDefined();
+    for (const p of real) {
+      expect(find(entries, `/posts/${p.slug}`)).toMatchObject({
+        locales: LOCALES.filter((l) => p.locales[l]),
+        lastModified: p.meta.updatedAt ?? p.meta.publishedAt,
+      });
+    }
   });
   it('nonEmptyOnly drops unused pages and trims locales', () => {
     const ne = pageEntries(posts, vocab, { nonEmptyOnly: true });

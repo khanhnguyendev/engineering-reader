@@ -73,7 +73,7 @@ describe('about page', () => {
     expect(enRss.closest('section')).toBeNull();
     expect(enRss.textContent).toBe('Follow new posts by RSS: English RSS feed');
     expect(en.querySelector('a.h2-anchor')!.getAttribute('aria-label')).toBe('Link to this section');
-      });
+  });
 
   it('keeps [S1] as literal text: no ref plugin runs on pages', async () => {
     for (const locale of ['vi', 'en']) {
