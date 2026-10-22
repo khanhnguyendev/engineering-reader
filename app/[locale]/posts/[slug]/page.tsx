@@ -112,29 +112,31 @@ export default async function Page({ params }: { params: Params }) {
           <div data-pagefind-ignore>
             <JsonLd data={articleJsonLd(post, locale, vocab, dict, SITE_URL)} />
           </div>
-          {twinMissing && <MissingLocaleNote text={dict.post.missingLocale} />}
+          <div data-pagefind-ignore>
+            {twinMissing && <MissingLocaleNote text={dict.post.missingLocale} />}
 
-          <nav aria-label={dict.post.breadcrumb} className="mb-3 text-[13px] text-muted">
-            <ol className="flex min-w-0 items-center gap-1.5">
-              <li className="shrink-0">
-                <Link href={`/${locale}`} className="hover:text-ink">
-                  {dict.post.breadcrumbHome}
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li className="shrink-0">
-                <Link href={`/${locale}/companies/${meta.company}`} className="hover:text-ink">
-                  {companyName}
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li aria-current="page" className="min-w-0 truncate text-ink-2">
-                {fm.title}
-              </li>
-            </ol>
-          </nav>
+            <nav aria-label={dict.post.breadcrumb} className="mb-3 text-[13px] text-muted">
+              <ol className="flex min-w-0 items-center gap-1.5">
+                <li className="shrink-0">
+                  <Link href={`/${locale}`} className="hover:text-ink">
+                    {dict.post.breadcrumbHome}
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li className="shrink-0">
+                  <Link href={`/${locale}/companies/${meta.company}`} className="hover:text-ink">
+                    {companyName}
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li aria-current="page" className="min-w-0 truncate text-ink-2">
+                  {fm.title}
+                </li>
+              </ol>
+            </nav>
 
-          <TagsRow pills={[companyName, topic, dict.caseType[meta.caseType]]} />
+            <TagsRow pills={[companyName, topic, dict.caseType[meta.caseType]]} />
+          </div>
 
           <h1 className="mb-3 text-[25px] leading-[1.25] text-balance text-ink lg:mb-4 lg:text-[40px] lg:leading-[1.18]">
             {fm.title}
@@ -143,12 +145,14 @@ export default async function Page({ params }: { params: Params }) {
           <p className="mb-4 text-[16px] leading-[1.6] text-ink-2 lg:mb-5 lg:text-[19px]">
             {fm.summary}
           </p>
-          <PostMeta
-            locale={locale}
-            dict={dict}
-            publishedAt={meta.publishedAt}
-            minutes={doc.readingTime.whole}
-          />
+          <div data-pagefind-ignore>
+            <PostMeta
+              locale={locale}
+              dict={dict}
+              publishedAt={meta.publishedAt}
+              minutes={doc.readingTime.whole}
+            />
+          </div>
 
           <KeyNumbers
             heading={dict.post.keyNumbers}

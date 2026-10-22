@@ -23,6 +23,13 @@ describe('plainText', () => {
   });
 });
 
+describe('plainText tags', () => {
+  it('strips JSX and HTML tags but keeps their text', () => {
+    const out = plainText('Before <Callout kind="note">inside</Callout> and <br/> after <b>bold</b>');
+    expect(out).toBe('Before inside and after bold');
+  });
+});
+
 describe('toSitePath', () => {
   it('removes a trailing .html', () => {
     expect(toSitePath('/vi/posts/a.html')).toBe('/vi/posts/a');

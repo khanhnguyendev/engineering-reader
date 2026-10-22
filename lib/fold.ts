@@ -3,11 +3,12 @@ export function fold(s: string): string {
   return s.normalize("NFD").replace(/\p{M}/gu, "").replace(/đ/g, "d").replace(/Đ/g, "D");
 }
 
-/** Markdown to searchable prose: drops fenced code and URLs, strips markup characters. */
+/** Markdown to searchable prose: drops fenced code, URLs and tags, strips markup characters. */
 export function plainText(md: string): string {
   return md
     .replace(/^(```|~~~)[^\n]*\n[\s\S]*?^\1[^\n]*$/gm, " ")
     .replace(/https?:\/\/[^\s)\]>]+/g, " ")
+    .replace(/<[^>]*>/g, " ")
     .replace(/[#*_`>[\]()|]/g, "")
     .replace(/\s+/g, " ")
     .trim();

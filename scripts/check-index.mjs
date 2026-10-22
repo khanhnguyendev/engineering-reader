@@ -14,6 +14,7 @@ const cases = [
   { locale: "en", q: "messages", check: (r) => r.length >= 1 && r.every((x) => x.url.startsWith("/en/posts/")), expect: ">=1 result, all /en/posts/" },
   // Pagefind folds and prefix-matches, so English words may match; the invariant is no vi leakage.
   { locale: "en", q: "dữ liệu", check: (r) => r.every((x) => x.url.startsWith("/en/posts/")), expect: "every result under /en/posts/ (zero is fine)" },
+  { locale: "en", q: "tin nhắn", check: (r) => r.length === 0, expect: "zero results (vi-only phrase)" },
   { locale: "en", q: "zzqxv", check: (r) => r.length === 0, expect: "zero results" },
 ];
 
