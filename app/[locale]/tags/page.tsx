@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CHIP_LINK } from "@/components/chip";
 import { Header } from "@/components/header";
 import { PageIntro } from "@/components/page-intro";
 import { tagsWithCounts } from "@/lib/content/index";
 import { listPosts } from "@/lib/content/load";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
-import { isLocale } from "@/lib/i18n";
+import { isLocale, plural } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 
 type Params = Promise<{ locale: string }>;
@@ -49,10 +50,13 @@ export default async function Page({ params }: { params: Params }) {
             <li key={tag.slug}>
               <Link
                 href={`/${locale}/tags/${tag.slug}`}
-                className="inline-flex items-baseline gap-2 rounded-md border border-hairline-strong px-2.5 py-1 text-[13px] leading-[1.35] text-ink-2 transition-colors duration-150 hover:bg-panel-2 hover:text-ink"
+                className={CHIP_LINK}
               >
                 {tag[locale]}
-                <span className="font-mono text-xs text-muted">{count}</span>
+                <span className="font-mono text-xs text-muted">
+                  <span aria-hidden="true">{count}</span>
+                <span className="sr-only">{plural(locale, count, dict.list.postsOne, dict.list.postsOther)}</span>
+                </span>
               </Link>
             </li>
           ))}

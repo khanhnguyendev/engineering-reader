@@ -62,8 +62,6 @@
   "companies": {
     "title": "Companies",
     "dek": "The engineering teams whose write-ups we retell, and how many cases each has so far.",
-    "postsOne": "{n} post",
-    "postsOther": "{n} posts",
     "empty": "No posts from this company yet.",
     "blog": "Engineering blog"
   },
@@ -85,6 +83,8 @@
     "empty": "No posts with this tag yet."
   },
   "list": {
+    "postsOne": "{n} post",
+    "postsOther": "{n} posts",
     "posts": "Posts"
   },
   "series": {

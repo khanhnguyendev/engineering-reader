@@ -61,7 +61,7 @@ export default async function Page({ params }: { params: Params }) {
                     </Link>
                   </h2>
                   <p className="font-mono text-xs text-muted">
-                    {plural(locale, count, dict.companies.postsOne, dict.companies.postsOther)}
+                    {plural(locale, count, dict.list.postsOne, dict.list.postsOther)}
                   </p>
                 </div>
               </div>

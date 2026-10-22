@@ -167,7 +167,7 @@ describe('tag page', () => {
     const { generateMetadata } = await import('@/app/[locale]/tags/[tag]/page');
     const m = await generateMetadata({ params: Promise.resolve({ locale: 'vi', tag: 'cassandra' }) });
     expect(m.title).toBe('Cassandra · Hệ thống lớn');
-    expect(m.description).toMatch(/^Mọi công nghệ/);
+    expect(m.description).toBe('Cassandra: 2 bài');
     expect(m.alternates?.canonical).toBe('/vi/tags/cassandra');
     expect(await generateMetadata({ params: Promise.resolve({ locale: 'vi', tag: 'nope' }) })).toEqual({});
   });

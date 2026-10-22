@@ -24,11 +24,12 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const tag = loadVocab().tags.find((t) => t.slug === slug);
   if (!tag) return {};
   const dict = getDictionary(locale);
+  const count = listPosts().filter((p) => p.meta.tags.includes(tag.slug) && hasLocale(p, locale)).length;
   return buildMetadata({
     locale,
     path: `/tags/${tag.slug}`,
     title: `${tag[locale]} · ${dict.site.name}`,
-    description: dict.tags.dek,
+    description: `${tag[locale]}: ${plural(locale, count, dict.list.postsOne, dict.list.postsOther)}`,
   });
 }
 
@@ -54,7 +55,7 @@ export default async function Page({ params }: { params: Params }) {
         <div className="max-w-[720px]">
           <PageIntro
             title={tag[locale]}
-            dek={plural(locale, count, dict.companies.postsOne, dict.companies.postsOther)}
+            dek={plural(locale, count, dict.list.postsOne, dict.list.postsOther)}
           />
         </div>
         <section>

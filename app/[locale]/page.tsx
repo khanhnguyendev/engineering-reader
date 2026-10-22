@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CHIP_LINK } from "@/components/chip";
 import { Header } from "@/components/header";
 import { Monogram } from "@/components/monogram";
 import { PostList } from "@/components/post-list";
@@ -9,7 +10,7 @@ import { companiesWithCounts, featuredPosts, topicsWithCounts } from "@/lib/cont
 import { hasLocale, listPosts } from "@/lib/content/load";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
-import { isLocale } from "@/lib/i18n";
+import { isLocale, plural } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 
 type Params = Promise<{ locale: string }>;
@@ -37,7 +38,7 @@ export default async function Page({ params }: { params: Params }) {
     .filter((p) => hasLocale(p, locale) && !startSlugs.has(p.slug))
     .slice(0, LATEST);
   const companies = companiesWithCounts(posts, vocab, locale).filter((c) => c.count > 0);
-  const topics = topicsWithCounts(posts, vocab, locale).filter((t) => t.count > 0);
+  const topics = topicsWithCounts(posts, vocab, locale);
 
   return (
     <>
@@ -85,7 +86,10 @@ export default async function Page({ params }: { params: Params }) {
                     <span className="text-[16px] font-semibold underline decoration-transparent underline-offset-4 transition-colors duration-150 group-hover:decoration-accent">
                       {company.name}
                     </span>
-                    <span className="font-mono text-[13px] text-muted">{count}</span>
+                    <span className="font-mono text-[13px] text-muted">
+                      <span aria-hidden="true">{count}</span>
+                <span className="sr-only">{plural(locale, count, dict.list.postsOne, dict.list.postsOther)}</span>
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -101,10 +105,13 @@ export default async function Page({ params }: { params: Params }) {
                 <li key={topic.slug}>
                   <Link
                     href={`/${locale}/topics/${topic.slug}`}
-                    className="inline-flex items-baseline gap-2 rounded-md border border-hairline-strong px-2.5 py-1 text-[13px] leading-[1.35] text-ink-2 transition-colors duration-150 hover:bg-panel-2 hover:text-ink"
+                    className={CHIP_LINK}
                   >
                     {topic[locale]}
-                    <span className="font-mono text-xs text-muted">{count}</span>
+                    <span className="font-mono text-xs text-muted">
+                      <span aria-hidden="true">{count}</span>
+                <span className="sr-only">{plural(locale, count, dict.list.postsOne, dict.list.postsOther)}</span>
+                    </span>
                   </Link>
                 </li>
               ))}

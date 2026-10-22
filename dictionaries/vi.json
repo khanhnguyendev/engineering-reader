@@ -62,8 +62,6 @@
   "companies": {
     "title": "Công ty",
     "dek": "Những đội kỹ thuật có bài viết được kể lại ở đây, và số bài của từng nơi.",
-    "postsOne": "{n} bài",
-    "postsOther": "{n} bài",
     "empty": "Chưa có bài nào về công ty này.",
     "blog": "Blog kỹ thuật"
   },
@@ -85,6 +83,8 @@
     "empty": "Chưa có bài nào gắn thẻ này."
   },
   "list": {
+    "postsOne": "{n} bài",
+    "postsOther": "{n} bài",
     "posts": "Bài viết"
   },
   "series": {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CHIP } from "@/components/chip";
 import { Monogram } from "@/components/monogram";
 import type { PostRecord } from "@/lib/content/load";
 import type { Company } from "@/lib/content/schema";
@@ -48,7 +49,7 @@ export function PostCard({
           </span>
         )}
         <span className="mt-auto flex items-center justify-between gap-3 pt-1">
-          <span className="rounded-md border border-hairline-strong px-2 py-[3px] text-xs leading-[1.35] text-ink-2">
+          <span className={CHIP}>
             {topicLabel}
           </span>
           <span className="font-mono text-xs text-muted">

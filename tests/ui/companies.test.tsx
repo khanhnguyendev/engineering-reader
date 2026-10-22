@@ -15,6 +15,13 @@ const GOOD = 'tests/fixtures/posts/good-post';
 const META = JSON.parse(readFileSync(path.join(GOOD, 'post.json'), 'utf8'));
 const VOCAB_FILES = ['companies', 'topics', 'tags', 'series', 'source-hosts', 'featured'];
 
+/** Inline so the test never depends on the live content/companies.json. */
+const COMPANIES = [
+  { slug: 'discord', name: 'Discord', blogUrl: 'https://discord.com/blog', feedUrl: 'https://discord.com/blog/rss.xml', brandColor: '#5865F2', logo: 'public/logos/discord.svg' },
+  { slug: 'cloudflare', name: 'Cloudflare', blogUrl: 'https://blog.cloudflare.com', feedUrl: 'https://blog.cloudflare.com/rss/', brandColor: '#F38020', logo: 'public/logos/cloudflare.svg' },
+  { slug: 'netflix', name: 'Netflix', blogUrl: 'https://netflixtechblog.com', feedUrl: 'https://netflixtechblog.com/feed', brandColor: '#E50914', logo: 'public/logos/netflix.svg' },
+];
+
 type P = { slug: string; company?: string; publishedAt?: string; enDraft?: boolean };
 type Site = { postsDir: string; vocabDir: string };
 
@@ -31,6 +38,7 @@ function site(posts: P[]): Site {
   mkdirSync(postsDir, { recursive: true });
   mkdirSync(vocabDir, { recursive: true });
   for (const f of VOCAB_FILES) cpSync(`content/${f}.json`, path.join(vocabDir, `${f}.json`));
+  writeFileSync(path.join(vocabDir, 'companies.json'), JSON.stringify(COMPANIES));
   for (const { enDraft, ...p } of posts) {
     const dir = path.join(postsDir, p.slug);
     cpSync(GOOD, dir, { recursive: true });
@@ -199,7 +207,7 @@ describe('company page', () => {
     const { generateMetadata } = await import('@/app/[locale]/companies/[company]/page');
     const m = await generateMetadata({ params: Promise.resolve({ locale: 'en', company: 'discord' }) });
     expect(m.title).toBe('Discord · Hệ thống lớn');
-    expect(m.description).toMatch(/^The engineering teams/);
+    expect(m.description).toBe('Discord: 2 posts');
     expect(m.alternates).toEqual({
       canonical: '/en/companies/discord',
       languages: { vi: '/vi/companies/discord', en: '/en/companies/discord', 'x-default': '/vi/companies/discord' },

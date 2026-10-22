@@ -23,12 +23,12 @@ describe("dictionaries", () => {
   it("carry the M2 wayfinding keys in both locales", () => {
     const required = [
       "home.intro", "home.startHere", "home.latest", "home.byCompany", "home.byTopic", "home.all",
-      "companies.title", "companies.dek", "companies.postsOne", "companies.postsOther",
+      "companies.title", "companies.dek",
       "companies.empty", "companies.blog",
       "topics.title", "topics.dek", "topics.empty",
       "topics.shelf.distributed-systems", "topics.shelf.data", "topics.shelf.realtime",
       "topics.shelf.infra", "topics.shelf.reliability",
-      "tags.title", "tags.dek", "tags.empty", "list.posts",
+      "tags.title", "tags.dek", "tags.empty", "list.posts", "list.postsOne", "list.postsOther",
       "series.title", "series.part", "series.prev", "series.next", "series.index",
       "related.title", "about.title", "about.dek",
       "notFound.title", "notFound.body", "notFound.home",
@@ -36,6 +36,10 @@ describe("dictionaries", () => {
     for (const l of ["vi", "en"] as const) {
       const keys = new Set(keyPaths(getDictionary(l)));
       for (const k of required) expect(keys, `${l}: ${k}`).toContain(k);
+    }
+    for (const l of ["vi", "en"] as const) {
+      expect(Object.keys(getDictionary(l).companies)).not.toContain("postsOne");
+      expect(Object.keys(getDictionary(l).companies)).not.toContain("postsOther");
     }
     expect(getDictionary("en").series.part).toBe("Part {i} of {n}");
     expect(getDictionary("vi").series.part).toBe("Phần {i}/{n}");
@@ -46,7 +50,7 @@ describe("dictionaries", () => {
 
 describe("plural", () => {
   it("picks one/other by Intl.PluralRules in en", () => {
-    const d = getDictionary("en").companies;
+    const d = getDictionary("en").list;
     expect(plural("en", 1, d.postsOne, d.postsOther)).toBe("1 post");
     expect(plural("en", 3, d.postsOne, d.postsOther)).toBe("3 posts");
   });
@@ -61,7 +65,7 @@ describe("plural", () => {
     expect(plural("vi", 2, "ONE", "OTHER")).toBe("OTHER");
   });
   it("uses the other form for every n in vi", () => {
-    const d = getDictionary("vi").companies;
+    const d = getDictionary("vi").list;
     expect(plural("vi", 1, d.postsOne, d.postsOther)).toBe("1 bài");
     expect(plural("vi", 3, d.postsOne, d.postsOther)).toBe("3 bài");
   });

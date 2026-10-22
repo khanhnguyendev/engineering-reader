@@ -26,11 +26,12 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const company = loadVocab().companies.find((c) => c.slug === slug);
   if (!company) return {};
   const dict = getDictionary(locale);
+  const count = listPosts().filter((p) => p.meta.company === company.slug && hasLocale(p, locale)).length;
   return buildMetadata({
     locale,
     path: `/companies/${company.slug}`,
     title: `${company.name} · ${dict.site.name}`,
-    description: dict.companies.dek,
+    description: `${company.name}: ${plural(locale, count, dict.list.postsOne, dict.list.postsOther)}`,
   });
 }
 
@@ -53,19 +54,20 @@ export default async function Page({ params }: { params: Params }) {
         tabIndex={-1}
         className="mx-auto max-w-[1200px] px-4 pb-24 pt-8 focus:outline-none sm:px-6 lg:pt-14"
       >
-        <div className="mb-8 max-w-[720px] lg:mb-10">
+        <div className="max-w-[720px]">
           <PageIntro
             title={company.name}
-            dek={plural(locale, count, dict.companies.postsOne, dict.companies.postsOther)}
-          />
-          <a
-            href={company.blogUrl}
-            rel="noopener noreferrer"
-            target="_blank"
-            className="mono-label -mt-5 inline-block text-muted underline decoration-hairline-strong underline-offset-4 transition-colors duration-150 hover:text-ink hover:decoration-accent lg:-mt-6"
+            dek={plural(locale, count, dict.list.postsOne, dict.list.postsOther)}
           >
-            {dict.companies.blog}
-          </a>
+            <a
+              href={company.blogUrl}
+              rel="noopener noreferrer"
+              target="_blank"
+              className="mono-label mt-3 inline-block text-muted underline decoration-hairline-strong underline-offset-4 transition-colors duration-150 hover:text-ink hover:decoration-accent"
+            >
+              {dict.companies.blog}
+            </a>
+          </PageIntro>
         </div>
         <section>
           <SectionHeading title={dict.list.posts} />

@@ -6,17 +6,11 @@ import { PageIntro } from "@/components/page-intro";
 import { topicsWithCounts } from "@/lib/content/index";
 import { listPosts } from "@/lib/content/load";
 import { loadVocab } from "@/lib/content/vocab";
-import { getDictionary, type Dictionary } from "@/lib/dictionaries";
+import { getDictionary, shelfDek } from "@/lib/dictionaries";
 import { isLocale, plural } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 
 type Params = Promise<{ locale: string }>;
-
-/** The one-line shelf dek for a topic; the topics dek when the shelf has none. */
-function shelfDek(dict: Dictionary, slug: string): string {
-  const shelf: Record<string, string> = dict.topics.shelf;
-  return Object.hasOwn(shelf, slug) ? shelf[slug] : dict.topics.dek;
-}
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { locale } = await params;
@@ -58,7 +52,7 @@ export default async function Page({ params }: { params: Params }) {
                 <h2 className="text-[17px] leading-[1.35] text-ink lg:text-[19px]">{topic[locale]}</h2>
                 <p className="text-[15px] leading-[1.6] text-ink-2">{shelfDek(dict, topic.slug)}</p>
                 <span className="mt-auto pt-2 font-mono text-xs text-muted">
-                  {plural(locale, count, dict.companies.postsOne, dict.companies.postsOther)}
+                  {plural(locale, count, dict.list.postsOne, dict.list.postsOther)}
                 </span>
               </Link>
             </li>

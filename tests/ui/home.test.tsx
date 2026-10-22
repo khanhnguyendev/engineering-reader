@@ -138,12 +138,35 @@ describe('home (vi)', () => {
   it('renders topic chips with counts linking to topic pages', async () => {
     const { host } = await render(site(TEN));
     const chips = [...section(host, 'Theo chủ đề')!.querySelectorAll('a')];
-    expect(chips.map((a) => a.getAttribute('href'))).toEqual(['/vi/topics/data', '/vi/topics/reliability']);
-    expect(chips[0].textContent).toContain('Dữ liệu');
-    expect(chips[0].textContent).toContain('5');
+    expect(chips.map((a) => a.getAttribute('href'))).toEqual(
+      ['distributed-systems', 'data', 'realtime', 'infra', 'reliability'].map((t) => `/vi/topics/${t}`),
+    );
+    expect(chips[1].textContent).toContain('Dữ liệu');
+    expect(chips[1].textContent).toContain('5');
+    expect(chips[2].textContent).toContain('0');
     for (const c of ['border', 'border-hairline-strong', 'rounded-md']) {
       expect(chips[0].className.split(' ')).toContain(c);
     }
+  });
+
+  it('gives bare counts sr-only plural text, hiding the digit from readers', async () => {
+    const vi_ = (await render(site(TEN))).host;
+    const company = section(vi_, 'Theo công ty')!.querySelector('a')!;
+    expect([...company.querySelectorAll('span[aria-hidden="true"]')].map((s) => s.textContent)).toContain('6');
+    expect(company.querySelector('.sr-only')!.textContent).toBe('6 bài');
+    const topic = section(vi_, 'Theo chủ đề')!.querySelector('a[href="/vi/topics/data"]')!;
+    expect(topic.querySelector('.sr-only')!.textContent).toBe('5 bài');
+    const en = (await render(site(TEN.slice(0, 1)), 'en')).host;
+    expect(section(en, 'By company')!.querySelector('.sr-only')!.textContent).toBe('1 post');
+    expect(section(en, 'By topic')!.querySelector('a[href="/en/topics/data"] .sr-only')!.textContent).toBe('1 post');
+  });
+
+  it('uses the one shared chip class string for topic chips', async () => {
+    const { CHIP } = await import('@/components/chip');
+    const { host } = await render(site(TEN));
+    const chip = section(host, 'Theo chủ đề')!.querySelector('a')!;
+    expect(chip.className).toContain(CHIP);
+    expect(chip.className).toContain('px-2 py-[3px] text-xs');
   });
 
   it('renders the en home in English', async () => {

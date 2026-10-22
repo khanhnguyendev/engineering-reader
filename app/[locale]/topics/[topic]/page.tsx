@@ -6,17 +6,11 @@ import { PostList } from "@/components/post-list";
 import { SectionHeading } from "@/components/section-heading";
 import { listPosts } from "@/lib/content/load";
 import { loadVocab } from "@/lib/content/vocab";
-import { getDictionary, type Dictionary } from "@/lib/dictionaries";
+import { getDictionary, shelfDek } from "@/lib/dictionaries";
 import { isLocale, LOCALES } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 
 type Params = Promise<{ locale: string; topic: string }>;
-
-/** The one-line shelf dek for a topic; the topics dek when the shelf has none. */
-function shelfDek(dict: Dictionary, slug: string): string {
-  const shelf: Record<string, string> = dict.topics.shelf;
-  return Object.hasOwn(shelf, slug) ? shelf[slug] : dict.topics.dek;
-}
 
 export const dynamicParams = false;
 

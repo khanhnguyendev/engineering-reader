@@ -12,10 +12,13 @@ import { KeyNumbers } from "@/components/post/key-numbers";
 import { Lessons } from "@/components/post/lessons";
 import { MissingLocaleNote } from "@/components/post/missing-locale-note";
 import { formatDate, PostMeta } from "@/components/post/post-meta";
+import { Related } from "@/components/post/related";
+import { SeriesNav } from "@/components/post/series-nav";
 import { SmallTeam } from "@/components/post/small-team";
 import { Sources } from "@/components/post/sources";
 import { TagsRow } from "@/components/post/tags-row";
 import { Tldr } from "@/components/post/tldr";
+import { relatedPosts, seriesNav } from "@/lib/content/index";
 import { CONTENT_ROOT, getPost, hasLocale, listPosts } from "@/lib/content/load";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
@@ -88,6 +91,9 @@ export default async function Page({ params }: { params: Params }) {
   const company = vocab.companies.find((c) => c.slug === meta.company);
   const companyName = company?.name ?? meta.company;
   const topic = vocab.topics.find((t) => t.slug === meta.topic)?.[locale] ?? meta.topic;
+  const allPosts = listPosts();
+  const nav = seriesNav(post, vocab, allPosts, locale);
+  const related = relatedPosts(post, allPosts, locale);
   const { content, headings } = await compilePostBody(post, locale, dict.post.permalink);
 
   return (
@@ -153,6 +159,19 @@ export default async function Page({ params }: { params: Params }) {
           {fm.lessons && <Lessons heading={dict.post.lessons} items={fm.lessons} />}
           <Sources dict={dict} locale={locale} sources={meta.sources} />
           <Byline text={dict.post.byline} />
+          {nav.series && nav.index >= 0 && (
+            <SeriesNav
+              locale={locale}
+              dict={dict}
+              seriesKey={nav.series.key}
+              title={nav.series[locale]}
+              index={nav.index}
+              total={nav.total}
+              prev={nav.prev}
+              next={nav.next}
+            />
+          )}
+          <Related posts={related} locale={locale} vocab={vocab} dict={dict} />
         </article>
 
         <aside className="hidden lg:block">
