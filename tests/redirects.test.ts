@@ -2,7 +2,8 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { readRedirects, RedirectsSchema, staticRoutes, toNextRedirects } from '@/lib/content/redirects';
+import { RedirectsSchema, staticRoutes, toNextRedirects } from '@/lib/content/redirects';
+import { readRedirects } from '@/lib/content/read-redirects';
 import { validateAll } from '@/lib/content/validate';
 import type { Vocab } from '@/lib/content/vocab';
 

@@ -5,7 +5,8 @@ import { LOCALES, type Locale } from '@/lib/i18n';
 import { parsePost, readRawPost, type RawPost, type ZodIssueWithFile } from '@/lib/content/load';
 import { hostOf } from '@/lib/content/normalize-url';
 import type { Vocab } from '@/lib/content/vocab';
-import { readRedirects, staticRoutes } from './redirects';
+import { readRedirects } from './read-redirects';
+import { staticRoutes } from './redirects';
 import type { RoutePost } from './routes';
 
 export type Finding = {

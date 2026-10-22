@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { z } from 'zod';
 import { endpointRoutes, pageEntries, type RoutePost } from './routes';
 import type { Vocab } from './vocab';
@@ -18,10 +17,6 @@ export const RedirectsSchema = z.array(
     .transform((r) => (r.statusCode === undefined ? { ...r, permanent: r.permanent ?? true } : r)),
 );
 export type Redirect = z.infer<typeof RedirectsSchema>[number];
-
-export function readRedirects(file = 'content/redirects.json'): Redirect[] {
-  return RedirectsSchema.parse(JSON.parse(readFileSync(file, 'utf8')));
-}
 
 /** Every URL the site serves itself; a redirect `from` here would shadow a real page. */
 export function staticRoutes(posts: readonly RoutePost[], vocab: Vocab): Set<string> {

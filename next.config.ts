@@ -1,6 +1,7 @@
 import path from "node:path";
 import type { NextConfig } from "next";
-import { readRedirects, toNextRedirects } from "./lib/content/redirects";
+import { readRedirects } from "./lib/content/read-redirects";
+import { toNextRedirects } from "./lib/content/redirects";
 
 const nextConfig: NextConfig = {
   async redirects() {
