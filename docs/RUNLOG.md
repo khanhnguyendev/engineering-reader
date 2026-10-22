@@ -27,3 +27,6 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-22 M2/T6 series pages, prev/next, related (+ T3–T5 carried minors) (series route verified by the fixture test only; no real series in content yet) — f72bfe7
 - 2026-10-22 M2/T7 about page from MDX (+ T6 carried minors) — ccc9e9b
 - 2026-10-22 M2/T8 redirects module, localized 404, header nav state — 4e612ec
+- 2026-10-22 M2/T9 done-when: 18 IA routes 200 in vi+en under pnpm start, / → 308 /vi, /vi/nope and /en/nope → 404 localized with header
+- 2026-10-22 M2/T9 finish review (home, company, topic, about, 404): fix → 2 rounds → ship — 58253d7, 868a199, 63cb697
+- 2026-10-22 M2/T9 DESIGN.md + design.json record M2 components — eb750a5
