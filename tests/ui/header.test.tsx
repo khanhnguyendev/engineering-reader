@@ -42,6 +42,10 @@ describe('header nav state', () => {
     expect(current('/vi/topics')).toEqual(['/vi/topics']);
     expect(current('/en/about', 'en')).toEqual(['/en/about']);
   });
+  it('marks search, linking to /<locale>/search', () => {
+    expect(current('/vi/search')).toEqual(['/vi/search']);
+    expect(current('/en/search', 'en')).toEqual(['/en/search']);
+  });
   it('marks nothing on tags, series, posts and home', () => {
     for (const p of ['/vi/tags/x', '/vi/series/s', '/vi/posts/p', '/vi']) expect(current(p)).toEqual([]);
   });
