@@ -43,6 +43,12 @@ describe('pageEntries', () => {
     expect(find(all, '/posts/vi-only')).toMatchObject({ locales: ['vi'], lastModified: '2026-10-01' });
     expect(find(all, '/posts/both')).toMatchObject({ locales: ['vi', 'en'], lastModified: '2026-10-05' });
   });
+  it('lists /search as non-indexable in both locales, with and without nonEmptyOnly', () => {
+    for (const list of [all, pageEntries(posts, vocab, { nonEmptyOnly: true })]) {
+      expect(find(list, '/search')).toEqual({ path: '/search', locales: ['vi', 'en'], indexable: false });
+    }
+    expect(find(all, '/about')?.indexable).not.toBe(false);
+  });
   it('covers indexes and every vocab page by default', () => {
     for (const p of ['/about', '/companies', '/topics', '/tags', '/companies/empty-co', '/tags/unused', '/series/s1']) {
       expect(find(all, p), p).toBeDefined();

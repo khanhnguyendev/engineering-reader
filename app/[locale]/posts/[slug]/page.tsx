@@ -28,6 +28,7 @@ import { fmt, isLocale, LOCALES, otherLocale } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 import { articleJsonLd } from "@/lib/json-ld";
 import { isoAtPublication } from "@/lib/dates";
+import { fold, plainText } from "@/lib/fold";
 import { compilePostBody } from "@/lib/mdx/compile";
 import { SITE_URL } from "@/lib/site";
 
@@ -79,6 +80,7 @@ export default async function Page({ params }: { params: Params }) {
   const twinMissing = !hasLocale(post, otherLocale(locale));
   const company = vocab.companies.find((c) => c.slug === meta.company);
   const companyName = company?.name ?? meta.company;
+  const firstKey = meta.keyNumbers[0];
   const topic = vocab.topics.find((t) => t.slug === meta.topic)?.[locale] ?? meta.topic;
   const allPosts = listPosts();
   const nav = seriesNav(post, vocab, allPosts, locale);
@@ -94,31 +96,59 @@ export default async function Page({ params }: { params: Params }) {
         tabIndex={-1}
         className="mx-auto max-w-[1200px] px-4 pb-24 focus:outline-none pt-5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,720px)_260px] lg:justify-between lg:gap-10 lg:pt-10"
       >
-        <article className="min-w-0">
-          <JsonLd data={articleJsonLd(post, locale, vocab, dict, SITE_URL)} />
-          {twinMissing && <MissingLocaleNote text={dict.post.missingLocale} />}
+        <article className="min-w-0" data-pagefind-body>
+          {/* Meta values live in attributes so commas stay exact and nothing is indexed twice. */}
+          <span hidden data-pagefind-meta="title[data-meta-value]" data-meta-value={fm.title} />
+          <span hidden data-pagefind-meta="summary[data-meta-value]" data-meta-value={fm.summary} />
+          <span hidden data-pagefind-meta="company[data-meta-value]" data-meta-value={companyName} />
+          <span hidden data-pagefind-meta="companyId[data-meta-value]" data-meta-value={meta.company} />
+          {firstKey && (
+            <>
+              <span hidden data-pagefind-meta="keyValue[data-meta-value]" data-meta-value={firstKey.value} />
+              <span
+                hidden
+                data-pagefind-meta="keyLabel[data-meta-value]"
+                data-meta-value={fm.keyNumberLabels[firstKey.id] ?? firstKey.id}
+              />
+            </>
+          )}
+          {/* Accent-folded copy so unaccented queries match; never rendered or announced. */}
+          <span
+            hidden
+            aria-hidden="true"
+            data-pagefind-index-attrs="data-folded"
+            data-folded={fold(
+              `${fm.title} ${fm.summary} ${fm.tldr.join(" ")} ${plainText(doc.body)}`,
+            )}
+          />
+          <div data-pagefind-ignore>
+            <JsonLd data={articleJsonLd(post, locale, vocab, dict, SITE_URL)} />
+          </div>
+          <div data-pagefind-ignore>
+            {twinMissing && <MissingLocaleNote text={dict.post.missingLocale} />}
 
-          <nav aria-label={dict.post.breadcrumb} className="mb-3 text-[13px] text-muted">
-            <ol className="flex min-w-0 items-center gap-1.5">
-              <li className="shrink-0">
-                <Link href={`/${locale}`} className="hover:text-ink">
-                  {dict.post.breadcrumbHome}
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li className="shrink-0">
-                <Link href={`/${locale}/companies/${meta.company}`} className="hover:text-ink">
-                  {companyName}
-                </Link>
-              </li>
-              <li aria-hidden="true">/</li>
-              <li aria-current="page" className="min-w-0 truncate text-ink-2">
-                {fm.title}
-              </li>
-            </ol>
-          </nav>
+            <nav aria-label={dict.post.breadcrumb} className="mb-3 text-[13px] text-muted">
+              <ol className="flex min-w-0 items-center gap-1.5">
+                <li className="shrink-0">
+                  <Link href={`/${locale}`} className="hover:text-ink">
+                    {dict.post.breadcrumbHome}
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li className="shrink-0">
+                  <Link href={`/${locale}/companies/${meta.company}`} className="hover:text-ink">
+                    {companyName}
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li aria-current="page" className="min-w-0 truncate text-ink-2">
+                  {fm.title}
+                </li>
+              </ol>
+            </nav>
 
-          <TagsRow pills={[companyName, topic, dict.caseType[meta.caseType]]} />
+            <TagsRow pills={[companyName, topic, dict.caseType[meta.caseType]]} />
+          </div>
 
           <h1 className="mb-3 text-[25px] leading-[1.25] text-balance text-ink lg:mb-4 lg:text-[40px] lg:leading-[1.18]">
             {fm.title}
@@ -127,12 +157,14 @@ export default async function Page({ params }: { params: Params }) {
           <p className="mb-4 text-[16px] leading-[1.6] text-ink-2 lg:mb-5 lg:text-[19px]">
             {fm.summary}
           </p>
-          <PostMeta
-            locale={locale}
-            dict={dict}
-            publishedAt={meta.publishedAt}
-            minutes={doc.readingTime.whole}
-          />
+          <div data-pagefind-ignore>
+            <PostMeta
+              locale={locale}
+              dict={dict}
+              publishedAt={meta.publishedAt}
+              minutes={doc.readingTime.whole}
+            />
+          </div>
 
           <KeyNumbers
             heading={dict.post.keyNumbers}
@@ -143,25 +175,29 @@ export default async function Page({ params }: { params: Params }) {
           <SmallTeam heading={dict.post.smallTeam} items={fm.smallTeam} />
 
           <DeepDivider label={fmt(dict.post.deepRead, { n: doc.readingTime.deep })} />
-          <Toc label={dict.post.toc} headings={headings} variant="details" />
+          <div data-pagefind-ignore>
+            <Toc label={dict.post.toc} headings={headings} variant="details" />
+          </div>
           <div className={BODY}>{content}</div>
 
           {fm.lessons && <Lessons heading={dict.post.lessons} items={fm.lessons} />}
-          <Sources dict={dict} locale={locale} sources={meta.sources} />
-          <Byline text={dict.post.byline} />
-          {nav.series && nav.index >= 0 && (
-            <SeriesNav
-              locale={locale}
-              dict={dict}
-              seriesKey={nav.series.key}
-              title={nav.series[locale]}
-              index={nav.index}
-              total={nav.total}
-              prev={nav.prev}
-              next={nav.next}
-            />
-          )}
-          <Related posts={related} locale={locale} vocab={vocab} dict={dict} />
+          <div data-pagefind-ignore>
+            <Sources dict={dict} locale={locale} sources={meta.sources} />
+            <Byline text={dict.post.byline} />
+            {nav.series && nav.index >= 0 && (
+              <SeriesNav
+                locale={locale}
+                dict={dict}
+                seriesKey={nav.series.key}
+                title={nav.series[locale]}
+                index={nav.index}
+                total={nav.total}
+                prev={nav.prev}
+                next={nav.next}
+              />
+            )}
+            <Related posts={related} locale={locale} vocab={vocab} dict={dict} />
+          </div>
         </article>
 
         <aside className="hidden lg:block">

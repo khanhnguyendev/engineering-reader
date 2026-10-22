@@ -20,6 +20,7 @@ export function Header({
     { section: "companies", label: dict.nav.companies },
     { section: "topics", label: dict.nav.topics },
     { section: "about", label: dict.nav.about },
+    { section: "search", label: dict.nav.search },
   ];
   return (
     <header className="border-b border-hairline">

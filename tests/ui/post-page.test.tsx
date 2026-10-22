@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -64,7 +64,9 @@ describe('post page (vi)', () => {
 
   it('renders the top layer in order, then the divider, then the deep layer', () => {
     // the JSON-LD script repeats the summary text; order is about visible markup only
-    const visible = html.replace(/<script type="application\/ld\+json">[^]*?<\/script>/, '');
+    const visible = html
+      .replace(/<script type="application\/ld\+json">[^]*?<\/script>/, '')
+      .replace(/<span hidden[^>]*><\/span>/g, '');
     const at = (needle: string) => {
       const i = visible.indexOf(needle);
       expect(i, `missing: ${needle}`).toBeGreaterThanOrEqual(0);
@@ -120,6 +122,77 @@ describe('post page (vi)', () => {
     expect(ld.image[0]).toMatch(/^https?:\/\/.+\/og\/vi\/good-post\.png$/);
   });
 
+  it('marks the article as the single Pagefind body and ignores the non-prose blocks', () => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const bodies = host.querySelectorAll('[data-pagefind-body]');
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0].tagName).toBe('ARTICLE');
+    expect(host.querySelector('#post-sources')!.closest('[data-pagefind-ignore]')).not.toBeNull();
+    expect(host.querySelector('script[type="application/ld+json"]')!.closest('[data-pagefind-ignore]')).not.toBeNull();
+    expect(host.querySelector('#post-sources')!.closest('[data-pagefind-body]')).toBe(bodies[0]);
+    // the in-article TOC (details variant) is ignored; SeriesNav and Related are covered in "variants" below
+    expect(host.querySelector('article details nav')!.closest('[data-pagefind-ignore]')).not.toBeNull();
+  });
+
+  it('ignores the breadcrumb, tags row, meta line and missing-locale note, but not the prose', () => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const article = host.querySelector('article')!;
+    const ignored = (el: Element | null) => el!.closest('[data-pagefind-ignore]') !== null;
+    expect(ignored(article.querySelector('nav[aria-label="Đường dẫn"]'))).toBe(true);
+    expect(ignored(article.querySelector('li.rounded-md')), 'tags row').toBe(true);
+    expect(ignored(article.querySelector('time'))).toBe(true);
+    for (const el of [article.querySelector('h1'), article.querySelector('.callout'), host.querySelector('[data-folded]')]) {
+      expect(ignored(el), el!.outerHTML.slice(0, 40)).toBe(false);
+    }
+  });
+
+  it('carries exact accented title, summary and company as hidden meta elements', () => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const get = (k: string) => host.querySelector<HTMLElement>(`[data-pagefind-meta^="${k}["]`)!;
+    for (const k of ['title', 'summary', 'company']) {
+      const el = get(k);
+      expect(el, k).not.toBeNull();
+      expect(el.hasAttribute('hidden')).toBe(true);
+      expect(el.textContent).toBe('');
+    }
+    expect(get('title').getAttribute('data-meta-value')).toBe(fm('title'));
+    expect(get('title').getAttribute('data-meta-value')).toMatch(/[^\x00-\x7f]/);
+    expect(get('summary').getAttribute('data-meta-value')).toBe(fm('summary'));
+    expect(get('company').getAttribute('data-meta-value')).toBeTruthy();
+  });
+
+  it('carries the company id and the lead key number as hidden meta elements', () => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const get = (k: string) => host.querySelector<HTMLElement>(`[data-pagefind-meta^="${k}["]`)!;
+    for (const k of ['companyId', 'keyValue', 'keyLabel']) {
+      const el = get(k);
+      expect(el, k).not.toBeNull();
+      expect(el.hasAttribute('hidden')).toBe(true);
+      expect(el.textContent).toBe('');
+      expect(el.getAttribute('data-pagefind-meta')).toBe(`${k}[data-meta-value]`);
+    }
+    expect(get('companyId').getAttribute('data-meta-value')).toBe('discord');
+    expect(get('keyValue').getAttribute('data-meta-value')).toBeTruthy();
+    expect(get('keyLabel').getAttribute('data-meta-value')).toBeTruthy();
+  });
+
+  it('has one hidden, aria-hidden, empty folded span for indexing', () => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const spans = host.querySelectorAll('[data-folded]');
+    expect(spans).toHaveLength(1);
+    const span = spans[0];
+    expect(span.hasAttribute('hidden')).toBe(true);
+    expect(span.getAttribute('aria-hidden')).toBe('true');
+    expect(span.textContent).toBe('');
+    expect(span.getAttribute('data-pagefind-index-attrs')).toBe('data-folded');
+    expect(span.getAttribute('data-folded')).toContain('Discord chuyen kho tin nhan');
+  });
+
   it('marks the small-team block as the callout', () => {
     expect(html).toContain('class="callout');
   });
@@ -148,11 +221,45 @@ describe('post page variants', () => {
     edit('en.mdx', (s) => s.replace(/^---\n/, '---\ndraft: true\n'));
     const html = await render(tmp, 'vi');
     expect(html).toContain('Bài này chưa có bản tiếng Anh.');
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    expect(host.querySelector('[role="note"]')!.closest('[data-pagefind-ignore]')).not.toBeNull();
   });
 
   it('does not note a missing twin when both locales exist', async () => {
     const html = await render(tmp, 'vi');
     expect(html).not.toContain('Bài này chưa có bản tiếng Anh.');
+  });
+
+  it('ignores SeriesNav and Related when they render', async () => {
+    const vocabDir = path.join(tmp, '..', path.basename(tmp) + '-vocab');
+    mkdirSync(vocabDir, { recursive: true });
+    for (const f of ['companies', 'topics', 'tags', 'series', 'source-hosts', 'featured']) {
+      cpSync(`content/${f}.json`, path.join(vocabDir, `${f}.json`));
+    }
+    writeFileSync(
+      path.join(vocabDir, 'series.json'),
+      JSON.stringify({ scaling: { slugs: ['good-post', 'other-post'], vi: 'Mở rộng', en: 'Scaling' } }),
+    );
+    const other = path.join(tmp, 'other-post');
+    cpSync(FIXTURE, other, { recursive: true });
+    writeFileSync(path.join(other, 'post.json'), JSON.stringify({ ...meta, slug: 'other-post', series: 'scaling' }));
+    edit('post.json', (s) => JSON.stringify({ ...JSON.parse(s), series: 'scaling' }));
+    vi.stubEnv('VOCAB_ROOT', vocabDir);
+    try {
+      const html = await render(tmp, 'vi');
+      const host = document.createElement('div');
+      host.innerHTML = html;
+      const series = host.querySelector('nav[aria-label^="Loạt bài"]');
+      expect(series, 'series nav rendered').not.toBeNull();
+      expect(series!.closest('[data-pagefind-ignore]')).not.toBeNull();
+      const related = host.querySelector('a[href="/vi/posts/other-post"]');
+      expect(related, 'related rendered').not.toBeNull();
+      const relatedSection = [...host.querySelectorAll('section')].find((s) => s.textContent!.includes('Bài liên quan'))!;
+      expect(relatedSection.closest('[data-pagefind-ignore]')).not.toBeNull();
+    } finally {
+      rmSync(vocabDir, { recursive: true, force: true });
+    }
   });
 
   it('omits the draft locale from static params and alternates', async () => {

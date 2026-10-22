@@ -97,6 +97,16 @@ describe('sitemap', () => {
     }
   });
 
+  it('leaves the search page out of the sitemap', async () => {
+    const { root, entries } = await load();
+    try {
+      const urls = entries.flatMap((e) => [e.url, ...Object.values(e.alternates?.languages ?? {}).map(String)]);
+      expect(urls.filter((u) => /\/search$/.test(u))).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it('starts every URL and alternate with the stubbed site URL', async () => {
     const { root, entries } = await load();
     try {

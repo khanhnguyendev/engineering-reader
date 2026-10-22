@@ -23,6 +23,8 @@ export type PageEntry = {
   locales: readonly Locale[];
   /** ISO date, posts only: `updatedAt ?? publishedAt`. */
   lastModified?: string;
+  /** `false` keeps the page out of the sitemap; it stays a live route. Default true. */
+  indexable?: boolean;
 };
 
 const postLocales = (p: RoutePost): Locale[] => LOCALES.filter((l) => p.locales[l] !== undefined);
@@ -39,6 +41,7 @@ export function pageEntries(
     { path: '/companies', locales: all },
     { path: '/topics', locales: all },
     { path: '/tags', locales: all },
+    { path: '/search', locales: all, indexable: false },
   ];
   const group = (path: string, match: (p: RoutePost) => boolean) => {
     if (!opts.nonEmptyOnly) {

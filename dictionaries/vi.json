@@ -7,6 +7,7 @@
     "companies": "Công ty",
     "topics": "Chủ đề",
     "about": "Giới thiệu",
+    "search": "Tìm kiếm",
     "label": "Điều hướng chính",
     "skip": "Bỏ qua đến nội dung"
   },
@@ -117,5 +118,18 @@
   "llms": {
     "intro": "Case study về hệ thống lớn, kể lại từ nguồn kỹ thuật gốc, mỗi bài có lớp đọc nhanh và lớp đọc sâu.",
     "section": "Tiếng Việt"
+  },
+  "search": {
+    "title": "Tìm kiếm",
+    "dek": "Tìm trong các case study, có dấu hay không dấu đều được.",
+    "label": "Từ khóa",
+    "placeholder": "Ví dụ: dữ liệu, sự cố, Kafka",
+    "searching": "Đang tìm…",
+    "countOne": "{n} kết quả",
+    "countOther": "{n} kết quả",
+    "empty": "Không có bài nào khớp.",
+    "unavailable": "Tìm kiếm chỉ có trên bản build.",
+    "error": "Không tải được tìm kiếm. Thử tải lại trang.",
+    "browse": "Hoặc duyệt theo chủ đề:"
   }
 }
