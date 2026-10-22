@@ -17,7 +17,7 @@ export function NavLink({
   href: string;
   locale: string;
   section: string;
-  /** Path to use on the server and during hydration. `""` means unknown: mark nothing. `undefined` uses `usePathname()`. */
+  /** Overrides the path used for the server render and the hydration pass; `""` marks nothing current. `undefined` uses `usePathname()`. */
   serverPath?: string;
   children: React.ReactNode;
 }) {
