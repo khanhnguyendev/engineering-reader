@@ -6,7 +6,7 @@ const HEADLINE_MAX = 110;
 
 // Cut on code points so a surrogate pair is never split.
 const clip = (s: string) => {
-  const cps = Array.from(s);
+  const cps = Array.from(s.normalize('NFC'));
   return cps.length > HEADLINE_MAX ? `${cps.slice(0, HEADLINE_MAX - 1).join('').trimEnd()}…` : s;
 };
 

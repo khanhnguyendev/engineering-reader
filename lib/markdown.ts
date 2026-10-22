@@ -1,4 +1,4 @@
-import type { PostRecord } from './content/load';
+import { hasLocale, type PostRecord } from './content/load';
 import type { Vocab } from './content/vocab';
 import type { Dictionary } from './dictionaries';
 import { LOCALES, type Locale } from './i18n';
@@ -24,7 +24,9 @@ export function postMarkdown(
     `> ${fm.summary}`,
     [company, topic, meta.publishedAt, `${siteUrl}/${locale}/posts/${post.slug}`].join(' · '),
     `## ${dict.post.keyNumbers}`,
-    meta.keyNumbers.map((k) => `- **${k.value}** ${fm.keyNumberLabels[k.id] ?? ''} [${k.ref}]`.replace(/ +\[/, ' [')).join('\n'),
+    meta.keyNumbers
+      .map((k) => [`- **${k.value}**`, fm.keyNumberLabels[k.id], `[${k.ref}]`].filter(Boolean).join(' '))
+      .join('\n'),
     `## ${dict.post.tldr}`,
     bullets(fm.tldr).join('\n'),
     `## ${dict.post.smallTeam}`,
@@ -56,7 +58,7 @@ export function llmsTxt(
   void vocab;
   const sections = LOCALES.map((l) => {
     const lines = posts
-      .filter((p) => p.locales[l] !== undefined)
+      .filter((p) => hasLocale(p, l))
       .sort((a, b) => b.meta.publishedAt.localeCompare(a.meta.publishedAt) || a.slug.localeCompare(b.slug))
       .map((p) => {
         const fm = p.locales[l]!.frontmatter;

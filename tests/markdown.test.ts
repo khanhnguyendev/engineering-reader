@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cpSync, mkdtempSync, mkdirSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import type { PostRecord } from '@/lib/content/load';
@@ -72,6 +72,7 @@ describe('postMarkdown', () => {
     const order = [
       '# Tiêu đề',
       '> Tóm tắt',
+      'Discord · Dữ liệu · 2026-10-21',
       `## ${dicts.vi.post.keyNumbers}`,
       `## ${dicts.vi.post.tldr}`,
       `## ${dicts.vi.post.smallTeam}`,
@@ -163,6 +164,16 @@ describe('md route and llms route', () => {
     const root = mkdtempSync(path.join(tmpdir(), 'md-'));
     mkdirSync(path.join(root, 'posts'));
     cpSync(path.join(__dirname, 'fixtures', 'posts', 'good-post'), path.join(root, 'posts', 'good-post'), { recursive: true });
+    const fixture = path.join(root, 'posts', 'good-post');
+    for (const slug of ['vi-only', 'en-draft']) {
+      const dir = path.join(root, 'posts', slug);
+      cpSync(fixture, dir, { recursive: true });
+      const j = JSON.parse(readFileSync(path.join(dir, 'post.json'), 'utf8'));
+      writeFileSync(path.join(dir, 'post.json'), JSON.stringify({ ...j, slug }));
+    }
+    rmSync(path.join(root, 'posts', 'vi-only', 'en.mdx'));
+    const enPath = path.join(root, 'posts', 'en-draft', 'en.mdx');
+    writeFileSync(enPath, readFileSync(enPath, 'utf8').replace(/^---\n/, '---\ndraft: true\n'));
     vi.resetModules();
     vi.stubEnv('CONTENT_ROOT', path.join(root, 'posts'));
     vi.stubEnv('NEXT_PUBLIC_SITE_URL', SITE);
@@ -197,13 +208,21 @@ describe('md route and llms route', () => {
     }
   });
 
-  it('has no en entry for a post that exists only in vi', async () => {
+  it('has no en route for a vi-only post or an en draft, at params and at GET', async () => {
     const { root, route } = await load();
     try {
-      const en = route.generateStaticParams().filter((p: { locale: string }) => p.locale === 'en');
-      const { listPosts } = await import('@/lib/content/load');
-      const viOnly = listPosts().filter((p) => !p.locales.en).map((p) => `${p.slug}.md`);
-      for (const f of viOnly) expect(en.map((p: { file: string }) => p.file)).not.toContain(f);
+      const params = route.generateStaticParams();
+      expect(params).toContainEqual({ locale: 'vi', file: 'vi-only.md' });
+      expect(params).not.toContainEqual({ locale: 'en', file: 'vi-only.md' });
+      expect(params).toContainEqual({ locale: 'vi', file: 'en-draft.md' });
+      expect(params).not.toContainEqual({ locale: 'en', file: 'en-draft.md' });
+      expect(params).toContainEqual({ locale: 'en', file: 'good-post.md' });
+      const get = (locale: string, file: string) =>
+        route.GET(new Request(`${SITE}/x`), { params: Promise.resolve({ locale, file }) });
+      expect((await get('en', 'vi-only.md')).status).toBe(404);
+      expect((await get('en', 'en-draft.md')).status).toBe(404);
+      expect((await get('vi', 'vi-only.md')).status).toBe(200);
+      expect((await get('vi', 'en-draft.md')).status).toBe(200);
     } finally {
       vi.doUnmock('@/lib/content/vocab');
       rmSync(root, { recursive: true, force: true });
