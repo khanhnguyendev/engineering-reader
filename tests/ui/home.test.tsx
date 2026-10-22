@@ -146,7 +146,6 @@ describe('home (vi)', () => {
     );
     expect(all[1].textContent).toContain('Dữ liệu');
     expect(all[1].textContent).toContain('5');
-    expect(all[2].textContent).toContain('0');
     for (const c of ['border', 'border-hairline-strong', 'rounded-md']) {
       expect(chips[0].className.split(' ')).toContain(c);
     }
@@ -160,6 +159,10 @@ describe('home (vi)', () => {
     for (const z of zero) {
       expect(z.tagName).toBe('SPAN');
       expect(z.className.split(' ')).toContain('text-muted');
+      expect(z.className.split(' ')).not.toContain('text-ink-2');
+      expect(z.className).toContain('inline-flex');
+      expect(z.className).toContain('gap-2');
+      expect(z.querySelector('[aria-hidden="true"]')!.textContent).toBe('0');
       expect(z.className.split(' ')).toContain('border-hairline-strong');
       expect(z.querySelector('.sr-only')).not.toBeNull();
     }

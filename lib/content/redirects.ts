@@ -8,7 +8,7 @@ export const RedirectsSchema = z.array(
   z.object({
     from: z
       .string()
-      .regex(/^\/[^:*?()+\s]*$/)
+      .regex(/^\/[^:*?()+{}\s]*$/)
       .refine((s) => s === '/' || !s.endsWith('/'), 'no trailing slash'),
     to: z.string().startsWith('/'),
     permanent: z.boolean().default(true),

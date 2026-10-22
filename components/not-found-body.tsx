@@ -12,7 +12,9 @@ export function NotFoundBody({ vi, en }: { vi: Strings; en: Strings }) {
   const t = first === "en" ? en : vi;
   return (
     <div lang={first === "en" ? "en" : "vi"} className="mx-auto max-w-[1200px] px-4 pb-24 pt-8 sm:px-6 lg:pt-14">
-      <PageIntro title={t.title} dek={t.body} />
+      <div className="max-w-[720px]">
+        <PageIntro title={t.title} dek={t.body} />
+      </div>
       <p className="flex flex-wrap gap-x-6 gap-y-2">
         <Link href="/vi" lang="vi" className="mono-label text-ink underline underline-offset-4">
           {vi.home}

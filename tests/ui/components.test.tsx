@@ -54,7 +54,7 @@ describe('Monogram', () => {
     expect(el.className).toContain('bg-panel');
     expect(el.className).not.toContain('rounded-full');
     expect(el.textContent).toBe('D');
-    expect(el.getAttribute('style')).toContain('color-mix(in oklab, #5865F2 70%, var(--ink))');
+    expect(el.getAttribute('style')).toContain('color-mix(in oklab, #5865F2 var(--monogram-mix), var(--ink))');
     expect(el.style.borderColor).toBe('');
     expect(el.style.width).toBe('32px');
   });

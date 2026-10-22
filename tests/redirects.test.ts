@@ -41,7 +41,7 @@ describe('redirects schema', () => {
     expect(RedirectsSchema.safeParse([{ from: '/a', to: 'https://x.dev' }]).success).toBe(false);
   });
   it('rejects a from that is a pattern', () => {
-    for (const from of ['/a/:slug', '/a/*', '/a?x', '/(a)', '/a+', '/a b']) {
+    for (const from of ['/a/:slug', '/a/*', '/a?x', '/(a)', '/a+', '/a b', '/a{b}']) {
       expect(RedirectsSchema.safeParse([{ from, to: '/b' }]).success, from).toBe(false);
     }
   });

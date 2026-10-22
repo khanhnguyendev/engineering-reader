@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Header } from "@/components/header";
 import { NotFoundBody } from "@/components/not-found-body";
 import { ThemeScript } from "@/components/theme-script";
@@ -5,7 +6,7 @@ import { getDictionary } from "@/lib/dictionaries";
 import { fontVariables } from "./fonts";
 import "./globals.css";
 
-export const metadata = { title: getDictionary("vi").notFound.title };
+export const metadata: Metadata = { title: getDictionary("vi").notFound.title };
 
 // Unmatched URLs are served from the root, outside [locale]: this owns <html>.
 // The server cannot know the path, so lang is vi and the body picks strings by URL.

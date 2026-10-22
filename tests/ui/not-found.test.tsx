@@ -34,7 +34,6 @@ describe('root not-found', () => {
     expect(doc.querySelector('main#content')!.textContent).toContain(vi_.notFound.body);
     expect(doc.querySelector('header')).not.toBeNull();
     expect(html).toContain('inter-var jb-var');
-    expect(html).toContain('dataset.theme');
     expect(html).toMatch(/<script>[^<]*dataset\.theme/);
   });
   it('marks the language of the wrapper and of each home link', async () => {

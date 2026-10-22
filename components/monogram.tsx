@@ -19,7 +19,7 @@ export function Monogram({
         width: size,
         height: size,
         fontSize: Math.round(size * 0.5),
-        ...(color ? { color: `color-mix(in oklab, ${color} 70%, var(--ink))` } : {}),
+        ...(color ? { color: `color-mix(in oklab, ${color} var(--monogram-mix), var(--ink))` } : {}),
       }}
     >
       {name.charAt(0).toUpperCase()}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CHIP, CHIP_LINK } from "@/components/chip";
+import { CHIP_LINK, CHIP_MUTED } from "@/components/chip";
 import { Header } from "@/components/header";
 import { Monogram } from "@/components/monogram";
 import { PageIntro } from "@/components/page-intro";
@@ -107,7 +107,7 @@ export default async function Page({ params }: { params: Params }) {
                       </span>
                     </Link>
                   ) : (
-                    <span className={`${CHIP} text-muted`}>
+                    <span className={CHIP_MUTED}>
                       {topic[locale]}
                       <span className="font-mono text-xs">
                         <span aria-hidden="true">{count}</span>

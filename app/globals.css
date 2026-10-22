@@ -15,6 +15,7 @@
   --ground: #0a111c;
   --grid: rgba(110, 231, 183, 0.07);
   --ink: #eef0f1;
+  --monogram-mix: 85%;
   --ink-2: #d4d9db;
   --muted: #9aa5ad;
   --hairline: rgba(148, 197, 180, 0.17);
@@ -31,6 +32,7 @@
   --ground: #f2f4f3;
   --grid: rgba(15, 122, 90, 0.07);
   --ink: #111827;
+  --monogram-mix: 70%;
   --ink-2: #374151;
   --muted: #55606b;
   --hairline: rgba(15, 122, 90, 0.2);
@@ -48,6 +50,7 @@
     --ground: #f2f4f3;
     --grid: rgba(15, 122, 90, 0.07);
     --ink: #111827;
+    --monogram-mix: 70%;
     --ink-2: #374151;
     --muted: #55606b;
     --hairline: rgba(15, 122, 90, 0.2);
