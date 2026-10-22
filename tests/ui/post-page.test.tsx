@@ -41,6 +41,21 @@ async function render(root: string, locale: string, slug = 'good-post') {
 
 afterEach(() => vi.unstubAllEnvs());
 
+describe('post page metadata', () => {
+  it('goes through buildMetadata: article, og image, publishedTime, twitter', async () => {
+    const mod = await load(FIXTURE_ROOT);
+    const md = await mod.generateMetadata({ params: Promise.resolve({ locale: 'vi', slug: 'good-post' }) });
+    expect(md.openGraph).toMatchObject({
+      type: 'article',
+      publishedTime: meta.publishedAt,
+      images: [{ url: '/og/vi/good-post.png', width: 1200, height: 630 }],
+    });
+    expect(md.openGraph).not.toHaveProperty('modifiedTime');
+    expect(md.twitter).toMatchObject({ card: 'summary_large_image', images: ['/og/vi/good-post.png'] });
+    expect(md.alternates?.canonical).toBe('/vi/posts/good-post');
+  });
+});
+
 describe('post page (vi)', () => {
   let html: string;
   beforeEach(async () => {

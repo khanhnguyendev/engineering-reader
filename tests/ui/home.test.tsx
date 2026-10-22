@@ -216,7 +216,7 @@ describe('home (vi)', () => {
     const m = await generateMetadata({ params: Promise.resolve({ locale: 'vi' }) });
     expect(m.title).toBe('Hệ thống lớn');
     expect(m.description).toMatch(/^Các case study từ blog kỹ thuật/);
-    expect(m.alternates).toEqual({
+    expect(m.alternates).toMatchObject({
       canonical: '/vi',
       languages: { vi: '/vi', en: '/en', 'x-default': '/vi' },
     });

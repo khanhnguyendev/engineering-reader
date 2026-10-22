@@ -107,5 +107,9 @@
     "title": "Page not found",
     "body": "This page does not exist or has moved.",
     "home": "Back to the home page"
+  },
+  "feed": {
+    "title": "Hệ thống lớn: new posts",
+    "description": "Lessons from big systems, for small teams"
   }
 }

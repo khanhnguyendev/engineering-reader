@@ -6,6 +6,7 @@ import { parsePost, readRawPost, type RawPost, type ZodIssueWithFile } from '@/l
 import { hostOf } from '@/lib/content/normalize-url';
 import type { Vocab } from '@/lib/content/vocab';
 import { readRedirects, staticRoutes } from './redirects';
+import type { RoutePost } from './routes';
 
 export type Finding = {
   level: 'error' | 'warn';
@@ -275,6 +276,17 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
   return out;
 }
 
+/** Best-effort: route shape only needs these fields, and post.json errors are reported elsewhere. */
+function readRouteMeta(file: string): RoutePost['meta'] {
+  const fallback = { company: '', topic: '', tags: [], series: null, publishedAt: '', updatedAt: null };
+  try {
+    const m = JSON.parse(readFileSync(file, 'utf8')) as Partial<RoutePost['meta']>;
+    return { ...fallback, ...m };
+  } catch {
+    return fallback;
+  }
+}
+
 function validateRedirects(root: string, vocab: Vocab): Finding[] {
   const file = path.join(path.dirname(root), 'redirects.json');
   if (!existsSync(file)) return [];
@@ -288,13 +300,13 @@ function validateRedirects(root: string, vocab: Vocab): Finding[] {
     }
     return [err(e instanceof Error ? e.message : String(e))];
   }
-  const posts: { slug: string; locales: Partial<Record<Locale, true>> }[] = [];
+  const posts: RoutePost[] = [];
   if (existsSync(root)) {
     for (const name of readdirSync(root)) {
       if (!existsSync(path.join(root, name, 'post.json'))) continue;
       const locales: Partial<Record<Locale, true>> = {};
       for (const l of LOCALES) if (existsSync(path.join(root, name, `${l}.mdx`))) locales[l] = true;
-      posts.push({ slug: name, locales });
+      posts.push({ slug: name, locales, meta: readRouteMeta(path.join(root, name, 'post.json')) });
     }
   }
   const routes = staticRoutes(posts, vocab);

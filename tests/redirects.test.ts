@@ -19,9 +19,10 @@ const vocab: Vocab = {
   sourceHosts: [],
   featured: [],
 };
+const m = { company: 'discord', topic: 'data', tags: [], series: null, publishedAt: '2026-10-01', updatedAt: null };
 const posts = [
-  { slug: 'both', locales: { vi: {}, en: {} } },
-  { slug: 'vi-only', locales: { vi: {} } },
+  { slug: 'both', locales: { vi: {}, en: {} }, meta: m },
+  { slug: 'vi-only', locales: { vi: {} }, meta: m },
 ];
 
 /** A temp site: <site>/posts is the content root, <site>/redirects.json beside it. */
@@ -85,6 +86,24 @@ describe('staticRoutes', () => {
   it('lists a post only in the locales it has', () => {
     expect(routes.has('/vi/posts/vi-only')).toBe(true);
     expect(routes.has('/en/posts/vi-only')).toBe(false);
+  });
+});
+
+describe('statusCode redirects', () => {
+  it('maps statusCode instead of permanent, never both', () => {
+    const [out] = toNextRedirects(RedirectsSchema.parse([{ from: '/feed.xml', to: '/vi/feed.xml', statusCode: 301 }]));
+    expect(out).toEqual({ source: '/feed.xml', destination: '/vi/feed.xml', statusCode: 301 });
+    expect('permanent' in out).toBe(false);
+    const [old] = toNextRedirects(RedirectsSchema.parse([{ from: '/a', to: '/b' }]));
+    expect(old).toEqual({ source: '/a', destination: '/b', permanent: true });
+  });
+  it('rejects an unsupported statusCode', () => {
+    expect(RedirectsSchema.safeParse([{ from: '/a', to: '/b', statusCode: 200 }]).success).toBe(false);
+  });
+  it('validates /feed.xml -> /vi/feed.xml but rejects /vi/feed.xml as a from', () => {
+    const run = (json: unknown) => validateAll(path.join(site(json), 'posts'), vocab, { today: '2026-10-22' }).findings.filter((f) => f.rule === 'redirects');
+    expect(run([{ from: '/feed.xml', to: '/vi/feed.xml', statusCode: 301 }])).toEqual([]);
+    expect(run([{ from: '/vi/feed.xml', to: '/vi' }])).toHaveLength(1);
   });
 });
 

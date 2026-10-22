@@ -24,8 +24,8 @@ import { CONTENT_ROOT, getPost, hasLocale, listPosts } from "@/lib/content/load"
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
 import { fmt, isLocale, LOCALES, otherLocale } from "@/lib/i18n";
+import { buildMetadata } from "@/lib/metadata";
 import { compilePostBody } from "@/lib/mdx/compile";
-import { SITE_URL } from "@/lib/site";
 
 type Params = Promise<{ locale: string; slug: string }>;
 
@@ -46,25 +46,18 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const post = getPost(CONTENT_ROOT, slug);
   const doc = post?.locales[locale];
   if (!post || !doc) return {};
-  const path = (l: string) => `/${l}/posts/${slug}`;
-  const languages: Record<string, string> = {};
-  for (const l of LOCALES) if (hasLocale(post, l)) languages[l] = path(l);
-  if (hasLocale(post, "vi")) languages["x-default"] = path("vi");
   const { title, summary } = doc.frontmatter;
-  return {
-    metadataBase: new URL(SITE_URL),
+  return buildMetadata({
+    locale,
+    path: `/posts/${slug}`,
     title,
     description: summary,
-    alternates: { canonical: path(locale), languages },
-    openGraph: {
-      type: "article",
-      title,
-      description: summary,
-      url: path(locale),
-      locale: locale === "vi" ? "vi_VN" : "en_GB",
-      publishedTime: post.meta.publishedAt,
-    },
-  };
+    type: "article",
+    locales: LOCALES.filter((l) => hasLocale(post, l)),
+    image: `/og/${locale}/${slug}.png`,
+    publishedTime: post.meta.publishedAt,
+    modifiedTime: post.meta.updatedAt ?? undefined,
+  });
 }
 
 export default async function Page({ params }: { params: Params }) {

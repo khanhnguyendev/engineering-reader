@@ -107,5 +107,9 @@
     "title": "Không tìm thấy trang",
     "body": "Trang này không tồn tại hoặc đã được chuyển đi.",
     "home": "Về trang chủ"
+  },
+  "feed": {
+    "title": "Hệ thống lớn: bài mới",
+    "description": "Bài học từ hệ thống lớn, cho team nhỏ"
   }
 }

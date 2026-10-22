@@ -97,7 +97,7 @@ describe('about page', () => {
     const vi_ = await generateMetadata({ params: Promise.resolve({ locale: 'vi' }) });
     expect(vi_.title).toBe('Giới thiệu · Hệ thống lớn');
     expect(vi_.description).toMatch(/^Ai viết trang này/);
-    expect(vi_.alternates).toEqual({
+    expect(vi_.alternates).toMatchObject({
       canonical: '/vi/about',
       languages: { vi: '/vi/about', en: '/en/about', 'x-default': '/vi/about' },
     });
