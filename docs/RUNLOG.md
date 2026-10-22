@@ -24,3 +24,4 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-22 M2/T1 helpers, memoized loaders, metadata builder — 2604fd1
 - 2026-10-22 M2/T2 loader follow-ups, list UI components, dictionary keys — f6f5a5f
 - 2026-10-22 M2/T3–T5 home per IA, companies, topics, tags — 58d0b75
+- 2026-10-22 M2/T6 series pages, prev/next, related (+ T3–T5 carried minors) (series route verified by the fixture test only; no real series in content yet) — f72bfe7
