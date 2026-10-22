@@ -73,10 +73,10 @@ describe('articleJsonLd', () => {
   });
 
   it('dates: dateModified falls back to publishedAt', () => {
-    expect(ld.datePublished).toBe('2026-10-21');
-    expect(ld.dateModified).toBe('2026-10-21');
+    expect(ld.datePublished).toBe('2026-10-21T00:00:00+07:00');
+    expect(ld.dateModified).toBe('2026-10-21T00:00:00+07:00');
     const upd = articleJsonLd(post({ updatedAt: '2026-11-02' }), 'vi', vocab, dict, SITE) as LD;
-    expect(upd.dateModified).toBe('2026-11-02');
+    expect(upd.dateModified).toBe('2026-11-02T00:00:00+07:00');
   });
 
   it('cites every source with its URL and authors', () => {

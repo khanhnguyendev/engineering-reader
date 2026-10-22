@@ -34,6 +34,7 @@ export function buildMetadata({
   if (locales.includes('vi')) languages['x-default'] = `/vi${path}`;
   const imageUrl = image ?? `/og/${locale}/site.png`;
   const article = type === 'article';
+  const dict = getDictionary(locale);
   return {
     metadataBase: new URL(SITE_URL),
     title,
@@ -42,11 +43,12 @@ export function buildMetadata({
       canonical: `/${locale}${path}`,
       languages,
       types: {
-        'application/rss+xml': [{ url: `/${locale}/feed.xml`, title: getDictionary(locale).feed.title }],
+        'application/rss+xml': [{ url: `/${locale}/feed.xml`, title: dict.feed.title }],
         ...(markdown ? { 'text/markdown': markdown } : {}),
       },
     },
     openGraph: {
+      siteName: dict.site.name,
       locale: locale === 'vi' ? 'vi_VN' : 'en_GB',
       title,
       description,

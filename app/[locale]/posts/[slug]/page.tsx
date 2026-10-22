@@ -27,6 +27,7 @@ import { getDictionary } from "@/lib/dictionaries";
 import { fmt, isLocale, LOCALES, otherLocale } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 import { articleJsonLd } from "@/lib/json-ld";
+import { isoAtPublication } from "@/lib/dates";
 import { compilePostBody } from "@/lib/mdx/compile";
 import { SITE_URL } from "@/lib/site";
 
@@ -59,8 +60,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     locales: LOCALES.filter((l) => hasLocale(post, l)),
     image: `/og/${locale}/${slug}.png`,
     markdown: `/${locale}/posts/${slug}.md`,
-    publishedTime: post.meta.publishedAt,
-    modifiedTime: post.meta.updatedAt ?? undefined,
+    publishedTime: isoAtPublication(post.meta.publishedAt),
+    modifiedTime: post.meta.updatedAt ? isoAtPublication(post.meta.updatedAt) : undefined,
   });
 }
 
