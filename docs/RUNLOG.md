@@ -41,3 +41,4 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-22 M3 final review fixes: listing-page hreflang matches sitemap, draft redirect targets, language-neutral key-number values — 5a4c90a
 - 2026-10-22 M3 merged (PR #3 squash 8301bfa); production: feeds, /feed.xml 301, sitemap, robots, llms.txt, OG PNGs, .md routes live; Rich Results Test 1 valid Article on /vi/posts/discord-cassandra-to-scylladb and /en/posts/netflix-microservices-mastering-chaos; opengraph.xyz reads 1200×630 card + summary_large_image
 - 2026-10-22 M3 follow-up: og:site_name, JSON-LD/OG article times with +07:00 — a60ca85
+- 2026-10-22 M3 follow-up merged (PR #4 squash 32b2957); Rich Results Test re-run: 1 valid Article, 0 non-critical issues
