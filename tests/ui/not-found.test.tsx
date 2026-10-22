@@ -72,6 +72,7 @@ describe('root not-found', () => {
     expect(onRecoverableError).not.toHaveBeenCalled();
     expect(container.querySelector('h1')!.textContent).toBe(en_.notFound.title);
     expect(document.title).toBe(`${en_.notFound.title} · ${en_.site.name}`);
+    expect(container.querySelector('div')!.getAttribute('lang')).toBe('en');
     await act(async () => root.unmount());
     container.remove();
   });
