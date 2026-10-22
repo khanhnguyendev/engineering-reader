@@ -101,7 +101,8 @@
   "about": {
     "title": "About",
     "dek": "Who writes this, how the posts are made and why.",
-    "rss": "RSS feeds per language are coming."
+    "rss": "Follow new posts by RSS:",
+    "rssLink": "English RSS feed"
   },
   "notFound": {
     "title": "Page not found",
@@ -110,6 +111,7 @@
   },
   "feed": {
     "title": "Hệ thống lớn: new posts",
-    "description": "Lessons from big systems, for small teams"
+    "description": "Lessons from big systems, for small teams",
+    "readMore": "Read the full post"
   }
 }

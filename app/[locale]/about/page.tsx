@@ -50,7 +50,9 @@ export default async function Page({ params }: { params: Params }) {
           <PageIntro title={dict.about.title} dek={dict.about.dek} />
           <div className={BODY}>{content}</div>
           <div className={`${BODY} mt-6`}>
-            <p>{dict.about.rss}</p>
+            <p>
+              {dict.about.rss} <a href={`/${locale}/feed.xml`}>{dict.about.rssLink}</a>
+            </p>
           </div>
           <Byline text={dict.post.byline} />
         </article>

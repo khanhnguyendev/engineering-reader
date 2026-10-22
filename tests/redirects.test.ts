@@ -69,7 +69,7 @@ describe('readRedirects', () => {
     expect(readRedirects(path.join(dir, 'redirects.json'))).toEqual([{ from: '/old', to: '/vi', permanent: false }]);
   });
   it('reads the committed content/redirects.json by default', () => {
-    expect(readRedirects()).toEqual([]);
+    expect(readRedirects()).toEqual([{ from: '/feed.xml', to: '/vi/feed.xml', statusCode: 301 }]);
   });
 });
 

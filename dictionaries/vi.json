@@ -101,7 +101,8 @@
   "about": {
     "title": "Giới thiệu",
     "dek": "Ai viết trang này, các bài được làm ra như thế nào và vì sao.",
-    "rss": "RSS cho từng ngôn ngữ sắp có."
+    "rss": "Theo dõi bài mới qua RSS:",
+    "rssLink": "Nguồn RSS tiếng Việt"
   },
   "notFound": {
     "title": "Không tìm thấy trang",
@@ -110,6 +111,7 @@
   },
   "feed": {
     "title": "Hệ thống lớn: bài mới",
-    "description": "Bài học từ hệ thống lớn, cho team nhỏ"
+    "description": "Bài học từ hệ thống lớn, cho team nhỏ",
+    "readMore": "Đọc toàn bài"
   }
 }
