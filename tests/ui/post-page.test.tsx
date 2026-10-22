@@ -63,8 +63,10 @@ describe('post page (vi)', () => {
   });
 
   it('renders the top layer in order, then the divider, then the deep layer', () => {
+    // the JSON-LD script repeats the summary text; order is about visible markup only
+    const visible = html.replace(/<script type="application\/ld\+json">[^]*?<\/script>/, '');
     const at = (needle: string) => {
-      const i = html.indexOf(needle);
+      const i = visible.indexOf(needle);
       expect(i, `missing: ${needle}`).toBeGreaterThanOrEqual(0);
       return i;
     };
@@ -104,6 +106,18 @@ describe('post page (vi)', () => {
 
   it('renders no Related heading when the single fixture has nothing related', () => {
     expect(html).not.toContain('Bài liên quan');
+  });
+
+  it('has exactly one parseable JSON-LD Article with citations', () => {
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const scripts = host.querySelectorAll('script[type="application/ld+json"]');
+    expect(scripts).toHaveLength(1);
+    const ld = JSON.parse(scripts[0].textContent!);
+    expect(ld['@type']).toBe('Article');
+    expect(ld.inLanguage).toBe('vi');
+    expect(ld.citation).toHaveLength(meta.sources.length);
+    expect(ld.image[0]).toMatch(/^https?:\/\/.+\/og\/vi\/good-post\.png$/);
   });
 
   it('marks the small-team block as the callout', () => {

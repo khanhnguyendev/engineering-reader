@@ -8,6 +8,7 @@ import { Toc } from "@/components/toc";
 import { Avatar } from "@/components/post/avatar";
 import { BODY } from "@/components/post/body-classes";
 import { Byline } from "@/components/post/byline";
+import { JsonLd } from "@/components/post/json-ld";
 import { DeepDivider } from "@/components/post/deep-divider";
 import { KeyNumbers } from "@/components/post/key-numbers";
 import { Lessons } from "@/components/post/lessons";
@@ -25,7 +26,9 @@ import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
 import { fmt, isLocale, LOCALES, otherLocale } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
+import { articleJsonLd } from "@/lib/json-ld";
 import { compilePostBody } from "@/lib/mdx/compile";
+import { SITE_URL } from "@/lib/site";
 
 type Params = Promise<{ locale: string; slug: string }>;
 
@@ -90,6 +93,7 @@ export default async function Page({ params }: { params: Params }) {
         className="mx-auto max-w-[1200px] px-4 pb-24 focus:outline-none pt-5 sm:px-6 lg:grid lg:grid-cols-[minmax(0,720px)_260px] lg:justify-between lg:gap-10 lg:pt-10"
       >
         <article className="min-w-0">
+          <JsonLd data={articleJsonLd(post, locale, vocab, dict, SITE_URL)} />
           {twinMissing && <MissingLocaleNote text={dict.post.missingLocale} />}
 
           <nav aria-label={dict.post.breadcrumb} className="mb-3 text-[13px] text-muted">
