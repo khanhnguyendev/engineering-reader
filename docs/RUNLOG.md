@@ -30,3 +30,4 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-22 M2/T9 done-when: 18 IA routes 200 in vi+en under pnpm start, / → 308 /vi, /vi/nope and /en/nope → 404 localized with header
 - 2026-10-22 M2/T9 finish review (home, company, topic, about, 404): fix → 2 rounds → ship — 58253d7, 868a199, 63cb697
 - 2026-10-22 M2/T9 DESIGN.md + design.json record M2 components — eb750a5
+- 2026-10-22 M2 merged (PR #2 squash ee34509); production verified: 18 IA routes 200 in vi+en, / → 308 /vi, 404s localized — https://engineering-reader.vercel.app
