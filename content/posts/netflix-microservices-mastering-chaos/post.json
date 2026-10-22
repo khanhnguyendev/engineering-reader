@@ -12,7 +12,7 @@
   "author": "ryan",
   "reviewedBy": "ryan",
   "keyNumbers": [
-    { "id": "availability", "value": "4 nines × 10 → ~3 nines", "ref": "S1" },
+    { "id": "availability", "value": "99.99% × 10 → ~99.9%", "ref": "S1" },
     { "id": "evcache", "value": "30M req/s", "ref": "S1" },
     { "id": "outage", "value": "3.5 h", "ref": "S1" }
   ],

@@ -14,7 +14,7 @@
   "keyNumbers": [
     { "id": "nodes", "value": "177 → 72", "ref": "S1" },
     { "id": "latency", "value": "p99 40–125 → 15 ms", "ref": "S1" },
-    { "id": "migration", "value": "9 days", "ref": "S1" }
+    { "id": "migration", "value": "9 d", "ref": "S1" }
   ],
   "sources": [
     {
