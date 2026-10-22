@@ -10,7 +10,7 @@ export const RedirectsSchema = z.array(
       .string()
       .regex(/^\/[^:*?()+{}\s]*$/)
       .refine((s) => s === '/' || !s.endsWith('/'), 'no trailing slash'),
-    to: z.string().startsWith('/'),
+    to: z.string().regex(/^\/(?![\/\\])[^\s\\]*$/, 'internal path only'),
     permanent: z.boolean().default(true),
   }),
 );

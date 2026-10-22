@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSyncExternalStore } from "react";
+
+const noop = () => () => {};
 
 /** A header nav item; `aria-current="page"` when the path is in `locale` and its first segment after the locale is `section`. */
 export function NavLink({
@@ -15,7 +18,11 @@ export function NavLink({
   section: string;
   children: React.ReactNode;
 }) {
-  const [, pathLocale, pathSection] = usePathname().split("/");
+  // On a prerendered 404 the server path is /_not-found while the browser path is the real URL;
+  // hydrate with the server value, then switch to the browser value.
+  const serverPath = usePathname();
+  const path = useSyncExternalStore(noop, () => window.location.pathname, () => serverPath);
+  const [, pathLocale, pathSection] = path.split("/");
   const active = pathLocale === locale && pathSection === section;
   return (
     <Link

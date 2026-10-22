@@ -51,6 +51,17 @@ describe('redirects schema', () => {
   });
 });
 
+describe('redirects schema, to', () => {
+  it('rejects control characters, double slashes, backslashes and spaces', () => {
+    for (const to of ['/\t/evil.dev', '/\n/evil.dev', '//evil.dev', '/\\evil.dev', '/a b']) {
+      expect(RedirectsSchema.safeParse([{ from: '/x', to }]).success, JSON.stringify(to)).toBe(false);
+    }
+  });
+  it('accepts an internal path with query and hash', () => {
+    expect(RedirectsSchema.safeParse([{ from: '/x', to: '/vi/tags/kafka?a=1#h' }]).success).toBe(true);
+  });
+});
+
 describe('readRedirects', () => {
   it('reads and parses a file', () => {
     const dir = site([{ from: '/old', to: '/vi', permanent: false }]);
@@ -100,6 +111,17 @@ describe('validator rule redirects', () => {
     expect(run([{ from: '/x', to: 'https://evil.dev' }])).toHaveLength(1);
     expect(run([{ from: '/x', to: '//evil.dev' }])).toHaveLength(1);
     expect(run([{ from: '/x', to: '/\\evil.dev' }])).toHaveLength(1);
+  });
+  it('compares from case-insensitively against live routes', () => {
+    expect(run([{ from: '/VI/Companies/Discord', to: '/vi' }])).toHaveLength(1);
+  });
+  it('rejects to equal to from', () => {
+    expect(run([{ from: '/loop', to: '/loop' }]).map((f) => f.message)).toContainEqual(expect.stringContaining('points to itself'));
+  });
+  it('rejects a to that is not a live route, ignoring hash and query', () => {
+    expect(run([{ from: '/x', to: '/vi/nowhere' }])).toHaveLength(1);
+    expect(run([{ from: '/x', to: '/vi/companies/discord?a=1#h' }])).toEqual([]);
+    expect(run([{ from: '/x', to: '/vi/topics/data#top' }])).toEqual([]);
   });
   it('reports malformed JSON as one finding', () => {
     const dir = mkdtempSync(path.join(tmp, 's-'));

@@ -298,10 +298,13 @@ function validateRedirects(root: string, vocab: Vocab): Finding[] {
     }
   }
   const routes = staticRoutes(posts, vocab);
+  const live = new Set([...routes].map((r) => r.toLowerCase()));
   const out: Finding[] = [];
   for (const r of list) {
-    if (routes.has(r.from)) out.push(err(`redirect from "${r.from}" is a live route`));
-    if (/^\/[\/\\]/.test(r.to)) out.push(err(`redirect to "${r.to}" must be an internal path`));
+    if (live.has(r.from.toLowerCase())) out.push(err(`redirect from "${r.from}" is a live route`));
+    if (r.to === r.from) out.push(err(`redirect from "${r.from}" points to itself`));
+    const target = r.to.split(/[?#]/)[0];
+    if (!routes.has(target)) out.push(err(`redirect to "${r.to}" is not a live route`));
   }
   return out;
 }

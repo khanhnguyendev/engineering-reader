@@ -87,9 +87,9 @@ describe('tags index', () => {
     expect(main.getAttribute('tabindex')).toBe('-1');
     expect(main.querySelector('h1')!.textContent).toBe('Thẻ');
     expect(main.textContent).toContain('Mọi công nghệ và kỹ thuật');
-    const chips = [...main.querySelectorAll('li > a')];
+    const chips = [...main.querySelectorAll('li > a, li > span')];
     expect(chips.map((a) => a.getAttribute('href'))).toEqual(
-      ['b-alpha', 'c-mid', 'cassandra', 'a-zeta'].map((s) => `/vi/tags/${s}`),
+      [null, null, '/vi/tags/cassandra', '/vi/tags/a-zeta'],
     );
     expect(chips[2].textContent).toContain('Cassandra');
     expect(chips[2].textContent).toContain('2');
@@ -101,12 +101,20 @@ describe('tags index', () => {
     }
   });
 
+  it('does not link a tag no post uses; it is a muted span that keeps its count', async () => {
+    const host = await renderIndex(site(SITE));
+    const unused = [...host.querySelectorAll('main li')].find((li) => li.textContent!.includes('Ă'))!;
+    expect(unused.querySelector('a')).toBeNull();
+    const chip = unused.querySelector('span')!;
+    expect(chip.className.split(' ')).toContain('text-muted');
+    expect(unused.querySelector('.sr-only')!.textContent).toBe('0 bài');
+    expect(host.querySelectorAll('main li > a')).toHaveLength(2);
+  });
+
   it('sorts by the en label on the en index', async () => {
     const host = await renderIndex(site(SITE), 'en');
-    const chips = [...host.querySelectorAll('main li > a')];
-    expect(chips.map((a) => a.getAttribute('href'))).toEqual(
-      ['b-alpha', 'cassandra', 'c-mid', 'a-zeta'].map((s) => `/en/tags/${s}`),
-    );
+    const chips = [...host.querySelectorAll('main li > a, main li > span')];
+    expect(chips.map((a) => a.getAttribute('href'))).toEqual([null, '/en/tags/cassandra', null, '/en/tags/a-zeta']);
     expect(chips[0].textContent).toContain('Alpha');
   });
 
