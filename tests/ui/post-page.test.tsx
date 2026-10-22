@@ -140,7 +140,8 @@ describe('post page (vi)', () => {
     host.innerHTML = html;
     const article = host.querySelector('article')!;
     const ignored = (el: Element | null) => el!.closest('[data-pagefind-ignore]') !== null;
-    expect(ignored(article.querySelector('nav[aria-label="Đường dẫn"]') ?? article.querySelector('nav'))).toBe(true);
+    expect(ignored(article.querySelector('nav[aria-label="Đường dẫn"]'))).toBe(true);
+    expect(ignored(article.querySelector('li.rounded-md')), 'tags row').toBe(true);
     expect(ignored(article.querySelector('time'))).toBe(true);
     for (const el of [article.querySelector('h1'), article.querySelector('.callout'), host.querySelector('[data-folded]')]) {
       expect(ignored(el), el!.outerHTML.slice(0, 40)).toBe(false);

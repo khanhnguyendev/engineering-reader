@@ -169,4 +169,51 @@ describe('SearchBox', () => {
       expect(host.textContent).not.toContain(s);
     }
   });
+
+  it('shows ten rows but the full count for 12 results', async () => {
+    const many = Array.from({ length: 12 }, (_, i) => ({
+      url: `/vi/posts/p${i}.html`,
+      meta: { title: `Bài ${i}`, summary: `Tóm tắt ${i}`, company: 'Discord' },
+    }));
+    mockLoad.mockResolvedValue(fake(many as typeof ROWS));
+    await mount();
+    await type('du lieu');
+    expect(host.querySelectorAll('ol[data-search-results] > li')).toHaveLength(10);
+    expect(host.querySelector('[aria-live="polite"]')!.textContent).toBe('12 kết quả');
+  });
+
+  it('ignores a stale search that resolves after a newer one', async () => {
+    type Res = Awaited<ReturnType<NonNullable<Awaited<ReturnType<typeof loadPagefind>>>['search']>>;
+    const mk = (title: string): Res => ({
+      results: [{ id: title, data: async () => ({ url: `/vi/posts/${title}.html`, meta: { title, summary: 's', company: 'c' } }) }],
+    });
+    const resolvers: ((r: Res) => void)[] = [];
+    const search = vi.fn(() => new Promise<Res>((res) => resolvers.push(res)));
+    mockLoad.mockResolvedValue({ init: vi.fn(), search });
+    await mount();
+    await type('aa');
+    await type('bb');
+    expect(resolvers).toHaveLength(2);
+    await act(async () => {
+      resolvers[1](mk('from-bb'));
+    });
+    await act(async () => {
+      resolvers[0](mk('from-aa'));
+    });
+    const titles = [...host.querySelectorAll('ol[data-search-results] a')].map((a) => a.textContent);
+    expect(titles).toEqual(['from-bb']);
+  });
+
+  it('shows loading while search is pending and keeps the previous rows', async () => {
+    const pf = fake(ROWS);
+    mockLoad.mockResolvedValue(pf);
+    await mount();
+    await type('du lieu');
+    expect(host.querySelectorAll('ol li')).toHaveLength(2);
+    pf.search.mockReturnValue(new Promise(() => {}));
+    await type('du lieu 2');
+    expect(state()).toBe('loading');
+    expect(host.querySelector('[aria-live="polite"]')!.textContent).toBe(vi_dict.search.searching);
+    expect(host.querySelectorAll('ol li')).toHaveLength(2);
+  });
 });

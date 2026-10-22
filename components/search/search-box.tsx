@@ -20,6 +20,7 @@ export function SearchBox({ locale, dict }: { locale: Locale; dict: Dictionary }
   const [q, setQ] = useState("");
   const [state, setState] = useState<State>("idle");
   const [rows, setRows] = useState<Row[]>([]);
+  const [total, setTotal] = useState(0);
   const run = useRef(0);
 
   // The ?q= value seeds the box once, after hydration.
@@ -45,6 +46,7 @@ export function SearchBox({ locale, dict }: { locale: Locale; dict: Dictionary }
         const found = await pf.search(term);
         const data = await Promise.all(found.results.slice(0, MAX_ROWS).map((r) => r.data()));
         if (run.current !== mine) return;
+        setTotal(found.results.length);
         setRows(
           data.map((d) => ({
             url: toSitePath(d.url),
@@ -53,7 +55,7 @@ export function SearchBox({ locale, dict }: { locale: Locale; dict: Dictionary }
             company: d.meta.company ?? "",
           })),
         );
-        setState(data.length === 0 ? "empty" : "results");
+        setState(found.results.length === 0 ? "empty" : "results");
       } catch {
         if (run.current === mine) setState("error");
       }
@@ -73,7 +75,7 @@ export function SearchBox({ locale, dict }: { locale: Locale; dict: Dictionary }
   const message: Record<State, string> = {
     idle: "",
     loading: t.searching,
-    results: plural(locale, rows.length, t.countOne, t.countOther),
+    results: plural(locale, total, t.countOne, t.countOther),
     empty: t.empty,
     unavailable: t.unavailable,
     error: t.error,
@@ -97,7 +99,7 @@ export function SearchBox({ locale, dict }: { locale: Locale; dict: Dictionary }
       <p aria-live="polite" className="mono-label mt-4 min-h-[1.5em] text-muted">
         {message[view]}
       </p>
-      {view === "results" && (
+      {(view === "results" || (view === "loading" && rows.length > 0)) && (
         <ol data-search-results className="mt-2 border-b border-hairline">
           {rows.map((r) => (
             <li

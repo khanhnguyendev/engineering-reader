@@ -8,7 +8,7 @@ export function plainText(md: string): string {
   return md
     .replace(/^(```|~~~)[^\n]*\n[\s\S]*?^\1[^\n]*$/gm, " ")
     .replace(/https?:\/\/[^\s)\]>]+/g, " ")
-    .replace(/<[^>]*>/g, " ")
+    .replace(/<\/?[A-Za-z][^<>]*>/g, " ")
     .replace(/[#*_`>[\]()|]/g, "")
     .replace(/\s+/g, " ")
     .trim();

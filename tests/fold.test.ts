@@ -30,6 +30,15 @@ describe('plainText tags', () => {
   });
 });
 
+describe('plainText prose angle brackets', () => {
+  it('keeps text around escaped less-than signs and arrows', () => {
+    const out = plainText('p99 \\<5ms here. Then a -> b, and <1% of it');
+    expect(out).toContain('5ms here');
+    expect(out).toContain('a - b'); // the later char strip drops ">", the words survive
+    expect(out).toContain('1% of it');
+  });
+});
+
 describe('toSitePath', () => {
   it('removes a trailing .html', () => {
     expect(toSitePath('/vi/posts/a.html')).toBe('/vi/posts/a');
