@@ -3,17 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-/** A header nav item; `aria-current="page"` when the first segment after the locale is `section`. */
+/** A header nav item; `aria-current="page"` when the path is in `locale` and its first segment after the locale is `section`. */
 export function NavLink({
   href,
+  locale,
   section,
   children,
 }: {
   href: string;
+  locale: string;
   section: string;
   children: React.ReactNode;
 }) {
-  const active = usePathname().split("/")[2] === section;
+  const [, pathLocale, pathSection] = usePathname().split("/");
+  const active = pathLocale === locale && pathSection === section;
   return (
     <Link
       href={href}

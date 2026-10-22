@@ -32,7 +32,7 @@ export function Header({
         </Link>
         <nav aria-label={dict.nav.label} className="order-last flex w-full items-center gap-5 sm:order-none sm:w-auto sm:gap-6">
           {nav.map((n) => (
-            <NavLink key={n.section} href={`/${locale}/${n.section}`} section={n.section}>
+            <NavLink key={n.section} href={`/${locale}/${n.section}`} locale={locale} section={n.section}>
               {n.label}
             </NavLink>
           ))}

@@ -40,6 +40,15 @@ describe('redirects schema', () => {
     expect(RedirectsSchema.safeParse([{ from: 'a', to: '/b' }]).success).toBe(false);
     expect(RedirectsSchema.safeParse([{ from: '/a', to: 'https://x.dev' }]).success).toBe(false);
   });
+  it('rejects a from that is a pattern', () => {
+    for (const from of ['/a/:slug', '/a/*', '/a?x', '/(a)', '/a+', '/a b']) {
+      expect(RedirectsSchema.safeParse([{ from, to: '/b' }]).success, from).toBe(false);
+    }
+  });
+  it('rejects a trailing slash on from, except the root', () => {
+    expect(RedirectsSchema.safeParse([{ from: '/old/', to: '/b' }]).success).toBe(false);
+    expect(RedirectsSchema.safeParse([{ from: '/', to: '/b' }]).success).toBe(true);
+  });
 });
 
 describe('readRedirects', () => {
@@ -90,5 +99,19 @@ describe('validator rule redirects', () => {
   it('rejects a to that is not an internal path', () => {
     expect(run([{ from: '/x', to: 'https://evil.dev' }])).toHaveLength(1);
     expect(run([{ from: '/x', to: '//evil.dev' }])).toHaveLength(1);
+    expect(run([{ from: '/x', to: '/\\evil.dev' }])).toHaveLength(1);
+  });
+  it('reports malformed JSON as one finding', () => {
+    const dir = mkdtempSync(path.join(tmp, 's-'));
+    mkdirSync(path.join(dir, 'posts'));
+    writeFileSync(path.join(dir, 'redirects.json'), '{ not json');
+    const f = validateAll(path.join(dir, 'posts'), vocab, { today: '2026-10-22' }).findings.filter((x) => x.rule === 'redirects');
+    expect(f).toHaveLength(1);
+  });
+  it('treats a missing redirects.json as no findings', () => {
+    const dir = mkdtempSync(path.join(tmp, 's-'));
+    mkdirSync(path.join(dir, 'posts'));
+    const f = validateAll(path.join(dir, 'posts'), vocab, { today: '2026-10-22' }).findings.filter((x) => x.rule === 'redirects');
+    expect(f).toEqual([]);
   });
 });

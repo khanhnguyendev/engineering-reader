@@ -301,7 +301,7 @@ function validateRedirects(root: string, vocab: Vocab): Finding[] {
   const out: Finding[] = [];
   for (const r of list) {
     if (routes.has(r.from)) out.push(err(`redirect from "${r.from}" is a live route`));
-    if (r.to.startsWith('//')) out.push(err(`redirect to "${r.to}" must be an internal path`));
+    if (/^\/[\/\\]/.test(r.to)) out.push(err(`redirect to "${r.to}" must be an internal path`));
   }
   return out;
 }

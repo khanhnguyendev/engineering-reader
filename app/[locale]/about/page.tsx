@@ -49,7 +49,9 @@ export default async function Page({ params }: { params: Params }) {
         <article className="max-w-[720px]">
           <PageIntro title={dict.about.title} dek={dict.about.dek} />
           <div className={BODY}>{content}</div>
-          <p className="mt-6 text-ink-2">{dict.about.rss}</p>
+          <div className={`${BODY} mt-6`}>
+            <p>{dict.about.rss}</p>
+          </div>
           <Byline text={dict.post.byline} />
         </article>
       </main>

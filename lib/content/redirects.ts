@@ -6,7 +6,10 @@ import type { Vocab } from './vocab';
 // Loaded by next.config.ts, so nothing in this file's import chain may use the `@/` alias.
 export const RedirectsSchema = z.array(
   z.object({
-    from: z.string().startsWith('/'),
+    from: z
+      .string()
+      .regex(/^\/[^:*?()+\s]*$/)
+      .refine((s) => s === '/' || !s.endsWith('/'), 'no trailing slash'),
     to: z.string().startsWith('/'),
     permanent: z.boolean().default(true),
   }),

@@ -5,6 +5,8 @@ import { getDictionary } from "@/lib/dictionaries";
 import { fontVariables } from "./fonts";
 import "./globals.css";
 
+export const metadata = { title: getDictionary("vi").notFound.title };
+
 // Unmatched URLs are served from the root, outside [locale]: this owns <html>.
 // The server cannot know the path, so lang is vi and the body picks strings by URL.
 export default function NotFound() {

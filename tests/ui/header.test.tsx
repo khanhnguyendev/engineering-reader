@@ -21,6 +21,20 @@ describe('header nav state', () => {
   it('marks companies on a company page only', () => {
     expect(current('/vi/companies/discord')).toEqual(['/vi/companies']);
   });
+  it('does not mark a section under the other locale', () => {
+    expect(current('/en/companies/nope', 'vi')).toEqual([]);
+  });
+  it('gives text-ink only to the active link', () => {
+    state.pathname = '/vi/companies/discord';
+    const host = document.createElement('div');
+    host.innerHTML = renderToStaticMarkup(<Header locale="vi" />);
+    const links = [...host.querySelectorAll('nav a')];
+    expect(links.length).toBeGreaterThan(1);
+    for (const a of links) {
+      const active = a.getAttribute('aria-current') === 'page';
+      expect(a.className.split(' ').includes('text-ink')).toBe(active);
+    }
+  });
   it('marks topics and about', () => {
     expect(current('/vi/topics')).toEqual(['/vi/topics']);
     expect(current('/en/about', 'en')).toEqual(['/en/about']);
