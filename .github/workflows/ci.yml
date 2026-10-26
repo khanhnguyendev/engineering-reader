@@ -63,6 +63,8 @@ jobs:
       - run: pnpm test
       - run: pnpm validate
       - run: pnpm build
+      - name: Check search index
+        run: test -f public/pagefind/pagefind-entry.json && grep -q '"vi"' public/pagefind/pagefind-entry.json && grep -q '"en"' public/pagefind/pagefind-entry.json
       - name: Report status on pushed SHA
         if: always() && steps.commit.outputs.pushed == 'true'
         env:

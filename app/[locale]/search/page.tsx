@@ -50,7 +50,8 @@ export default async function Page({ params }: { params: Params }) {
           <PageIntro title={dict.search.title} dek={dict.search.dek} />
           <SearchBox
             locale={locale}
-            dict={dict}
+            t={dict.search}
+            list={{ postsOne: dict.list.postsOne, postsOther: dict.list.postsOther }}
             companies={vocab.companies.map((c) => ({ slug: c.slug, name: c.name, brandColor: c.brandColor }))}
             topics={topicsWithCounts(listPosts(), vocab, locale).map(({ topic, count }) => ({
               slug: topic.slug,

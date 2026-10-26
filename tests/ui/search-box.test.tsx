@@ -43,7 +43,7 @@ async function mount(locale: 'vi' | 'en' = 'vi') {
   root = createRoot(host);
   const dict = (locale === 'vi' ? vi_dict : en_dict) as typeof vi_dict;
   await act(async () => {
-    root.render(<SearchBox locale={locale} dict={dict} companies={COMPANIES} topics={TOPICS} />);
+    root.render(<SearchBox locale={locale} t={dict.search} list={{ postsOne: dict.list.postsOne, postsOther: dict.list.postsOther }} companies={COMPANIES} topics={TOPICS} />);
   });
 }
 
@@ -195,6 +195,49 @@ describe('SearchBox', () => {
     expect(state()).toBe('idle');
     expect(host.querySelector('ol')).toBeNull();
     expect(pf.search).not.toHaveBeenCalled();
+  });
+
+  it('does not flash the idle topic chips for a ?q= deep link', async () => {
+    window.history.replaceState(null, '', '/vi/search?q=du%20lieu');
+    mockLoad.mockResolvedValue(fake(ROWS));
+    await mount();
+    expect(host.querySelector('[data-search-browse]')).toBeNull();
+    expect(state()).toBe('loading');
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+    expect(state()).toBe('results');
+  });
+
+  it('drops old rows once the query shrinks below two characters and grows back', async () => {
+    mockLoad.mockResolvedValue(fake(ROWS));
+    await mount();
+    await type('du lieu');
+    expect(host.querySelectorAll('ol li')).toHaveLength(2);
+    await type('d');
+    expect(host.querySelector('ol')).toBeNull();
+    const input = host.querySelector('input')!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, 'du');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(host.querySelector('ol')).toBeNull();
+    expect(host.querySelectorAll('ol li')).toHaveLength(0);
+  });
+
+  it('does not search after unmount before the debounce fires', async () => {
+    const pf = fake(ROWS);
+    mockLoad.mockResolvedValue(pf);
+    await mount();
+    const input = host.querySelector('input')!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, 'du lieu');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await act(async () => root.unmount());
+    await vi.advanceTimersByTimeAsync(200);
+    expect(pf.search).not.toHaveBeenCalled();
+    root = createRoot(host);
   });
 
   it('shows the empty message for no matches', async () => {

@@ -28,16 +28,17 @@ const MIN_CHARS = 2;
 /** Search over the static Pagefind index. Rows come from result metadata, never from excerpts. */
 export function SearchBox({
   locale,
-  dict,
+  t,
+  list,
   companies,
   topics,
 }: {
   locale: Locale;
-  dict: Dictionary;
+  t: Dictionary["search"];
+  list: Pick<Dictionary["list"], "postsOne" | "postsOther">;
   companies: CompanyRef[];
   topics: TopicRef[];
 }) {
-  const t = dict.search;
   const id = useId();
   const [q, setQ] = useState("");
   const [state, setState] = useState<State>("idle");
@@ -48,8 +49,12 @@ export function SearchBox({
   // The ?q= value seeds the box once, after hydration.
   useEffect(() => {
     const initial = new URLSearchParams(window.location.search).get("q");
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading the URL is only possible after mount
-    if (initial) setQ(initial);
+    if (initial) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reading the URL is only possible after mount
+      setQ(initial);
+      // A deep link searches right away, so the idle browse block must never render for it.
+      if (initial.trim().length >= MIN_CHARS) setState("loading");
+    }
   }, []);
 
   useEffect(() => {
@@ -59,7 +64,7 @@ export function SearchBox({
     const timer = setTimeout(async () => {
       setState("loading");
       try {
-        const pf = await loadPagefind();
+        const pf = await loadPagefind(locale);
         if (run.current !== mine) return;
         if (!pf) {
           setState("unavailable");
@@ -86,11 +91,16 @@ export function SearchBox({
       }
     }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [q]);
+  }, [q, locale]);
 
   function onChange(value: string) {
     setQ(value);
     const term = value.trim();
+    if (term.length < MIN_CHARS) {
+      setState("idle");
+      setRows([]);
+      setTotal(0);
+    }
     const { pathname, hash } = window.location;
     window.history.replaceState(null, "", `${pathname}${term ? `?q=${encodeURIComponent(term)}` : ""}${hash}`);
   }
@@ -132,7 +142,7 @@ export function SearchBox({
               const n = (
                 <span className="font-mono text-xs">
                   <span aria-hidden="true">{tp.count}</span>
-                  <span className="sr-only">{plural(locale, tp.count, dict.list.postsOne, dict.list.postsOther)}</span>
+                  <span className="sr-only">{plural(locale, tp.count, list.postsOne, list.postsOther)}</span>
                 </span>
               );
               return (

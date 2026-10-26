@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "prebuild": "pnpm validate",
-    "postbuild": "pagefind --site .next/server/app --output-path public/pagefind",
+    "postbuild": "node -e \"require('fs').rmSync('public/pagefind',{recursive:true,force:true})\" && pagefind --site .next/server/app --output-path public/pagefind",
     "check:index": "node scripts/check-index.mjs",
     "check:search": "node scripts/check-search.mjs",
     "start": "next start",

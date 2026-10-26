@@ -62,6 +62,34 @@ try {
     if (!ok) failed++;
     console.log(`${ok ? "PASS" : "FAIL"} [${c.locale}] "${c.q}" -> ${line} (expect: ${c.expect})`);
   }
+  // A client-side locale switch must search the new locale's index, not the one already loaded.
+  {
+    const page = await browser.newPage();
+    let line;
+    let ok = false;
+    try {
+      await page.goto(`${BASE}/vi/search?q=${encodeURIComponent("du lieu")}`, { waitUntil: "load" });
+      const first = await waitSettled(page);
+      await page.click('a[hreflang="en"]');
+      await page.waitForFunction(() => location.pathname.startsWith("/en/search"), { timeout: 10000 });
+      await page.$eval("input[type=search]", (el) => {
+        const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
+        set.call(el, "");
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await page.type("input[type=search]", "messages");
+      await new Promise((r) => setTimeout(r, 400));
+      const state = await waitSettled(page);
+      const rows = await page.$$eval("ol[data-search-results] li a[href]", (as) => as.map((a) => a.getAttribute("href")));
+      ok = first === "results" && state === "results" && rows.length > 0 && rows.every((h) => h.startsWith("/en/"));
+      line = `vi=${first} state=${state} hrefs=${rows.join(", ") || "(none)"}`;
+    } catch (e) {
+      line = String(e);
+    }
+    await page.close();
+    if (!ok) failed++;
+    console.log(`${ok ? "PASS" : "FAIL"} [vi->en switch] "messages" -> ${line} (expect: results, all /en/)`);
+  }
 } finally {
   await browser.close();
 }
