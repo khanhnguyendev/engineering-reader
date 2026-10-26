@@ -14,6 +14,7 @@ export function buildMetadata({
   publishedTime,
   modifiedTime,
   markdown,
+  noindex,
 }: {
   locale: Locale;
   path: string;
@@ -27,6 +28,8 @@ export function buildMetadata({
   modifiedTime?: string;
   /** Path of the post's Markdown twin, advertised as an alternate. */
   markdown?: string;
+  /** Emits `robots: noindex, follow`. */
+  noindex?: boolean;
 }): Metadata {
   if (path === '/') path = '';
   const languages: Record<string, string> = {};
@@ -39,6 +42,7 @@ export function buildMetadata({
     metadataBase: new URL(SITE_URL),
     title,
     description,
+    ...(noindex ? { robots: { index: false, follow: true } } : {}),
     alternates: {
       canonical: `/${locale}${path}`,
       languages,

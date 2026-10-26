@@ -73,4 +73,7 @@ describe('buildMetadata', () => {
     const n = buildMetadata({ locale: 'vi', path: '/posts/x', title: 'T', description: 'D' });
     expect(n.alternates?.types?.['text/markdown']).toBeUndefined();
   });
+  it('leaves robots undefined unless noindex is requested', () => {
+    expect(buildMetadata({ locale: 'vi', path: '/about', title: 't', description: 'd' }).robots).toBeUndefined();
+  });
 });

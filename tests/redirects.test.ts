@@ -84,6 +84,10 @@ describe('staticRoutes', () => {
     }
     expect(routes.has('/')).toBe(true);
   });
+  it('includes the search page so a redirect cannot shadow it', () => {
+    expect(routes.has('/vi/search')).toBe(true);
+    expect(routes.has('/en/search')).toBe(true);
+  });
   it('lists a post only in the locales it has', () => {
     expect(routes.has('/vi/posts/vi-only')).toBe(true);
     expect(routes.has('/en/posts/vi-only')).toBe(false);

@@ -168,6 +168,14 @@ components:
     padding: "16px"
   post-card-hover:
     backgroundColor: "{colors.panel-2}"
+  search-input:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.panel}"
+    padding: "12px 16px"
+  search-result-row:
+    textColor: "{colors.ink}"
+    padding: "16px 0"
   page-intro:
     textColor: "{colors.ink}"
     typography: "{typography.display}"
@@ -350,6 +358,14 @@ The case in a list: the whole panel is the link (panel, 10px radius, 1px hairlin
 ### Post List
 A grid of Post Cards on a 16px gap: one column on phones, two-up from 640px, three-up from 1024px only where the caller asks (the home "Start here" row). A locale with no posts shows a single muted line, never an empty box.
 
+### Search
+A quiet field over a hairline list: no panels, no highlight, no excerpt. The search page is a 720px measure under PageIntro.
+- **Input:** full width, panel fill, 1px strong-hairline border, 10px radius, 12px by 16px padding, text in 17px ink, placeholder in muted, accent caret. The WebKit cancel glyph is removed. Focus is the system accent ring (2px, accent).
+- **Count line:** an aria-live mono label in muted (Label role) under the input. It renders only after a search (results count, searching, empty, unavailable, error) and takes no space while idle.
+- **Result row:** an ordered list closed by hairlines; each row sits between a top hairline and the next, 16px (20px from 1024px) vertical padding, 12px between parts. In order: the title (Title role, 17px 700, ink, balanced) as the link; the lead key number in mono 18px 600 ink over its 13px muted label (omitted when the post has none); the summary in 15px ink-2, capped at 65ch; a footer of the 24px Monogram and the company name in 13px ink-2. The row never shows a Pagefind excerpt; it is built from result metadata only.
+- **Row link:** the title link is stretched over the whole row by its `::after`, which extends 8px past the row on each side. Hover is the title's accent underline (offset 4px, 150ms) and nothing else; there is no hover fill. Keyboard focus draws a rounded 10px, 2px accent outline at 2px offset on that `::after`, so the ring wraps the row.
+- **Idle browse block:** while idle, a 15px ink-2 lead-in line, then the topics as chips: CHIP_LINK with a mono 12px muted count when the topic has posts, CHIP_MUTED with the count when it has none. The block leaves the page as soon as a search runs.
+
 ### Monogram
 A company mark: a rounded square (6px) on the panel tint with a 1px hairline border; the border never takes colour. The initial is Inter 700 at half the box. With a brand colour the letter alone is tinted, mixed toward ink by `--monogram-mix` (85% brand in dark, 70% in light) so every brand clears contrast on the panel; without one, or on the home company row, the letter is plain ink.
 
@@ -360,7 +376,7 @@ The head of every list page: the H1 (Display, 25px phone, 40px from 1024px, Inte
 An H2 row (Headline, 20px, 26px from 1024px) with an optional right-aligned mono "all" link in muted that turns ink on hover. Nothing sits above the heading.
 
 ### Navigation
-- **Header:** brand in Inter 600 ink, three mono-label links in muted that turn ink on hover; the item for the current section carries `aria-current="page"` and sits in ink, the language switch (`VI | EN`, current in ink) and the theme toggle; a hairline rule closes it. On phones the nav wraps to its own full-width line.
+- **Header:** brand in Inter 600 ink, four mono-label links (companies, topics, about, search) in muted that turn ink on hover; the item for the current section carries `aria-current="page"` and sits in ink, the language switch (`VI | EN`, current in ink) and the theme toggle; a hairline rule closes it. On phones the nav wraps to its own full-width line.
 - **TOC rail:** a panel with a mono label heading and 14px links in muted; the section on screen is accent and medium weight, changing colour over 150ms.
 - **TOC (phone):** a collapsible panel whose mono summary carries a 12px chevron that rotates 180° over 200ms.
 - **Breadcrumb:** 13px muted, current page in ink-2, truncated.

@@ -7,6 +7,7 @@
     "companies": "Companies",
     "topics": "Topics",
     "about": "About",
+    "search": "Search",
     "label": "Main navigation",
     "skip": "Skip to content"
   },
@@ -117,5 +118,18 @@
   "llms": {
     "intro": "Case studies of large systems, retold from primary engineering sources, each with a quick top layer and a deep layer.",
     "section": "English"
+  },
+  "search": {
+    "title": "Search",
+    "dek": "Search the case studies.",
+    "label": "Search terms",
+    "placeholder": "e.g. database, outage, Kafka",
+    "searching": "Searching…",
+    "countOne": "{n} result",
+    "countOther": "{n} results",
+    "empty": "No posts match.",
+    "unavailable": "Search is available on the built site only.",
+    "error": "Search failed to load. Try reloading the page.",
+    "browse": "Or browse by topic:"
   }
 }
