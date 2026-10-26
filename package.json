@@ -5,13 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "prebuild": "pnpm validate",
-    "postbuild": "node -e \"require('fs').rmSync('public/pagefind',{recursive:true,force:true})\" && pagefind --site .next/server/app --output-path public/pagefind",
+    "prebuild": "pnpm validate && pnpm search-index",
     "check:index": "node scripts/check-index.mjs",
     "check:search": "node scripts/check-search.mjs",
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
+    "search-index": "tsx scripts/build-search-index.ts",
     "validate": "tsx scripts/validate-content.ts",
     "render-mermaid": "tsx scripts/render-mermaid.ts"
   },

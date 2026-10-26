@@ -2,7 +2,7 @@
 import puppeteer from "puppeteer";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
-const DISCORD = "/vi/posts/discord-cassandra-to-scylladb.html";
+const DISCORD = "/vi/posts/discord-cassandra-to-scylladb";
 // Test hook: FAIL_PROBE=1 inverts one expectation so the script can be seen to fail.
 const FAIL_PROBE = process.env.FAIL_PROBE === "1";
 const nonAscii = (s) => /[^\x00-\x7f]/.test(s);
