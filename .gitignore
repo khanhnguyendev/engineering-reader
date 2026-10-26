@@ -20,5 +20,5 @@ npm-debug.log*
 next-env.d.ts
 !.env.example
 
-# pagefind index (built by postbuild)
+# pagefind index (built by prebuild (pnpm search-index))
 /public/pagefind/

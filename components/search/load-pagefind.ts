@@ -11,7 +11,7 @@ export type Pagefind = {
   }>;
 };
 
-// A variable specifier: the file exists only after `postbuild`, so no bundler or type check may resolve it.
+// A variable specifier: the file exists only after `prebuild` (`pnpm search-index`), so no bundler or type check may resolve it.
 const SRC = "/pagefind/pagefind.js";
 
 let memo: { locale: Locale; promise: Promise<Pagefind | null>; token: object } | undefined;

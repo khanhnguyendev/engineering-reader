@@ -5,7 +5,7 @@ import path from 'node:path';
 import { listPosts, _resetListPostsCache } from '@/lib/content/load';
 import { loadVocab } from '@/lib/content/vocab';
 import { fold } from '@/lib/fold';
-import { searchRecords } from '@/lib/search-records';
+import { searchRecords, verdict } from '@/lib/search-records';
 
 const FIXTURE = 'tests/fixtures/posts/good-post';
 const TITLE = 'Discord chuyển kho tin nhắn từ Cassandra sang ScyllaDB';
@@ -66,5 +66,32 @@ describe('searchRecords', () => {
     const r = records().find((x) => x.url === '/vi/posts/good-post')!;
     expect(r.content).toContain('Đoạn văn giữ lại.');
     expect(r.content).not.toContain('secretFence');
+  });
+});
+
+describe('verdict', () => {
+  it('is empty when both locales have records and there are no errors', () => {
+    expect(verdict({ vi: 3, en: 3 }, [])).toEqual([]);
+  });
+
+  it('fails when a locale has 0 records', () => {
+    const v = verdict({ vi: 3, en: 0 }, []);
+    expect(v).toHaveLength(1);
+    expect(v[0]).toContain('"en"');
+  });
+
+  it('fails when errors are present', () => {
+    const v = verdict({ vi: 3, en: 3 }, ['boom']);
+    expect(v).toHaveLength(1);
+    expect(v[0]).toContain('boom');
+  });
+});
+
+describe('draft exclusion', () => {
+  it('drops a draft locale from the records', () => {
+    const f = path.join(tmp, 'vi-only', 'vi.mdx');
+    writeFileSync(f, readFileSync(f, 'utf8').replace(/^---\n/, '---\ndraft: true\n'));
+    _resetListPostsCache();
+    expect(records().map((x) => x.url)).not.toContain('/vi/posts/vi-only');
   });
 });

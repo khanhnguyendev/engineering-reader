@@ -36,3 +36,13 @@ export function searchRecords(posts: readonly PostRecord[], vocab: Vocab): Searc
   }
   return out;
 }
+
+/** Failure lines for the index build. An empty array means OK. */
+export function verdict(counts: Record<'vi' | 'en', number>, errors: string[]): string[] {
+  const out: string[] = [];
+  for (const lang of ['vi', 'en'] as const) {
+    if (counts[lang] === 0) out.push(`✖ search index: 0 records for "${lang}"`);
+  }
+  if (errors.length) out.push(`✖ search index errors:\n${errors.join('\n')}`);
+  return out;
+}
