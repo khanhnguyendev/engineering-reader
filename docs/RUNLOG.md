@@ -42,3 +42,8 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-22 M3 merged (PR #3 squash 8301bfa); production: feeds, /feed.xml 301, sitemap, robots, llms.txt, OG PNGs, .md routes live; Rich Results Test 1 valid Article on /vi/posts/discord-cassandra-to-scylladb and /en/posts/netflix-microservices-mastering-chaos; opengraph.xyz reads 1200×630 card + summary_large_image
 - 2026-10-22 M3 follow-up: og:site_name, JSON-LD/OG article times with +07:00 — a60ca85
 - 2026-10-22 M3 follow-up merged (PR #4 squash 32b2957); Rich Results Test re-run: 1 valid Article, 0 non-critical issues
+- 2026-10-26 M4/T1 Pagefind index (postbuild, per-locale by html lang, post bodies only, folded copy, meta spans) + check:index — 40f5d81
+- 2026-10-26 M4/T2 SearchBox (lazy loader, debounce, meta-only rows, six states, ?q= sync, race guard) — 562d972
+- 2026-10-26 M4/T3 /[locale]/search page (noindex, out of sitemap), header nav — 69ccdb2
+- 2026-10-26 M4/T4 check:search e2e; finish review fix → 2 rounds → ship; DESIGN.md search entry — 9f4e2f5
+- 2026-10-26 M4 final review fixes: per-locale Pagefind instance across client-side language switch, deep-link and shrink-query states, clean postbuild output, CI index check — 2f14363
