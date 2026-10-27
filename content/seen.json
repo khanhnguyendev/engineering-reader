@@ -11,6 +11,12 @@
     "decision": "picked",
     "slug": "discord-cassandra-to-scylladb"
   },
+  "https://discord.com/blog/how-discord-stores-trillions-of-messages?dry-run=dry-run-2026-10-27": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "picked",
+    "slug": "dry-run-2026-10-27"
+  },
   "https://www.youtube.com/watch?v=CZ3wIuvmHeM": {
     "company": "netflix",
     "seenAt": "2026-10-21",
