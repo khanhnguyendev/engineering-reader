@@ -281,6 +281,31 @@ describe('zodIssuesToFindings', () => {
   });
 });
 
+describe('key-number-words', () => {
+  const setValue = (v: string) => {
+    const d = fresh();
+    editJson(d, (j) => (j.keyNumbers[2].value = v));
+    return run(d);
+  };
+  it.each(['9 days', '3 ngày', '177 nodes', 'p99 fast'])('rejects %s', (v) => {
+    const fs = setValue(v);
+    expect(rules(fs)).toContain('key-number-words');
+    const f = fs.find((x) => x.rule === 'key-number-words')!;
+    const word = v === '9 days' ? 'days' : v === '3 ngày' ? 'ngày' : v === '177 nodes' ? 'nodes' : 'fast';
+    expect(f.message).toContain(`"${word}"`);
+  });
+  it.each(['9 d', '≈41 h', '4 / 10 min', '≈10%', '177 → 72', 'p99 40–125 → 15 ms', '99.99% × 10 → ~99.9%', '30M req/s', '1T'])(
+    'accepts %s',
+    (v) => {
+      expect(rules(setValue(v))).not.toContain('key-number-words');
+    },
+  );
+  it('live posts have no key-number-words finding', () => {
+    const r = validateAll(path.resolve(import.meta.dirname, '../../content/posts'), vocab, { today: TODAY });
+    expect(r.findings.filter((f) => f.rule === 'key-number-words')).toEqual([]);
+  });
+});
+
 describe('validateAll', () => {
   it('aggregates, flags missing post.json, sorts, and ok reflects errors', () => {
     const root = path.join(tmp, 'all');

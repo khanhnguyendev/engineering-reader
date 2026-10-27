@@ -4,6 +4,7 @@ import { ZodError } from 'zod';
 import { LOCALES, type Locale } from '@/lib/i18n';
 import { parsePost, readRawPost, type RawPost, type ZodIssueWithFile } from '@/lib/content/load';
 import { hostOf } from '@/lib/content/normalize-url';
+import { KEY_NUMBER_UNITS, wordsIn } from '@/lib/content/key-number-units';
 import type { Vocab } from '@/lib/content/vocab';
 import { readRedirects } from './read-redirects';
 import { staticRoutes } from './redirects';
@@ -176,6 +177,14 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
     used.add(k.ref);
     if (!sourceIds.has(k.ref)) {
       add('error', 'refs', `keyNumbers "${k.id}" refers to unknown source ${k.ref}`, 'post.json');
+    }
+    const words = wordsIn(k.value);
+    if (words.length > 0) {
+      add(
+        'error', 'key-number-words',
+        `keyNumbers "${k.id}" value "${k.value}" contains words (${words.map((w) => `"${w}"`).join(', ')}); values are shared by both locales, so use digits, symbols and these units: ${KEY_NUMBER_UNITS.join(' ')}`,
+        'post.json',
+      );
     }
   }
   for (const locale of LOCALES) {

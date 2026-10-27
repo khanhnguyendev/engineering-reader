@@ -18,7 +18,7 @@ const base = () => ({
   keyNumbers: [
     { id: 'nodes', value: '177 → 72', ref: 'S1' },
     { id: 'latency', value: 'p99 40–125 → 15 ms', ref: 'S1' },
-    { id: 'migration', value: '9 days', ref: 'S1' },
+    { id: 'migration', value: '9 d', ref: 'S1' },
   ],
   sources: [
     { id: 'S1', type: 'blog', title: 'How Discord Stores Trillions of Messages', authors: ['Bo Ingram'], publishedAt: '2023-03-06', url: 'https://discord.com/blog/how-discord-stores-trillions-of-messages', accessedAt: '2026-10-20', locator: null },
