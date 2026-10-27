@@ -8,7 +8,7 @@ import { listPosts } from "@/lib/content/load";
 import { localesFor } from "@/lib/content/routes";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
-import { fmt, isLocale, LOCALES, plural } from "@/lib/i18n";
+import { fmt, isLocale, LOCALES, otherLocale, plural } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 
 type Params = Promise<{ locale: string; tag: string }>;
@@ -52,10 +52,11 @@ export default async function Page({ params }: { params: Params }) {
 
   const dict = getDictionary(locale);
   const posts = allPosts.filter((p) => p.meta.tags.includes(tag.slug));
+  const twin = localesFor(`/tags/${tag.slug}`, allPosts, vocab).includes(otherLocale(locale));
 
   return (
     <>
-      <Header locale={locale} />
+      <Header locale={locale} twinMissing={!twin} />
       <main
         id="content"
         tabIndex={-1}

@@ -155,6 +155,15 @@ describe('tag page', () => {
     });
   });
 
+  it('points the language switch at the en home when the tag has no en posts', async () => {
+    const s = site([{ slug: 'p1', tags: ['cassandra', 'a-zeta'] }]);
+    rmSync(path.join(s.postsDir, 'p1', 'en.mdx'));
+    const vi_ = await renderTag(s, 'vi', 'cassandra');
+    expect(vi_.querySelector('header a[hreflang="en"]')!.getAttribute('href')).toBe('/en');
+    const both = await renderTag(site(SITE), 'vi', 'cassandra');
+    expect(both.querySelector('header a[hreflang="en"]')!.getAttribute('href')).toBe('/en/tags'); // usePathname is mocked to /vi/tags: a real twin keeps the path switch
+  });
+
   it('uses the en dek sentence', async () => {
     const host = await renderTag(site(SITE), 'en', 'cassandra');
     expect(host.querySelector('main header p')!.textContent).toBe('2 posts that name Cassandra.');

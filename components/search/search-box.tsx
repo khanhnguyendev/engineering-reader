@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { CHIP_LINK, CHIP_MUTED } from "@/components/chip";
+import { CHIP_LINK } from "@/components/chip";
 import { Monogram } from "@/components/monogram";
 import { loadPagefind } from "@/components/search/load-pagefind";
 import type { Dictionary } from "@/lib/dictionaries";
@@ -156,17 +156,10 @@ export function SearchBox({
               );
               return (
                 <li key={tp.slug}>
-                  {tp.count > 0 ? (
-                    <a href={`/${locale}/topics/${tp.slug}`} className={CHIP_LINK}>
-                      {tp.label}
-                      <span className="text-muted">{n}</span>
-                    </a>
-                  ) : (
-                    <span className={CHIP_MUTED}>
-                      {tp.label}
-                      {n}
-                    </span>
-                  )}
+                  <a href={`/${locale}/topics/${tp.slug}`} className={CHIP_LINK}>
+                    {tp.label}
+                    <span className="text-muted">{n}</span>
+                  </a>
                 </li>
               );
             })}

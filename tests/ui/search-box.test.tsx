@@ -32,7 +32,6 @@ const COMPANIES = [{ slug: 'discord', name: 'Discord', brandColor: '#5865f2' }];
 const TOPICS = [
   { slug: 'databases', label: 'Cơ sở dữ liệu', count: 3 },
   { slug: 'incidents', label: 'Sự cố', count: 1 },
-  { slug: 'scaling', label: 'Mở rộng', count: 0 },
   { slug: 'ai', label: 'AI', count: 2 },
   { slug: 'infra', label: 'Hạ tầng', count: 5 },
 ];
@@ -128,7 +127,7 @@ describe('SearchBox', () => {
     expect(mono.style.color).toBe('');
   });
 
-  it('shows linked topic chips with counts, a muted non-link for zero, and hides them once searching', async () => {
+  it('shows linked topic chips with counts, and hides them once searching', async () => {
     mockLoad.mockResolvedValue(fake(ROWS));
     await mount();
     const browse = host.querySelector('[data-search-browse]')!;
@@ -141,9 +140,6 @@ describe('SearchBox', () => {
     expect(anchors[0].textContent).toContain('Cơ sở dữ liệu');
     expect(anchors[0].querySelector('[aria-hidden="true"]')!.textContent).toBe('3');
     expect(anchors[0].querySelector('.sr-only')!.textContent).toBe('3 bài');
-    const zero = [...browse.querySelectorAll('li')].find((li) => li.textContent!.includes('Mở rộng'))!;
-    expect(zero.querySelector('a')).toBeNull();
-    expect(zero.querySelector('span')!.className).toContain('text-muted');
     await type('du lieu');
     expect(host.querySelector('[data-search-browse]')).toBeNull();
   });

@@ -155,7 +155,7 @@ export default async function Page({ params }: { params: Params }) {
 
           {fm.lessons && <Lessons heading={dict.post.lessons} items={fm.lessons} />}
           <Sources dict={dict} locale={locale} sources={meta.sources} />
-          <Byline text={dict.post.byline} />
+          <Byline text={dict.post.byline} className="lg:hidden" />
           {nav.series && nav.index >= 0 && (
             <SeriesNav
               locale={locale}

@@ -4,7 +4,7 @@ import type { Vocab } from "@/lib/content/vocab";
 import type { Dictionary } from "@/lib/dictionaries";
 import type { Locale } from "@/lib/i18n";
 
-/** A two- or three-up (at `lg`) grid of PostCards for `locale`, or the empty label; a single card sits in one column capped at 720px when none have that locale. */
+/** A two- or three-up (at `lg`) grid of PostCards for `locale`, or the empty label when none has that locale. Exactly one card sits in one column capped at 720px. */
 export function PostList({
   posts,
   locale,

@@ -22,9 +22,16 @@ export function Mermaid({ index, caption, post, locale }: MermaidProps) {
       );
     }
   }
-  return (
+  const fallback = (
     <pre className="diagram-fallback">
       <code className="language-mermaid">{src}</code>
     </pre>
+  );
+  if (!caption) return fallback;
+  return (
+    <figure className="diagram">
+      {fallback}
+      <figcaption className="mt-2 text-[13px] leading-[1.45] text-muted">{caption}</figcaption>
+    </figure>
   );
 }

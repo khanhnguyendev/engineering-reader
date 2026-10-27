@@ -74,6 +74,14 @@ describe('compilePostBody', () => {
     expect(html).toContain('<svg');
   });
 
+  it('renders the caption in the code-block fallback too', async () => {
+    const post = load();
+    post.locales.vi!.body = post.locales.vi!.body.replace(/^```mermaid[^\n]*$/m, '```mermaid caption="Mô tả."');
+    const html = renderToStaticMarkup((await compilePostBody(post, 'vi')).content);
+    expect(html).toContain('language-mermaid');
+    expect(html).toMatch(/<figcaption[^>]*>Mô tả\.<\/figcaption>/);
+  });
+
   it('renders no figcaption without a caption', async () => {
     const post = load();
     const src = post.locales.vi!.mermaidBlocks[0];
