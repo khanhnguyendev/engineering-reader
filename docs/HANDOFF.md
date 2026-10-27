@@ -1,19 +1,24 @@
-# HANDOFF (2026-10-26, after M4)
+# HANDOFF (2026-10-27, after M5 and M6 build)
 
-Not a gate. M4 Search is complete; the run continues with M5.
+Not a gate. The run continues with M7.
 
 ## State
-- `main`: M0+M1 (PR #1), M2 (PR #2), M3 (PR #3 + follow-up PR #4), M4 (PR #5), verified on production: https://engineering-reader.vercel.app.
-- M4 delivered: `/vi/search` and `/en/search` (header nav), Pagefind index built from content in `prebuild` (one index per locale), accented and unaccented Vietnamese queries match, rows show title, lead number, summary and company. `pnpm check:index` / `pnpm check:search` (set `BASE` to target production) verify the live index.
-- M3 delivered: full metadata on every page (canonical, OG with per-locale cards, Twitter large card, hreflang for existing pairs only, RSS and markdown alternates), JSON-LD Article with citations, RSS per locale, sitemap with hreflang, robots, llms.txt, a Markdown copy of every post at `/<locale>/posts/<slug>.md`.
-- Done-when verified on production: Google's Rich Results Test finds a valid Article in both locales; opengraph.xyz reads the 1200×630 card, title, description and large Twitter card.
+- `main`: M0–M4 as before; M5 (PR #6) and M6 (this branch's PR) merged and verified.
+- M5 delivered: `docs/pipeline.md` (the contract), `docs/pipeline-prompt.md` (the routine prompt), validator rules (language-neutral key numbers, `seen.json` checks), `pnpm normalize-url`, `pnpm pipeline:pr-body`, `pnpm pipeline:dry-run`, and the `label` workflow. Done-when verified: dry-run PR #7 passed `ci` and Vercel with no human commit and got its label from CI; closed unmerged.
+- M6 delivered: `pnpm shadow-status`; the routine "engineering-reader content pipeline (shadow mode)" at https://claude.ai/code/routines (Mon/Wed/Fri 08:00 ICT, Opus 5.5, no connectors). Its first run followed the contract but could not read any feed (see below).
 - Run ledgers: `docs/runs/`. Rulings: `docs/decisions.md`.
 
-## For Ryan (when you have a moment)
-- Read the About page copy (`content/pages/about.vi.mdx`, `about.en.mdx`); the feed line now links to the RSS feed.
-- Key-number values are shared across locales, so they were made language-neutral: Discord "9 d", Netflix "99.99% × 10 → ~99.9%". Change them if you prefer other wording; keep them free of words in one language.
-- The site name "Hệ thống lớn" appears on English pages, OG cards and feeds because the name is still undecided (PRODUCT.md).
-- A no-JS visitor on an `/en/...` 404 sees the Vietnamese text and tab title (static root not-found; ruling in decisions.md).
+## For Ryan
+
+**Needed to start the pipeline (blocks M6):** the routine's cloud environment ("Default") refuses outbound connections to the feed hosts. In the environment's network settings on claude.ai, allow `discord.com`, `blog.cloudflare.com`, `netflixtechblog.com` and the hosts in `content/source-hosts.json` (or choose full network access). Then run the routine once from https://claude.ai/code/routines and check that it opens a `pipeline/...` PR.
+
+**Per pipeline PR (shadow mode):** read the whole post in both languages and the sources; edit on the branch if needed; merge; if the merge needed zero `post.json` edits and only minor prose edits, add the label `clean`. Any edit to a number or source means no label. `pnpm shadow-status` says when shadow mode can end (5 consecutive clean merges, at least 3 weeks). Close a bad PR unmerged: its picks become `rejected` and are never picked again unless you delete their `seen.json` entries.
+
+**Earlier items, still open:**
+- About page copy (`content/pages/about.*.mdx`) is the run's draft.
+- Key-number values are language-neutral by rule now ("9 d", "99.99% × 10 → ~99.9%").
+- Site name "Hệ thống lớn" is still a placeholder (M8).
+- A no-JS visitor on an `/en/...` 404 sees Vietnamese (static root not-found).
 
 ## Next
-M5 Pipeline contract (spec §9, §10): `docs/pipeline.md` for an outsider, the pipeline prompt and checklist, validator rules the pipeline needs (including no words in shared key-number values, noted in M3). Done when a fixture PR passes CI unchanged. Plan to be written at the start of M5.
+M7 Craft pass (spec §10): Impeccable finish review on every surface, DESIGN.md from the built world, Lighthouse on phone, both themes audited against the craft references. Plan to be written at the start of M7.
