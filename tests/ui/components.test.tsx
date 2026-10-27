@@ -128,20 +128,45 @@ describe('PostCard', () => {
 describe('PostList', () => {
   it('renders a two-column grid of cards with company and topic from vocab', () => {
     const html = renderToStaticMarkup(
-      <PostList posts={[post]} locale="en" vocab={vocab} dict={getDictionary('en')} emptyLabel="None" />,
+      <PostList
+        posts={[post, { ...post, slug: 'second-post' }]}
+        locale="en"
+        vocab={vocab}
+        dict={getDictionary('en')}
+        emptyLabel="None"
+      />,
     );
     const ul = dom(html).firstElementChild as HTMLElement;
     expect(ul.tagName).toBe('UL');
     expect(ul.className).toBe('grid gap-4 sm:grid-cols-2 lg:grid-cols-2');
-    expect(ul.querySelectorAll('li')).toHaveLength(1);
+    expect(ul.querySelectorAll('li')).toHaveLength(2);
     expect(ul.textContent).toContain('Discord');
     expect(ul.textContent).toContain('Data');
     expect(ul.querySelector('a')!.getAttribute('href')).toBe('/en/posts/good-post');
   });
 
+  it('renders a single post in one column capped at 720px', () => {
+    for (const cols of [2, 3] as const) {
+      const html = renderToStaticMarkup(
+        <PostList posts={[post]} locale="en" vocab={vocab} dict={getDictionary('en')} emptyLabel="None" cols={cols} />,
+      );
+      const ul = dom(html).firstElementChild as HTMLElement;
+      expect(ul.className).toBe('grid gap-4 max-w-[720px]');
+      expect(ul.querySelectorAll('li')).toHaveLength(1);
+      expect(ul.querySelector('a')!.getAttribute('href')).toBe('/en/posts/good-post');
+    }
+  });
+
   it('uses three columns at lg when cols is 3', () => {
     const html = renderToStaticMarkup(
-      <PostList posts={[post]} locale="en" vocab={vocab} dict={getDictionary('en')} emptyLabel="None" cols={3} />,
+      <PostList
+        posts={[post, { ...post, slug: 'second-post' }]}
+        locale="en"
+        vocab={vocab}
+        dict={getDictionary('en')}
+        emptyLabel="None"
+        cols={3}
+      />,
     );
     expect((dom(html).firstElementChild as HTMLElement).className).toBe('grid gap-4 sm:grid-cols-2 lg:grid-cols-3');
   });

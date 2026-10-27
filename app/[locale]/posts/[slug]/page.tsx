@@ -118,7 +118,14 @@ export default async function Page({ params }: { params: Params }) {
             </ol>
           </nav>
 
-          <TagsRow pills={[companyName, topic, dict.caseType[meta.caseType]]} />
+          <TagsRow
+            pills={[companyName, topic, dict.caseType[meta.caseType]]}
+            locale={locale}
+            tags={meta.tags.map((slug) => ({
+              slug,
+              label: vocab.tags.find((t) => t.slug === slug)?.[locale] ?? slug,
+            }))}
+          />
 
           <h1 className="mb-3 text-[25px] leading-[1.25] text-balance text-ink lg:mb-4 lg:text-[40px] lg:leading-[1.18]">
             {fm.title}

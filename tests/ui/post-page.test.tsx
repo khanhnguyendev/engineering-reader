@@ -87,6 +87,24 @@ describe('post page (vi)', () => {
     expect(deep).toBeLessThan(firstSection);
   });
 
+  it('renders post tags as chip links to their tag pages, labelled from tags.json', () => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const link = doc.querySelector('a[href="/vi/tags/scylladb"]') as HTMLElement;
+    expect(link).not.toBeNull();
+    expect(link.textContent).toBe('ScyllaDB');
+    expect(link.className).toContain('hover:bg-panel-2');
+    expect(link.closest('div')!.nextElementSibling!.tagName).toBe('H1');
+  });
+
+  it('hides the end byline from lg up but keeps the AI line unhidden', () => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const footer = doc.querySelector('article footer') as HTMLElement;
+    expect(footer.className.split(' ')).toContain('lg:hidden');
+    const ai = [...doc.querySelectorAll('p')].find((p) => p.textContent?.includes('Soạn thảo với AI'))!;
+    expect(ai.closest('.lg\\:hidden')).toBeNull();
+    expect(ai.closest('footer')).toBeNull();
+  });
+
   it('anchors sources by id and shows the AI line', () => {
     expect(html).toContain('id="S1"');
     expect(html).toContain('Soạn thảo với AI từ các nguồn trên, Ryan đọc lại và biên tập.');
