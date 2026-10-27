@@ -131,10 +131,19 @@ export function SearchBox({
         spellCheck={false}
         className="w-full rounded-panel border border-hairline-strong bg-panel px-4 py-3 text-[17px] leading-[1.4] text-ink caret-[var(--accent)] placeholder:text-muted [&::-webkit-search-cancel-button]:appearance-none"
       />
-      <p aria-live="polite" className={view === "idle" ? "" : "mono-label mt-4 min-h-[1.5em] text-muted"}>
+      <p
+        aria-live="polite"
+        className={
+          view === "idle"
+            ? ""
+            : view === "results" || view === "loading"
+              ? "mono-label mt-4 min-h-[1.5em] text-muted"
+              : "mt-4 text-[15px] leading-[1.55] text-ink-2"
+        }
+      >
         {message[view]}
       </p>
-      {view === "idle" && topics.length > 0 && (
+      {(view === "idle" || view === "empty") && topics.length > 0 && (
         <div data-search-browse className="mt-3">
           <p className="text-[15px] leading-[1.55] text-ink-2">{t.browse}</p>
           <ul className="mt-3 flex flex-wrap gap-2">

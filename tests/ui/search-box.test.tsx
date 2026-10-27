@@ -249,12 +249,34 @@ describe('SearchBox', () => {
     expect(host.querySelector('ol')).toBeNull();
   });
 
+  it('sets the empty sentence in 15px ink-2 Inter, not mono, and keeps the topic browse chips', async () => {
+    mockLoad.mockResolvedValue(fake([]));
+    await mount();
+    await type('zzqxv');
+    const live = host.querySelector('[aria-live="polite"]')!;
+    expect(live.className).not.toContain('mono-label');
+    for (const c of ['mt-4', 'text-[15px]', 'leading-[1.55]', 'text-ink-2']) expect(live.className.split(' ')).toContain(c);
+    expect(vi_dict.search.empty).toBe('Không có bài nào khớp. Thử từ khác, hoặc duyệt theo chủ đề bên dưới.');
+    expect(en_dict.search.empty).toBe('No posts match. Try another word, or browse by topic below.');
+    expect(host.querySelector('[data-search-browse]')).not.toBeNull();
+  });
+
+  it('keeps mono only on the results count and the searching line', async () => {
+    mockLoad.mockResolvedValue(fake(ROWS));
+    await mount();
+    await type('du lieu');
+    expect(host.querySelector('[aria-live="polite"]')!.className).toContain('mono-label');
+    expect(host.querySelector('[data-search-browse]')).toBeNull();
+  });
+
   it('shows unavailable when the index cannot load', async () => {
     mockLoad.mockResolvedValue(null);
     await mount();
     await type('du lieu');
     expect(state()).toBe('unavailable');
     expect(host.querySelector('[aria-live="polite"]')!.textContent).toBe(vi_dict.search.unavailable);
+    expect(host.querySelector('[aria-live="polite"]')!.className).not.toContain('mono-label');
+    expect(host.querySelector('[data-search-browse]')).toBeNull();
   });
 
   it('shows error when search rejects', async () => {

@@ -44,7 +44,7 @@ describe('root not-found', () => {
   it('marks the language of the wrapper and of each home link', async () => {
     const vi1 = (await render('/vi/x')).doc;
     expect(vi1.querySelector('main#content > div')!.getAttribute('lang')).toBe('vi');
-    expect([...vi1.querySelectorAll('main#content a')].map((a) => a.getAttribute('lang'))).toEqual(['vi', 'en']);
+    expect([...vi1.querySelectorAll('main#content a')].map((a) => a.getAttribute('lang'))).toEqual(['vi', 'en', 'vi']);
   });
   it('marks no nav item current on the real 404 even when the router path is a nav section', async () => {
     const { doc } = await render('/vi/companies/nope');
@@ -107,7 +107,13 @@ describe('root not-found', () => {
   it('links to both locale homes with their own labels', async () => {
     const { doc } = await render('/_not-found');
     const links = [...doc.querySelectorAll('main#content a')];
-    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/vi', '/en']);
-    expect(links.map((a) => a.textContent)).toEqual([vi_.notFound.home, en_.notFound.home]);
+    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/vi', '/en', '/vi/search']);
+    expect(links.map((a) => a.textContent)).toEqual([vi_.notFound.home, en_.notFound.home, vi_.notFound.search]);
+    for (const a of links) {
+      for (const c of ['text-[15px]', 'leading-[1.55]', 'text-ink', 'underline', 'decoration-hairline-strong', 'underline-offset-4', 'hover:decoration-accent']) {
+        expect(a.className.split(' ')).toContain(c);
+      }
+      expect(a.className).not.toContain('mono-label');
+    }
   });
 });

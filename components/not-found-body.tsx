@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useEffect, useSyncExternalStore } from "react";
 import { PageIntro } from "@/components/page-intro";
 
-type Strings = { title: string; body: string; home: string };
+type Strings = { title: string; body: string; home: string; search: string };
+
+const LINK =
+  "text-[15px] leading-[1.55] text-ink underline decoration-hairline-strong underline-offset-4 transition-colors duration-150 hover:decoration-accent";
 
 /** The root 404 cannot know the locale on the server; pick the strings from the URL. */
 const noop = () => () => {};
@@ -29,11 +32,14 @@ export function NotFoundBody({ vi, en, siteNameEn }: { vi: Strings; en: Strings;
         <PageIntro title={t.title} dek={t.body} />
       </div>
       <p className="flex flex-wrap gap-x-6 gap-y-2">
-        <Link href="/vi" lang="vi" className="mono-label text-ink underline underline-offset-4">
+        <Link href="/vi" lang="vi" className={LINK}>
           {vi.home}
         </Link>
-        <Link href="/en" lang="en" className="mono-label text-ink underline underline-offset-4">
+        <Link href="/en" lang="en" className={LINK}>
           {en.home}
+        </Link>
+        <Link href={`/${first === "en" ? "en" : "vi"}/search`} lang={first === "en" ? "en" : "vi"} className={LINK}>
+          {t.search}
         </Link>
       </p>
     </div>

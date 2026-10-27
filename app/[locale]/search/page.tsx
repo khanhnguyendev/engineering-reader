@@ -53,11 +53,13 @@ export default async function Page({ params }: { params: Params }) {
             t={dict.search}
             list={{ postsOne: dict.list.postsOne, postsOther: dict.list.postsOther }}
             companies={vocab.companies.map((c) => ({ slug: c.slug, name: c.name, brandColor: c.brandColor }))}
-            topics={topicsWithCounts(listPosts(), vocab, locale).map(({ topic, count }) => ({
-              slug: topic.slug,
-              label: topic[locale],
-              count,
-            }))}
+            topics={topicsWithCounts(listPosts(), vocab, locale)
+              .filter(({ count }) => count > 0)
+              .map(({ topic, count }) => ({
+                slug: topic.slug,
+                label: topic[locale],
+                count,
+              }))}
           />
         </div>
       </main>
