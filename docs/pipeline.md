@@ -14,7 +14,7 @@ A bilingual (Vietnamese first, English full equivalent) digest of engineering ca
 4. **Read feeds.** `content/companies.json` lists each company's `feedUrl`. Fetch each feed. For every item, normalize its URL with `pnpm -s normalize-url <url>` and skip it if the normalized URL is a key in the ledger.
 5. **Decide each unseen item: picked or skipped.** The selection bar is below. Every unseen item gets a ledger entry this run, picked or skipped, with a one-line reason for skips. Two or three picks per run is a ceiling, not a target; zero picks is a normal run.
 6. **Write each pick.** Create `content/posts/<slug>/post.json`, `vi.mdx` and `en.mdx` (formats below). Write Mermaid as fenced ` ```mermaid ` blocks only. Never write or edit `.svg` files: CI renders diagrams and commits them to the PR branch.
-7. **Validate.** `pnpm validate` must print `✔ N posts valid`. Fix every `✖` error. Warnings (`⚠`) are allowed.
+7. **Validate.** `pnpm validate` must exit 0 (`0 error(s)`; or `✔ N posts valid` when there are no warnings either). Fix every `✖` error. Warnings (`⚠`), such as an old `publishedAt` on an existing post, are allowed.
 8. **Self-check.** Go through the review checklist below for each pick, honestly. Tick an item only if the post meets it. An unticked item is allowed and tells the reviewer where to look; a false tick is not allowed.
 9. **Open one PR.** Branch `pipeline/<YYYY-MM-DD>` (or `pipeline/ledger-<YYYY-MM-DD>` when there are no picks). Commit the posts and `content/seen.json` together. Generate the body with `pnpm -s pipeline:pr-body <slug...>` (no slugs for a ledger-only run), tick the checklist items you verified, and open the PR against `main` with the label `pipeline`. Never merge, never enable auto-merge, never push to `main`.
 
