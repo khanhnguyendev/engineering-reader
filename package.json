@@ -14,6 +14,7 @@
     "search-index": "tsx scripts/build-search-index.ts",
     "validate": "tsx scripts/validate-content.ts",
     "normalize-url": "tsx scripts/normalize-url.ts",
+    "pipeline:pr-body": "tsx scripts/pipeline-pr-body.ts",
     "render-mermaid": "tsx scripts/render-mermaid.ts"
   },
   "dependencies": {
