@@ -10,15 +10,15 @@ A bilingual (Vietnamese first, English full equivalent) digest of engineering ca
 
 1. **Start clean.** Clone or fetch the repo, check out `main`, and install without a browser: `PUPPETEER_SKIP_DOWNLOAD=1 pnpm install --frozen-lockfile`. Nothing in the pipeline needs Chromium, Next.js or a build.
 2. **Exit if a pipeline PR is open.** `gh pr list --label pipeline --state open`. If anything is listed, stop. At most one pipeline PR is in flight.
-3. **Build the ledger.** Start from `content/seen.json` on `main`. Then, for every PR from a branch named `pipeline/*` (except `pipeline/dry-run-*`) that was closed without merging in the last 90 days (`gh pr list --label pipeline --state closed --search "is:unmerged closed:>=<date 90 days ago>"`), read its `content/seen.json` from the PR head, which survives branch deletion (`git fetch origin pull/<n>/head` then `git show FETCH_HEAD:content/seen.json`). Any key found there and not on `main` is added to this run's ledger with `"decision": "rejected"` and `"reason": "closed unmerged in PR #<n>"`. A rejected draft is never picked again unless a human deletes its entry.
-4. **Read feeds.** `content/companies.json` lists each company's `feedUrl`. Fetch each feed. For every item, normalize its URL with `pnpm -s normalize-url <url>` and skip it if the normalized URL is a key in the ledger.
+3. **Build the ledger.** Start from `content/seen.json` on `main`. Then, for every PR from a branch named `pipeline/*` (except `pipeline/dry-run-*`) that was closed without merging in the last 90 days (`gh pr list --label pipeline --state closed --search "is:unmerged closed:>=<date 90 days ago>" --limit 200 --json number,headRefName`, dropping any `headRefName` that starts with `pipeline/dry-run-`), read its `content/seen.json` from the PR head, which survives branch deletion (`git fetch origin pull/<n>/head` then `git show FETCH_HEAD:content/seen.json`). Any key found there and not on `main` is added to this run's ledger once (the first PR found wins) as `{ "company": <copied from that entry>, "seenAt": <today>, "decision": "rejected", "reason": "closed unmerged in PR #<n>" }`, with no `slug`. A rejected draft is never picked again unless a human deletes its entry.
+4. **Read feeds.** `content/companies.json` lists each company's `feedUrl`. Fetch each feed. For every item, normalize its link with `pnpm -s normalize-url <item link>` and skip it if the result is a key in the ledger. That normalized feed link is the item's ledger key for this whole run, picks included, even when the post later cites a cleaner URL for the same article (Medium feeds, for example, add a `source` parameter). Using any other key would let the next run see the item as new.
 5. **Decide each unseen item: picked or skipped.** The selection bar is below. Every unseen item gets a ledger entry this run, picked or skipped, with a one-line reason for skips. Two or three picks per run is a ceiling, not a target; zero picks is a normal run.
 6. **Write each pick.** Create `content/posts/<slug>/post.json`, `vi.mdx` and `en.mdx` (formats below). Write Mermaid as fenced ` ```mermaid ` blocks only. Never write or edit `.svg` files: CI renders diagrams and commits them to the PR branch.
 7. **Validate.** `pnpm validate` must exit 0 (`0 error(s)`; or `✔ N posts valid` when there are no warnings either). Fix every `✖` error. Warnings (`⚠`), such as an old `publishedAt` on an existing post, are allowed.
 8. **Self-check.** Go through the review checklist below for each pick, honestly. Tick an item only if the post meets it. An unticked item is allowed and tells the reviewer where to look; a false tick is not allowed.
-9. **Open one PR.** Branch `pipeline/<YYYY-MM-DD>` (or `pipeline/ledger-<YYYY-MM-DD>` when there are no picks). Commit the posts and `content/seen.json` together. Generate the body with `pnpm -s pipeline:pr-body <slug...>` (no slugs for a ledger-only run), tick the checklist items you verified, and open the PR against `main` with the label `pipeline`. Never merge, never enable auto-merge, never push to `main`.
+9. **Open one PR.** If `content/seen.json` gained no keys this run, open no PR and report `nothing new`. Otherwise branch `pipeline/<YYYY-MM-DD>` (or `pipeline/ledger-<YYYY-MM-DD>` when there are no picks); if that branch already exists on `origin`, append `-2`, `-3`, and so on. Commit the posts and `content/seen.json` together and push. Write the body to a file with `pnpm -s pipeline:pr-body <slug...> > body.md` (no slugs for a ledger-only run; it reads the base ledger from `origin/main`, so fetch first). Tick verified items only inside each post's own `### <slug>` block (the ten lines repeat per post). Then `gh pr create --base main --body-file body.md --title "content: <slugs or ledger> <YYYY-MM-DD>"`. The `label` workflow adds the `pipeline` label. Never merge, never enable auto-merge, never push to `main`.
 
-A run with no picks still opens the ledger-only PR, so skip decisions reach `main`.
+A run with no picks but new skip decisions still opens the ledger-only PR, so those decisions reach `main`.
 
 ## The selection bar
 
@@ -105,7 +105,7 @@ Never paraphrase so closely that the text reproduces the original. Retell in you
 
 ### `content/seen.json`
 
-Keyed by normalized source URL (`pnpm -s normalize-url <url>` prints it; the validator rejects keys that are not normalized):
+Keyed by the normalized feed item link (`pnpm -s normalize-url <item link>` prints it; the validator rejects keys that are not normalized). The three posts published before the pipeline are keyed by their cited source URL.
 
 ```json
 {
@@ -164,3 +164,4 @@ Until the exit condition holds, Ryan reads every pipeline PR in full before merg
 - Write `.svg` files or run the Mermaid renderer.
 - Cite a secondary source, or use a number that is not in a cited source.
 - Remove or rewrite an existing `seen.json` entry.
+- Push to the PR branch after opening the PR: CI commits rendered diagrams to it, so a later push is rejected, and force-push is forbidden.

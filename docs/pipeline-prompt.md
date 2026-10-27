@@ -18,12 +18,13 @@ Follow the steps in `docs/pipeline.md` "What the pipeline does, once per run", i
 
 - If a PR labeled `pipeline` is open, stop now and report "pipeline PR open, nothing to do".
 - Build the ledger (main plus closed-unmerged pipeline PRs from the last 90 days).
-- Fetch every `feedUrl` in `content/companies.json`. A feed that fails to load is noted in the PR summary and skipped; it is not an error.
+- Fetch every `feedUrl` in `content/companies.json`. Key every ledger entry, picks included, by the normalized feed item link. A feed that fails to load is noted in the PR summary and skipped; it is not an error.
 - Decide every unseen item, picked or skipped, against the selection bar. Pick at most three. Zero picks is normal.
 - For each pick, read the full source (the article, or the talk's transcript or slides with timestamps), then write the post in both languages per the file formats. Every number in key numbers, TL;DR, body or small-team bullets must appear in a cited source; put the reference next to it.
 - Run `pnpm validate` until it exits 0 with no `✖` errors.
-- Self-check each post against the review checklist. Tick only what is true.
-- Commit posts and `content/seen.json` on a branch `pipeline/<YYYY-MM-DD>` (or `pipeline/ledger-<YYYY-MM-DD>` with no picks), push, and open the PR against `main` with the body from `pnpm -s pipeline:pr-body <slugs>`, checklist ticked as verified. Do not merge.
+- Self-check each post against the review checklist. Tick only what is true, inside that post's `### <slug>` block.
+- If `content/seen.json` gained no keys, open no PR and report "nothing new".
+- Commit posts and `content/seen.json` on a branch `pipeline/<YYYY-MM-DD>` (or `pipeline/ledger-<YYYY-MM-DD>` with no picks), push, and open the PR against `main` with `--body-file` from `pnpm -s pipeline:pr-body <slugs>`, checklist ticked as verified. The label comes from CI. Do not merge, and do not push again after the PR is open.
 
 ## Writing quality
 
