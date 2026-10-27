@@ -3,7 +3,8 @@ import path from 'node:path';
 import { ZodError } from 'zod';
 import { LOCALES, type Locale } from '@/lib/i18n';
 import { parsePost, readRawPost, type RawPost, type ZodIssueWithFile } from '@/lib/content/load';
-import { hostOf } from '@/lib/content/normalize-url';
+import { SeenSchema } from '@/lib/content/schema';
+import { hostOf, normalizeSourceUrl } from '@/lib/content/normalize-url';
 import { KEY_NUMBER_UNITS, wordsIn } from '@/lib/content/key-number-units';
 import type { Vocab } from '@/lib/content/vocab';
 import { readRedirects } from './read-redirects';
@@ -325,6 +326,46 @@ function validateRedirects(root: string, vocab: Vocab): Finding[] {
   return out;
 }
 
+function validateSeen(root: string, vocab: Vocab): Finding[] {
+  const file = path.join(path.dirname(root), 'seen.json');
+  if (!existsSync(file)) return [];
+  const out: Finding[] = [];
+  const err = (message: string) =>
+    out.push({ level: 'error', rule: 'seen', slug: 'seen', file: 'seen.json', message });
+  let json: unknown;
+  try {
+    json = JSON.parse(readFileSync(file, 'utf8'));
+  } catch (e) {
+    err(`seen.json is not valid JSON: ${(e as Error).message}`);
+    return out;
+  }
+  const parsed = SeenSchema.safeParse(json);
+  if (!parsed.success) {
+    for (const i of parsed.error.issues) {
+      const where = i.path.length > 0 ? `${i.path.map(String).join('.')}: ` : '';
+      err(`${where}${i.message}`);
+    }
+    return out;
+  }
+  const companies = new Set(vocab.companies.map((c) => c.slug));
+  for (const [key, e] of Object.entries(parsed.data)) {
+    let normal: string | undefined;
+    try {
+      normal = normalizeSourceUrl(key);
+    } catch {
+      err(`key "${key}" is not a URL`);
+    }
+    if (normal !== undefined && normal !== key) {
+      err(`key "${key}" is not normalized; use ${normal}`);
+    }
+    if (!companies.has(e.company)) err(`"${key}": company "${e.company}" is not in companies.json`);
+    if (e.decision === 'picked' && e.slug !== undefined && !existsSync(path.join(root, e.slug, 'post.json'))) {
+      err(`"${key}": picked slug "${e.slug}" has no post`);
+    }
+  }
+  return out;
+}
+
 const LEVEL_ORDER = { error: 0, warn: 1 } as const;
 
 export function validateAll(
@@ -368,6 +409,7 @@ export function validateAll(
     }
   }
   findings.push(...validateRedirects(root, vocab));
+  findings.push(...validateSeen(root, vocab));
   findings.sort(
     (a, b) => a.slug.localeCompare(b.slug) || LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level],
   );
