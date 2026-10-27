@@ -105,13 +105,16 @@ export const SeenEntrySchema = z
   .strictObject({
     company: z.string().min(1),
     seenAt: DateStr,
-    decision: z.enum(['picked', 'skipped', 'rejected']),
+    decision: z.enum(['picked', 'skipped', 'deferred', 'rejected']),
     slug: Slug.optional(),
     reason: z.string().min(1).optional(),
   })
   .superRefine((e, ctx) => {
     if (e.decision === 'picked' && e.slug === undefined) {
       ctx.addIssue({ code: 'custom', path: ['slug'], message: 'picked entries require slug' });
+    }
+    if (e.decision === 'deferred' && e.slug !== undefined) {
+      ctx.addIssue({ code: 'custom', path: ['slug'], message: 'deferred entries have no post, so no slug' });
     }
     if (e.decision !== 'picked' && e.reason === undefined) {
       ctx.addIssue({ code: 'custom', path: ['reason'], message: `${e.decision} entries require reason` });

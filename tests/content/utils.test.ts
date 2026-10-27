@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { countWords, readingTime, WPM } from '@/lib/content/reading-time';
 import { extractRefs } from '@/lib/content/refs';
-import { hostOf, normalizeSourceUrl } from '@/lib/content/normalize-url';
+import { hostOf, normalizeMany, normalizeSourceUrl } from '@/lib/content/normalize-url';
 
 const words = (n: number) => Array.from({ length: n }, () => 'w').join(' ');
 
@@ -59,5 +59,19 @@ describe('normalizeSourceUrl', () => {
 describe('hostOf', () => {
   it('returns lowercase hostname', () => {
     expect(hostOf('https://Discord.com/blog')).toBe('discord.com');
+  });
+});
+
+describe('normalizeMany', () => {
+  it('normalizes in order, skips blank lines silently', () => {
+    const r = normalizeMany(['https://Discord.com/blog/x/?utm_source=a', '', '   ', 'https://a.com/y#z']);
+    expect(r.ok).toBe(true);
+    expect(r.out).toEqual([normalizeSourceUrl('https://Discord.com/blog/x/?utm_source=a'), normalizeSourceUrl('https://a.com/y#z')]);
+  });
+  it('prints ERROR <input> for an invalid line and reports not ok', () => {
+    const r = normalizeMany(['https://a.com/y', 'not a url', 'https://b.com/']);
+    expect(r.ok).toBe(false);
+    expect(r.out[1]).toBe('ERROR not a url');
+    expect(r.out).toHaveLength(3);
   });
 });

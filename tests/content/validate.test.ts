@@ -138,6 +138,23 @@ describe('validatePost', () => {
     expect(f).toBeDefined();
   });
 
+  it('refs: a source cited only inside a fenced mermaid block counts as never referenced', () => {
+    const d = fresh();
+    editJson(d, (j) => {
+      j.sources.push({
+        id: 'S2', type: 'blog', title: 'T', authors: [], publishedAt: '2023-03-06',
+        url: 'https://discord.com/blog/other', accessedAt: '2026-10-21', locator: null,
+      });
+    });
+    for (const l of ['vi', 'en']) editMdx(d, l, (s) => s + '\n\n```mermaid\nflowchart LR\n    A["label [S2]"] --> B\n```\n');
+    const f = run(d).filter((x) => x.rule === 'refs');
+    expect(f.map((x) => x.message)).toEqual(['source S2 is never referenced']);
+  });
+  it('refs: an unknown [S9] inside a code fence is ignored', () => {
+    const d = fresh();
+    for (const l of ['vi', 'en']) editMdx(d, l, (s) => s + '\n\n```text\n[S9]\n```\n');
+    expect(run(d).filter((x) => x.rule === 'refs')).toEqual([]);
+  });
   it('refs: unreferenced source id', () => {
     const d = fresh();
     editJson(d, (j) => {

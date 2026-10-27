@@ -3,6 +3,7 @@ import path from 'node:path';
 import { ZodError } from 'zod';
 import { LOCALES, type Locale } from '@/lib/i18n';
 import { parsePost, readRawPost, type RawPost, type ZodIssueWithFile } from '@/lib/content/load';
+import { extractRefs } from '@/lib/content/refs';
 import { SeenSchema } from '@/lib/content/schema';
 import { hostOf, normalizeSourceUrl } from '@/lib/content/normalize-url';
 import { KEY_NUMBER_UNITS, wordsIn } from '@/lib/content/key-number-units';
@@ -192,7 +193,8 @@ export function validatePost(raw: RawPost, vocab: Vocab, opts: ValidateOpts): Fi
     const doc = post.locales[locale];
     if (!doc) continue;
     const reported = new Set<string>();
-    for (const r of doc.refs) {
+    // References inside fenced code blocks (mermaid labels, samples) do not count as citations.
+    for (const r of extractRefs(stripFences(raw.locales[locale]?.body ?? ''))) {
       used.add(r.id);
       if (!sourceIds.has(r.id) && !reported.has(r.id)) {
         reported.add(r.id);

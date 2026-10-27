@@ -141,6 +141,19 @@ describe('SeenEntrySchema', () => {
     expect(SeenEntrySchema.safeParse({ company: 'x', seenAt: '2026-10-21', decision: 'skipped' }).success).toBe(false);
     expect(SeenEntrySchema.safeParse({ company: 'x', seenAt: '2026-10-21', decision: 'rejected' }).success).toBe(false);
   });
+  it('deferred requires reason and forbids slug', () => {
+    const d = { company: 'x', seenAt: '2026-10-21', decision: 'deferred', reason: 'over the cap of three' };
+    expect(SeenEntrySchema.safeParse(d).success).toBe(true);
+    expect(SeenEntrySchema.safeParse({ ...d, reason: undefined }).success).toBe(false);
+    expect(SeenEntrySchema.safeParse({ ...d, slug: 'good-post' }).success).toBe(false);
+  });
+  it('a deferred entry may be rewritten to picked or skipped (no check forbids it)', () => {
+    const key = 'https://a.com/x';
+    const before = { [key]: { company: 'x', seenAt: '2026-10-20', decision: 'deferred', reason: 'cap' } };
+    const toPicked = { [key]: picked };
+    const toSkipped = { [key]: { company: 'x', seenAt: '2026-10-21', decision: 'skipped', reason: 'dup' } };
+    for (const seen of [before, toPicked, toSkipped]) expect(SeenSchema.safeParse(seen).success).toBe(true);
+  });
   it('rejects unknown decision and unknown keys', () => {
     expect(SeenEntrySchema.safeParse({ ...picked, decision: 'maybe' }).success).toBe(false);
     expect(SeenEntrySchema.safeParse({ ...picked, extra: 1 }).success).toBe(false);
