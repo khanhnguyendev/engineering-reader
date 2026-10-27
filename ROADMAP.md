@@ -8,7 +8,7 @@ Spec: docs/superpowers/specs/2026-10-21-engineering-reader-design.md §10.
 | M2 Wayfinding | done 2026-10-22: every IA route 200 in both locales, localized 404, finish review ship ([PR #2](https://github.com/khanhnguyendev/engineering-reader/pull/2)) | every IA route resolves in both locales |
 | M3 Discoverability | done 2026-10-22: Rich Results Test valid Article (vi + en), OG debugger correct cards, sitemap/feeds/llms.txt/.md live ([PR #3](https://github.com/khanhnguyendev/engineering-reader/pull/3), follow-up PR #4) | rich-results and OG debugger correct for both locales |
 | M4 Search | done 2026-10-26: "du lieu" and "dữ liệu" return the Discord post on production; per-locale index, no cross-locale leak ([PR #5](https://github.com/khanhnguyendev/engineering-reader/pull/5)) | Vietnamese diacritic query returns the right post |
-| M5 Pipeline contract | next | fixture PR passes CI unchanged |
-| M6 Pipeline | planned | shadow-status reports exit condition met |
-| M7 Craft pass | planned | finish review ships on every surface |
+| M5 Pipeline contract | done 2026-10-27: `docs/pipeline.md`, validator rules, dry-run fixture PR #7 passed `ci` and Vercel with no human commit, label from CI ([PR #6](https://github.com/khanhnguyendev/engineering-reader/pull/6)) | fixture PR passes CI unchanged |
+| M6 Pipeline | running in shadow mode since 2026-10-27 (routine Mon/Wed/Fri 08:00 ICT; `pnpm shadow-status`) | shadow-status reports exit condition met |
+| M7 Craft pass | next | finish review ships on every surface |
 | M8 Domain and launch | planned | every v1 item ships |

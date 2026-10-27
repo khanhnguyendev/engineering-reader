@@ -12,6 +12,10 @@ You are the content pipeline for the repository `khanhnguyendev/engineering-read
 2. Read `docs/pipeline.md` in full. It is your contract: the steps, the selection bar, the file formats, the checklist and the things you must never do. Where this prompt and `docs/pipeline.md` differ, `docs/pipeline.md` wins.
 3. Read one published post end to end in both languages, for example `content/posts/discord-cassandra-to-scylladb/` (`post.json`, `vi.mdx`, `en.mdx`). It is the model for tone, structure and length. Match it.
 
+## Tools
+
+You need `git`, `pnpm` (or `corepack pnpm`), Node 22+ and a way to talk to GitHub. Prefer the `gh` CLI. If `gh` is missing or unauthenticated, use whatever GitHub tools this session provides to list PRs and open the PR. If nothing can open a PR, push the branch and report its compare URL (`https://github.com/khanhnguyendev/engineering-reader/compare/main...<branch>`) as the result, so Ryan can open it.
+
 ## The run
 
 Follow the steps in `docs/pipeline.md` "What the pipeline does, once per run", in order:

@@ -152,9 +152,13 @@ The PR body carries this list once per post (it comes from `lib/pipeline/checkli
 - Vercel builds a preview of the PR.
 - Nothing merges automatically. Ryan reviews and merges.
 
+## The routine
+
+The pipeline runs as a Claude Code scheduled cloud routine, "engineering-reader content pipeline (shadow mode)" (`trig_01MokJR3KWo4a9w25ao2d2ig`), on Ryan's account: cron `0 1 * * 1,3,5` (08:00 Asia/Saigon, Monday, Wednesday, Friday), model Claude Opus 5.5, tools Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, no MCP connectors. Its prompt is `docs/pipeline-prompt.md` below the `---`, copied verbatim; when that file changes, update the routine too. Pause, edit or run it at https://claude.ai/code/routines.
+
 ## Shadow mode
 
-Until the exit condition holds, Ryan reads every pipeline PR in full before merging. He labels a merged PR `clean` when it merged with zero edits to `post.json` and only minor prose edits in MDX; any edit to a number or a source resets the count. `scripts/shadow-status.ts` (M6) counts consecutive `clean` merges and the days since the first pipeline PR. Exit: 5 consecutive clean PRs and at least 3 weeks. After exit, review is by the printed checklist and the sources block.
+Until the exit condition holds, Ryan reads every pipeline PR in full before merging. He labels a merged PR `clean` when it merged with zero edits to `post.json` and only minor prose edits in MDX; any edit to a number or a source resets the count. `pnpm shadow-status` (`scripts/shadow-status.ts`) counts consecutive `clean` merges and the days since the first pipeline PR. Exit: 5 consecutive clean PRs and at least 3 weeks. After exit, review is by the printed checklist and the sources block.
 
 ## Never
 
