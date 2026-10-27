@@ -9,7 +9,7 @@ A bilingual (Vietnamese first, English full equivalent) digest of engineering ca
 ## What the pipeline does, once per run
 
 1. **Start clean.** Clone or fetch the repo, check out `main`, and install without a browser: `PUPPETEER_SKIP_DOWNLOAD=1 pnpm install --frozen-lockfile`. Nothing in the pipeline needs Chromium, Next.js or a build.
-2. **Exit if a pipeline PR is open.** `gh pr list --label pipeline --state open`. If anything is listed, stop. At most one pipeline PR is in flight.
+2. **Exit if a pipeline PR is open.** (Every `gh` command in this document has an equivalent in the GitHub tools a cloud session provides; use those when `gh` is unauthenticated.) `gh pr list --label pipeline --state open`. If anything is listed, stop. At most one pipeline PR is in flight.
 3. **Build the ledger.** Start from `content/seen.json` on `main`. Then, for every PR from a branch named `pipeline/*` (except `pipeline/dry-run-*`) that was closed without merging in the last 90 days (`gh pr list --label pipeline --state closed --search "is:unmerged closed:>=<date 90 days ago>" --limit 200 --json number,headRefName`, dropping any `headRefName` that starts with `pipeline/dry-run-`), read its `content/seen.json` from the PR head, which survives branch deletion (`git fetch origin pull/<n>/head` then `git show FETCH_HEAD:content/seen.json`). Any key found there and not on `main` is added to this run's ledger once (the first PR found wins) as `{ "company": <copied from that entry>, "seenAt": <today>, "decision": "rejected", "reason": "closed unmerged in PR #<n>" }`, with no `slug`. A rejected draft is never picked again unless a human deletes its entry.
 4. **Read feeds.** `content/companies.json` lists each company's `feedUrl`. Fetch each feed. For every item, normalize its link with `pnpm -s normalize-url <item link>` and skip it if the result is a key in the ledger. That normalized feed link is the item's ledger key for this whole run, picks included, even when the post later cites a cleaner URL for the same article (Medium feeds, for example, add a `source` parameter). Using any other key would let the next run see the item as new.
 5. **Decide each unseen item: picked or skipped.** The selection bar is below. Every unseen item gets a ledger entry this run, picked or skipped, with a one-line reason for skips. Two or three picks per run is a ceiling, not a target; zero picks is a normal run.
@@ -152,9 +152,15 @@ The PR body carries this list once per post (it comes from `lib/pipeline/checkli
 - Vercel builds a preview of the PR.
 - Nothing merges automatically. Ryan reviews and merges.
 
+## The routine
+
+The pipeline runs as a Claude Code scheduled cloud routine, "engineering-reader content pipeline (shadow mode)" (`trig_01MokJR3KWo4a9w25ao2d2ig`), on Ryan's account: cron `0 1 * * 1,3,5` (08:00 Asia/Saigon, Monday, Wednesday, Friday), model Claude Opus 5.5, tools Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, no MCP connectors. Its prompt is `docs/pipeline-prompt.md` below the `---`, copied verbatim; when that file changes, update the routine too. Pause, edit or run it at https://claude.ai/code/routines.
+
+The routine's cloud environment ("Default") must allow outbound HTTPS to every company blog host in `content/companies.json` (today `discord.com`, `blog.cloudflare.com`, `netflixtechblog.com`) and every host in `content/source-hosts.json`, or be set to full network access. The first run (2026-10-27) could not load any feed because the environment's proxy refused those hosts; it reported that and opened no PR, as designed. In that environment `gh` is installed but its token is rejected; the run used the session's GitHub tools to list PRs, which can also open them.
+
 ## Shadow mode
 
-Until the exit condition holds, Ryan reads every pipeline PR in full before merging. He labels a merged PR `clean` when it merged with zero edits to `post.json` and only minor prose edits in MDX; any edit to a number or a source resets the count. `scripts/shadow-status.ts` (M6) counts consecutive `clean` merges and the days since the first pipeline PR. Exit: 5 consecutive clean PRs and at least 3 weeks. After exit, review is by the printed checklist and the sources block.
+Until the exit condition holds, Ryan reads every pipeline PR in full before merging. He labels a merged PR `clean` when it merged with zero edits to `post.json` and only minor prose edits in MDX; any edit to a number or a source resets the count. `pnpm shadow-status` (`scripts/shadow-status.ts`) counts consecutive `clean` merges and the days since the first pipeline PR. Exit: 5 consecutive clean PRs and at least 3 weeks. After exit, review is by the printed checklist and the sources block.
 
 ## Never
 
