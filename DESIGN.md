@@ -162,6 +162,11 @@ components:
     textColor: "{colors.ink}"
     rounded: "{rounded.tag}"
     size: "24px"
+  monogram-index:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.tag}"
+    size: "40px"
   post-card:
     backgroundColor: "{colors.panel}"
     rounded: "{rounded.panel}"
@@ -301,11 +306,11 @@ A cool, near-monochrome ground and ink scale with a single mint accent, defined 
 
 The ground is a 40px square grid drawn in the grid colour on every page. Content sits in a 1200px container with 16px side gutters (24px from 640px). From 1024px the post becomes two columns: a reading column up to 720px and a 260px rail that sticks 32px from the top, 40px apart; below 1024px the rail disappears and a collapsed TOC panel sits under the deep-read divider.
 
-The post is a fixed vertical sequence: breadcrumb, tag row, title, accent rule, dek, meta line, key numbers, TL;DR panel, the callout, the deep-read divider, (phone) TOC, section panels, then Lessons, Sources and byline, each set off by a top hairline rather than a panel.
+The post is a fixed vertical sequence: breadcrumb, tag row, title, accent rule, dek, meta line, key numbers, TL;DR panel, the callout, the deep-read divider, (phone) TOC, section panels, then Lessons, Sources and byline, each set off by a top hairline rather than a panel. From 1024px the rail card names the author, so the end byline shows below that width only; the AI-drafting line under Sources is always visible. The tag row ends with the post's own tags as chip links to their tag pages.
 
 Key numbers are stacked rows (value | label | ref) on phones and become 2 to 4 equal cells from 640px. Spacing is a small step scale (6, 8, 12, 16, 24, 32px); panels pad 16px on phones and 24px from 1024px (section panels 28px by 32px); blocks are 12 to 16px apart inside the top layer and 40px before end matter.
 
-List pages (home, companies, topics, tags, series, about) open with PageIntro in a 720px measure, then sections set off by SectionHeading rows 40px (56px from 1024px) apart. Case lists are PostLists: two-up from 640px by default, three-up from 1024px only for the home "Start here" row, 16px gaps, one column on phones. A post ends with the series nav panel (when it belongs to a series) and a "Related" PostList, 32px and 48px below the preceding block.
+List pages (home, companies, topics, tags, series, about) open with PageIntro in a 720px measure. Home, companies, topics, tags and series then set their sections off by SectionHeading rows 40px (56px from 1024px) apart; on the company, topic and tag pages the posts H2 is screen-reader only, and their dek is a sentence ("2 posts that name Kafka."). About is the exception: its sections are `.panel` blocks like a post's section panels, under the same PageIntro, with no SectionHeading rows. Case lists are PostLists: two-up from 640px by default, three-up from 1024px only for the home "Start here" row, 16px gaps, one column on phones. A list with exactly one card is one column capped at 720px at every width. A post ends with the series nav panel (when it belongs to a series) and a "Related" PostList, 32px and 48px below the preceding block.
 
 ### Named Rules
 **The Two-Layer Rule.** Every post renders its structured top layer, then the mono deep-read divider, then the prose layer. Nothing from the deep layer moves above the divider, and the top layer must stand alone in one phone screen and a short scroll.
@@ -323,7 +328,7 @@ The system is flat. There are no box-shadows, glows or gradient fills anywhere; 
 
 ## Shapes
 
-One radius does almost all the work: 10px on panels, the callout, cells, code and diagram boxes outside sections, the share button and the theme toggle frame. Chips are outlined at 6px, the pressed toggle segment at 7px, inline code at 4px; only the author avatar is a full circle. The company monogram is the one 6px exception to the 10px container radius: a small rounded square (24px in a card, 32px on the home company row) that reads as a mark, not a panel. Borders are 1px throughout, in three roles: hairline (structure), hairline-strong (interactive outlines and the divider), and the callout's accent edge. Figures inside sections are square, rule-bounded strips. The Mermaid fallback is the one dashed border, signalling a missing render.
+One radius does almost all the work: 10px on panels, the callout, cells, code and diagram boxes outside sections, the share button and the theme toggle frame. Chips are outlined at 6px, the pressed toggle segment at 7px, inline code at 4px; only the author avatar is a full circle. The company monogram is the one 6px exception to the 10px container radius: a small rounded square (24px in a card, 32px on the home company row, 40px on the companies index) that reads as a mark, not a panel. Borders are 1px throughout, in three roles: hairline (structure), hairline-strong (interactive outlines and the divider), and the callout's accent edge. Figures inside sections are square, rule-bounded strips. The Mermaid fallback is the one dashed border, signalling a missing render.
 
 ### Named Rules
 **The Three Borders Rule.** A border is a hairline (structure), a strong hairline (something you can press or a divider), or the callout. There is no fourth border role.
@@ -341,9 +346,9 @@ Outlined, quiet and labeled in mono; they never take a solid accent fill.
 
 ### Chips
 One strong-hairline base for every chip: transparent fill, 1px strong-hairline outline, 6px radius, Inter 12px (line-height 1.35), 3px by 8px padding. Three variants share it.
-- **CHIP (plain):** ink-2 text, static; the post tag row (company, topic, case type) and the topic label in a PostCard footer.
-- **CHIP_LINK:** a link carrying a name and a count, 8px apart on the baseline; hover fills panel-2 and lifts text to ink over 150ms.
-- **CHIP_MUTED:** a non-link chip with a count, text in muted; used for a zero-count topic or tag that has nothing to open.
+- **CHIP (plain):** ink-2 text, static; the post tag row's company, topic and case type, and the topic label in a PostCard footer.
+- **CHIP_LINK:** a link carrying a name and a count, 8px apart on the baseline; hover fills panel-2 and lifts text to ink over 150ms. The home topic and tag rows, the tags index and the search browse block use it with a count; the post's own tags use it as a name only, after the plain chips in the same row.
+- **CHIP_MUTED:** a non-link chip with a count, text in muted; used for a zero-count topic on the home row. Tags with no post in the locale are not shown at all (home, tags index) and have no page.
 
 ### Cards / Containers
 - **Corner Style:** 10px.
@@ -361,10 +366,16 @@ A grid of Post Cards on a 16px gap: one column on phones, two-up from 640px, thr
 ### Search
 A quiet field over a hairline list: no panels, no highlight, no excerpt. The search page is a 720px measure under PageIntro.
 - **Input:** full width, panel fill, 1px strong-hairline border, 10px radius, 12px by 16px padding, text in 17px ink, placeholder in muted, accent caret. The WebKit cancel glyph is removed. Focus is the system accent ring (2px, accent).
-- **Count line:** an aria-live mono label in muted (Label role) under the input. It renders only after a search (results count, searching, empty, unavailable, error) and takes no space while idle.
+- **Status line:** an aria-live line under the input that renders only after a search and takes no space while idle. Only the results count and "searching" are a mono label in muted (Label role). The empty, unavailable and error sentences are Inter 15px ink-2 (line-height 1.55, 16px above), because they are sentences, not measurements.
 - **Result row:** an ordered list closed by hairlines; each row sits between a top hairline and the next, 16px (20px from 1024px) vertical padding, 12px between parts. In order: the title (Title role, 17px 700, ink, balanced) as the link; the lead key number in mono 18px 600 ink over its 13px muted label (omitted when the post has none); the summary in 15px ink-2, capped at 65ch; a footer of the 24px Monogram and the company name in 13px ink-2. The row never shows a Pagefind excerpt; it is built from result metadata only.
 - **Row link:** the title link is stretched over the whole row by its `::after`, which extends 8px past the row on each side. Hover is the title's accent underline (offset 4px, 150ms) and nothing else; there is no hover fill. Keyboard focus draws a rounded 10px, 2px accent outline at 2px offset on that `::after`, so the ring wraps the row.
-- **Idle browse block:** while idle, a 15px ink-2 lead-in line, then the topics as chips: CHIP_LINK with a mono 12px muted count when the topic has posts, CHIP_MUTED with the count when it has none. The block leaves the page as soon as a search runs.
+- **Browse block:** while idle and after a search with no match, a 15px ink-2 lead-in line, then the non-empty topics only, as CHIP_LINK with a mono 12px muted count. The block leaves the page while results or the searching line show.
+
+### Topic Shelf
+The topics index renders each topic as a panel link (title, shelf dek, count). A topic with no posts is the muted variant: the same panel as a non-link `div`, no hover, the title in muted, the dek in ink-2 and the "0 posts" line kept. Its page still exists and shows the empty state.
+
+### Figure Caption
+A Mermaid figure may carry a caption, set in the fence meta (```` ```mermaid caption="…" ````): Inter 13px, line-height 1.45, muted, 8px under the diagram, inside the figure. It describes what the figure shows; it adds no number or claim. The render hash covers the diagram source only, so a caption edit never re-renders the SVG. No caption, no element. The SVG is centred and never wider than its box.
 
 ### Monogram
 A company mark: a rounded square (6px) on the panel tint with a 1px hairline border; the border never takes colour. The initial is Inter 700 at half the box. With a brand colour the letter alone is tinted, mixed toward ink by `--monogram-mix` (85% brand in dark, 70% in light) so every brand clears contrast on the panel; without one, or on the home company row, the letter is plain ink.
@@ -373,7 +384,7 @@ A company mark: a rounded square (6px) on the panel tint with a 1px hairline bor
 The head of every list page: the H1 (Display, 25px phone, 40px from 1024px, Inter 700, balanced, ink), then one 1px accent rule, then an optional dek in ink-2 (16px, 19px from 1024px). It never carries an eyebrow, a count badge or a brand colour; the rule is the page's only accent mark.
 
 ### Section Heading
-An H2 row (Headline, 20px, 26px from 1024px) with an optional right-aligned mono "all" link in muted that turns ink on hover. Nothing sits above the heading.
+An H2 row (Headline, 20px, 26px from 1024px) with an optional right-aligned mono "all" link in muted that turns ink on hover. Nothing sits above the heading. The home By company, By topic and By tag rows carry it ("All companies", "All topics", "All tags"), with no arrow glyph. By tag is the last home section: the tags that have posts, most used first, as CHIP_LINK.
 
 ### Navigation
 - **Header:** brand in Inter 600 ink, four mono-label links (companies, topics, about, search) in muted that turn ink on hover; the item for the current section carries `aria-current="page"` and sits in ink, the language switch (`VI | EN`, current in ink) and the theme toggle; a hairline rule closes it. On phones the nav wraps to its own full-width line.
