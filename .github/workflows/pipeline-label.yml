@@ -1,0 +1,19 @@
+name: Pipeline label
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'pipeline/') && github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Add pipeline label
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels -f 'labels[]=pipeline'
