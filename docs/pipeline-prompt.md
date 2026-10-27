@@ -24,7 +24,7 @@ Follow the steps in `docs/pipeline.md` "What the pipeline does, once per run", i
 - Run `pnpm validate` until it exits 0 with no `✖` errors.
 - Self-check each post against the review checklist. Tick only what is true, inside that post's `### <slug>` block.
 - If `content/seen.json` gained no keys, open no PR and report "nothing new".
-- Commit posts and `content/seen.json` on a branch `pipeline/<YYYY-MM-DD>` (or `pipeline/ledger-<YYYY-MM-DD>` with no picks), push, and open the PR against `main` with `--body-file` from `pnpm -s pipeline:pr-body <slugs>`, checklist ticked as verified. The label comes from CI. Do not merge, and do not push again after the PR is open.
+- Commit posts and `content/seen.json` on a branch `pipeline/<YYYY-MM-DD>` (or `pipeline/ledger-<YYYY-MM-DD>` with no picks; add `-2`, `-3` if the branch exists on origin), push, and open the PR against `main` with `--body-file` from `pnpm -s pipeline:pr-body <slugs>`, checklist ticked as verified. The label comes from CI. Do not merge, and do not push again after the PR is open.
 
 ## Writing quality
 
