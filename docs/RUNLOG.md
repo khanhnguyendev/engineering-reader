@@ -60,3 +60,4 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-27 pipeline run by hand from the controller session (cloud routine blocked on egress): PR #10, 3 picks (discord-voice-outage-supervisor-bottleneck, discord-voice-migration-to-cloudflare-edge, netflix-timeseries-cold-tier-from-backups), 127 skips; contract feedback queued (deferred decision, mermaid refs, batch normalize-url)
 - 2026-10-27 M7 finish reviews (posts / listings / about-search-404): fix → 2 fix rounds → ship on all three groups; code reviews clean — 63cafea..9b789ed
 - 2026-10-27 M8a pipeline contract v1.1: `deferred` decision, refs outside code fences, batch normalize-url, Reading sources notes; review fix round 1 — 8107cc3, 1af4ec4 (PR #11)
+- 2026-10-27 M7 Lighthouse mobile on production (median of 3): all surfaces performance 99–100, accessibility 100, best practices 100, SEO 100, except search SEO 66 (noindex) and search deep links performance 51–70 (issue filed)

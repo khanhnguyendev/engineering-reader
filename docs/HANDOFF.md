@@ -4,7 +4,7 @@ Not a gate. Everything the run can do without Ryan is done; what is left needs h
 
 ## State
 - `main`: M0–M7 merged and verified on https://engineering-reader.vercel.app; M8a (pipeline contract v1.1, PR #11) merged.
-- M7: finish review returned ship on every surface group (posts; home and listings; about, search, 404) in both themes at 390 and 1440. Lighthouse mobile on production (median of 3): see `docs/RUNLOG.md`.
+- M7: finish review returned ship on every surface group (posts; home and listings; about, search, 404) in both themes at 390 and 1440. Lighthouse mobile on production (median of 3): 99–100 performance and 100 elsewhere on every surface, except search (noindex SEO 66; deep links with a query 51–70 performance, issue #12).
 - Pipeline: contract `docs/pipeline.md` v1.1 (adds `deferred`), prompt `docs/pipeline-prompt.md`, routine "engineering-reader content pipeline (shadow mode)" (Mon/Wed/Fri 08:00 ICT) with the v1.1 prompt.
 - The first real pipeline run was done by hand from the build session: PR #10, three posts (Discord voice outage, Discord voice to the edge, Netflix TimeSeries cold tier), green on `ci`, Vercel and label. Not merged: it is yours to review.
 - Run ledgers: `docs/runs/`. Rulings: `docs/decisions.md`.
