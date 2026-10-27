@@ -39,14 +39,20 @@ Tòa nhà là PDX-04, lớn nhất trong ba site ở Oregon, do Flexential vận
 
 Chuỗi sự kiện đại khái như sau.
 
-```mermaid
-flowchart TD
-    A[Mất một nguồn điện lưới khi bảo trì] --> B[Bật generator chạy song song nguồn còn lại]
-    B --> C[Chạm đất ở một biến áp]
-    C --> D[Bảo vệ ngắt: điện lưới và generator cùng tắt]
-    D --> E[UPS trụ khoảng 4 phút, thiết kế 10 phút]
-    E --> F[PDX-04 tối: các service chỉ nằm ở đây sập]
-    F --> G[Service high availability phụ thuộc vào chúng sập theo]
+```mermaid caption="Từ lúc mất nguồn điện lưới đến lúc cả các service được thiết kế high availability cũng sập."
+%%{init: {"flowchart": {"rankSpacing": 16, "nodeSpacing": 16, "padding": 6, "subGraphTitleMargin": {"top": 0, "bottom": 0}}}}%%
+flowchart TB
+    subgraph R1[" "]
+        direction LR
+        A[Mất một nguồn điện lưới khi bảo trì] --> B[Bật generator chạy song song nguồn còn lại] --> C[Chạm đất ở một biến áp] --> D[Bảo vệ ngắt: điện lưới và generator cùng tắt]
+    end
+    subgraph R2[" "]
+        direction LR
+        E[UPS trụ khoảng 4 phút, thiết kế 10 phút] --> F[PDX-04 tối: các service chỉ nằm ở đây sập] --> G[Service high availability phụ thuộc vào chúng sập theo]
+    end
+    R1 --> R2
+    style R1 fill:none,stroke:none
+    style R2 fill:none,stroke:none
 ```
 
 Đầu tiên, đợt bảo trì đột xuất của công ty điện cắt mất một đường điện lưới của tòa nhà. Flexential bật generator và chạy song song với nguồn lưới còn lại, một cách làm Cloudflare gọi là bất thường và chưa được giải thích rõ [S1 §Flexential Data Center Power Failure]. Flexential im lặng về chuyện này, và cái giá là mất đúng khoảng thời gian duy nhất có thể dời service control plane khỏi site; giám sát của Cloudflare nhìn server, không nhìn điện đến từ đâu [S1 §Flexential Data Center Power Failure].

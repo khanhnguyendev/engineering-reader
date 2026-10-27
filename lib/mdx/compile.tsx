@@ -22,8 +22,8 @@ export async function compilePostBody(
     source: doc.body,
     components: {
       ...mdxComponents,
-      Mermaid: (props: { index: number | string }) => (
-        <Mermaid index={props.index} post={post} locale={locale} />
+      Mermaid: (props: { index: number | string; caption?: string }) => (
+        <Mermaid index={props.index} caption={props.caption} post={post} locale={locale} />
       ),
     },
     options: {

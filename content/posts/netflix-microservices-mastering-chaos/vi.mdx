@@ -67,7 +67,7 @@ EVCache chạy tốt đến mức dễ bị coi là hiển nhiên [S1 @30:46]. N
 
 Thành công đó che đi một dependency. Subscriber service, nơi trả lời mọi câu hỏi về thành viên, được gần như mọi service gọi [S1 @31:30]. Cụm EVCache của nó phục vụ cả batch job tính gợi ý lẫn luồng request thời gian thực [S1 @31:40]. Trong cùng một request, một ứng dụng có thể đọc nó nhiều lần, như thể mỗi lần đọc chẳng tốn gì [S1 @31:54]. Lúc cao điểm, kiểu dùng đó dồn 800.000 đến một triệu request mỗi giây về tầng subscriber [S1 @32:05].
 
-```mermaid
+```mermaid caption="Các lượt đọc tìm đến dữ liệu subscriber thế nào, và đường fallback làm quá tải subscriber service ở đâu."
 flowchart TD
     A[Gần như mọi service] --> B[Cụm EVCache cho dữ liệu subscriber]
     C[Batch job] --> B

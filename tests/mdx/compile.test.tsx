@@ -60,6 +60,31 @@ describe('compilePostBody', () => {
     expect(html).not.toContain('mermaid:');
   });
 
+  it('renders a figcaption from the fence meta and keeps the hash caption-free', async () => {
+    const post = load();
+    const src = post.locales.vi!.mermaidBlocks[0];
+    writeFileSync(
+      path.join(dir, svgName('vi', 0)),
+      `<!-- mermaid:${hashBlock(src)} -->\n<svg viewBox="0 0 1 1"></svg>`,
+    );
+    post.locales.vi!.body = post.locales.vi!.body.replace(/^```mermaid[^\n]*$/m, '```mermaid caption="Một dòng mô tả."');
+    expect(mermaidBlocksOf(post.locales.vi!.body)[0]).toBe(src);
+    const html = renderToStaticMarkup((await compilePostBody(post, 'vi')).content);
+    expect(html).toMatch(/<figcaption class="mt-2 text-\[13px\] leading-\[1\.45\] text-muted">Một dòng mô tả\.<\/figcaption>/);
+    expect(html).toContain('<svg');
+  });
+
+  it('renders no figcaption without a caption', async () => {
+    const post = load();
+    const src = post.locales.vi!.mermaidBlocks[0];
+    writeFileSync(
+      path.join(dir, svgName('vi', 0)),
+      `<!-- mermaid:${hashBlock(src)} -->\n<svg viewBox="0 0 1 1"></svg>`,
+    );
+    const html = renderToStaticMarkup((await compilePostBody(post, 'vi')).content);
+    expect(html).not.toContain('figcaption');
+  });
+
   it('falls back when the SVG is stale', async () => {
     const post = load();
     writeFileSync(path.join(dir, svgName('vi', 0)), `<!-- mermaid:deadbeef -->\n<svg></svg>`);
