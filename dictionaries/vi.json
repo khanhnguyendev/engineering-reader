@@ -34,7 +34,8 @@
     },
     "breadcrumb": "Đường dẫn",
     "permalink": "Liên kết đến mục này",
-    "copyFailed": "Không sao chép được"
+    "copyFailed": "Không sao chép được",
+    "tags": "Thẻ"
   },
   "caseType": {
     "migration": "Di chuyển hệ thống",
@@ -135,7 +136,7 @@
     "searching": "Đang tìm…",
     "countOne": "{n} kết quả",
     "countOther": "{n} kết quả",
-    "empty": "Không có bài nào khớp. Thử từ khác, hoặc duyệt theo chủ đề bên dưới.",
+    "empty": "Không có bài nào khớp. Thử từ khác.",
     "unavailable": "Tìm kiếm chỉ có trên bản build.",
     "error": "Không tải được tìm kiếm. Thử tải lại trang.",
     "browse": "Hoặc duyệt theo chủ đề:"

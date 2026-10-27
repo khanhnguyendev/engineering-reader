@@ -18,6 +18,7 @@ import { Related } from "@/components/post/related";
 import { SeriesNav } from "@/components/post/series-nav";
 import { SmallTeam } from "@/components/post/small-team";
 import { Sources } from "@/components/post/sources";
+import { PostTags } from "@/components/post/post-tags";
 import { TagsRow } from "@/components/post/tags-row";
 import { Tldr } from "@/components/post/tldr";
 import { relatedPosts, seriesNav } from "@/lib/content/index";
@@ -118,14 +119,7 @@ export default async function Page({ params }: { params: Params }) {
             </ol>
           </nav>
 
-          <TagsRow
-            pills={[companyName, topic, dict.caseType[meta.caseType]]}
-            locale={locale}
-            tags={meta.tags.map((slug) => ({
-              slug,
-              label: vocab.tags.find((t) => t.slug === slug)?.[locale] ?? slug,
-            }))}
-          />
+          <TagsRow pills={[companyName, topic, dict.caseType[meta.caseType]]} />
 
           <h1 className="mb-3 text-[25px] leading-[1.25] text-balance text-ink lg:mb-4 lg:text-[40px] lg:leading-[1.18]">
             {fm.title}
@@ -168,6 +162,14 @@ export default async function Page({ params }: { params: Params }) {
               next={nav.next}
             />
           )}
+          <PostTags
+            heading={dict.post.tags}
+            locale={locale}
+            tags={meta.tags.map((slug) => ({
+              slug,
+              label: vocab.tags.find((t) => t.slug === slug)?.[locale] ?? slug,
+            }))}
+          />
           <Related posts={related} locale={locale} vocab={vocab} dict={dict} />
         </article>
 

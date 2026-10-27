@@ -252,8 +252,8 @@ describe('SearchBox', () => {
     const live = host.querySelector('[aria-live="polite"]')!;
     expect(live.className).not.toContain('mono-label');
     for (const c of ['mt-4', 'text-[15px]', 'leading-[1.55]', 'text-ink-2']) expect(live.className.split(' ')).toContain(c);
-    expect(vi_dict.search.empty).toBe('Không có bài nào khớp. Thử từ khác, hoặc duyệt theo chủ đề bên dưới.');
-    expect(en_dict.search.empty).toBe('No posts match. Try another word, or browse by topic below.');
+    expect(vi_dict.search.empty).toBe('Không có bài nào khớp. Thử từ khác.');
+    expect(en_dict.search.empty).toBe('No posts match. Try another word.');
     expect(host.querySelector('[data-search-browse]')).not.toBeNull();
   });
 

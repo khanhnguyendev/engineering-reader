@@ -109,6 +109,9 @@ describe('root not-found', () => {
     const links = [...doc.querySelectorAll('main#content a')];
     expect(links.map((a) => a.getAttribute('href'))).toEqual(['/vi', '/en', '/vi/search']);
     expect(links.map((a) => a.textContent)).toEqual([vi_.notFound.home, en_.notFound.home, vi_.notFound.search]);
+    const rows = [...doc.querySelectorAll('main#content p')].filter((p) => p.querySelector('a'));
+    expect([...rows[0].querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual(['/vi', '/en']);
+    expect([...rows[1].querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual(['/vi/search']);
     for (const a of links) {
       for (const c of ['text-[15px]', 'leading-[1.55]', 'text-ink', 'underline', 'decoration-hairline-strong', 'underline-offset-4', 'hover:decoration-accent']) {
         expect(a.className.split(' ')).toContain(c);

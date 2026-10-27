@@ -306,7 +306,7 @@ A cool, near-monochrome ground and ink scale with a single mint accent, defined 
 
 The ground is a 40px square grid drawn in the grid colour on every page. Content sits in a 1200px container with 16px side gutters (24px from 640px). From 1024px the post becomes two columns: a reading column up to 720px and a 260px rail that sticks 32px from the top, 40px apart; below 1024px the rail disappears and a collapsed TOC panel sits under the deep-read divider.
 
-The post is a fixed vertical sequence: breadcrumb, tag row, title, accent rule, dek, meta line, key numbers, TL;DR panel, the callout, the deep-read divider, (phone) TOC, section panels, then Lessons, Sources and byline, each set off by a top hairline rather than a panel. From 1024px the rail card names the author, so the end byline shows below that width only; the AI-drafting line under Sources is always visible. The tag row ends with the post's own tags as chip links to their tag pages.
+The post is a fixed vertical sequence: breadcrumb, tag row, title, accent rule, dek, meta line, key numbers, TL;DR panel, the callout, the deep-read divider, (phone) TOC, section panels, then Lessons, Sources and byline, each set off by a top hairline rather than a panel. From 1024px the rail card names the author, so the end byline shows below that width only; the AI-drafting line under Sources is always visible. The header tag row holds only the three plain chips; the post's own tags close the article as a "Tags" SectionHeading and CHIP_LINK chips (name only) to their tag pages, just before Related.
 
 Key numbers are stacked rows (value | label | ref) on phones and become 2 to 4 equal cells from 640px. Spacing is a small step scale (6, 8, 12, 16, 24, 32px); panels pad 16px on phones and 24px from 1024px (section panels 28px by 32px); blocks are 12 to 16px apart inside the top layer and 40px before end matter.
 
@@ -347,7 +347,7 @@ Outlined, quiet and labeled in mono; they never take a solid accent fill.
 ### Chips
 One strong-hairline base for every chip: transparent fill, 1px strong-hairline outline, 6px radius, Inter 12px (line-height 1.35), 3px by 8px padding. Three variants share it.
 - **CHIP (plain):** ink-2 text, static; the post tag row's company, topic and case type, and the topic label in a PostCard footer.
-- **CHIP_LINK:** a link carrying a name and a count, 8px apart on the baseline; hover fills panel-2 and lifts text to ink over 150ms. The home topic and tag rows, the tags index and the search browse block use it with a count; the post's own tags use it as a name only, after the plain chips in the same row.
+- **CHIP_LINK:** a link carrying a name and a count, 8px apart on the baseline; hover fills panel-2 and lifts text to ink over 150ms. The home topic and tag rows, the tags index and the search browse block use it with a count; the post's own tags use it as a name only, in the end-of-article Tags row.
 - **CHIP_MUTED:** a non-link chip with a count, text in muted; used for a zero-count topic on the home row. Tags with no post in the locale are not shown at all (home, tags index) and have no page.
 
 ### Cards / Containers
@@ -372,7 +372,7 @@ A quiet field over a hairline list: no panels, no highlight, no excerpt. The sea
 - **Browse block:** while idle and after a search with no match, a 15px ink-2 lead-in line, then the non-empty topics only, as CHIP_LINK with a mono 12px muted count. The block leaves the page while results or the searching line show.
 
 ### Topic Shelf
-The topics index renders each topic as a panel link (title, shelf dek, count). A topic with no posts is the muted variant: the same panel as a non-link `div`, no hover, the title in muted, the dek in ink-2 and the "0 posts" line kept. Its page still exists and shows the empty state.
+The topics index renders each topic as a panel link (title, shelf dek, count). A topic with no posts is the muted variant: the same panel as a non-link `div`, no hover, title and dek in muted and the "0 posts" line kept. Its page still exists and shows the empty state.
 
 ### Figure Caption
 A Mermaid figure may carry a caption, set in the fence meta (```` ```mermaid caption="…" ````): Inter 13px, line-height 1.45, muted, 8px under the diagram, inside the figure. It describes what the figure shows; it adds no number or claim. The render hash covers the diagram source only, so a caption edit never re-renders the SVG. No caption, no element. The SVG is centred and never wider than its box.

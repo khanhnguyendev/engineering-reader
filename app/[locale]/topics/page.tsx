@@ -59,7 +59,7 @@ export default async function Page({ params }: { params: Params }) {
               ) : (
                 <div className="panel flex w-full flex-col gap-2 p-4 lg:p-6">
                   <h2 className="text-[17px] leading-[1.35] text-muted lg:text-[19px]">{topic[locale]}</h2>
-                  <p className="text-[15px] leading-[1.6] text-ink-2">{shelfDek(dict, topic.slug)}</p>
+                  <p className="text-[15px] leading-[1.6] text-muted">{shelfDek(dict, topic.slug)}</p>
                   <span className="mt-auto pt-2 font-mono text-xs text-muted">
                     {plural(locale, count, dict.list.postsOne, dict.list.postsOther)}
                   </span>

@@ -38,6 +38,8 @@ export function NotFoundBody({ vi, en, siteNameEn }: { vi: Strings; en: Strings;
         <Link href="/en" lang="en" className={LINK}>
           {en.home}
         </Link>
+      </p>
+      <p className="mt-2">
         <Link href={`/${first === "en" ? "en" : "vi"}/search`} lang={first === "en" ? "en" : "vi"} className={LINK}>
           {t.search}
         </Link>

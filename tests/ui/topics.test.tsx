@@ -97,7 +97,7 @@ describe('topics index', () => {
     expect(empty.className.split(' ')).toContain('panel');
     expect(empty.className).not.toContain('hover:');
     expect(empty.querySelector('h2')!.className.split(' ')).toContain('text-muted');
-    expect(empty.querySelector('p')!.className.split(' ')).toContain('text-ink-2');
+    expect(empty.querySelector('p')!.className.split(' ')).toContain('text-muted');
     expect(empty.textContent).toContain('0 bài');
   });
 

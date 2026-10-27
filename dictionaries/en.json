@@ -34,7 +34,8 @@
     },
     "breadcrumb": "Breadcrumb",
     "permalink": "Link to this section",
-    "copyFailed": "Copy failed"
+    "copyFailed": "Copy failed",
+    "tags": "Tags"
   },
   "caseType": {
     "migration": "Migration",
@@ -135,7 +136,7 @@
     "searching": "Searching…",
     "countOne": "{n} result",
     "countOther": "{n} results",
-    "empty": "No posts match. Try another word, or browse by topic below.",
+    "empty": "No posts match. Try another word.",
     "unavailable": "Search is available on the built site only.",
     "error": "Search failed to load. Try reloading the page.",
     "browse": "Or browse by topic:"
