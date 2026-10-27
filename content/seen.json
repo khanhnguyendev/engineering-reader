@@ -1,1 +1,20 @@
-{}
+{
+  "https://blog.cloudflare.com/post-mortem-on-cloudflare-control-plane-and-analytics-outage": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-21",
+    "decision": "picked",
+    "slug": "cloudflare-control-plane-outage-2023"
+  },
+  "https://discord.com/blog/how-discord-stores-trillions-of-messages": {
+    "company": "discord",
+    "seenAt": "2026-10-21",
+    "decision": "picked",
+    "slug": "discord-cassandra-to-scylladb"
+  },
+  "https://www.youtube.com/watch?v=CZ3wIuvmHeM": {
+    "company": "netflix",
+    "seenAt": "2026-10-21",
+    "decision": "picked",
+    "slug": "netflix-microservices-mastering-chaos"
+  }
+}

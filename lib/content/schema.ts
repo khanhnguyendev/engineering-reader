@@ -101,6 +101,26 @@ export const SeriesSchema = z.record(
 export const SourceHostsSchema = z.array(z.string().min(1));
 export const FeaturedSchema = z.array(Slug);
 
+export const SeenEntrySchema = z
+  .strictObject({
+    company: z.string().min(1),
+    seenAt: DateStr,
+    decision: z.enum(['picked', 'skipped', 'rejected']),
+    slug: Slug.optional(),
+    reason: z.string().min(1).optional(),
+  })
+  .superRefine((e, ctx) => {
+    if (e.decision === 'picked' && e.slug === undefined) {
+      ctx.addIssue({ code: 'custom', path: ['slug'], message: 'picked entries require slug' });
+    }
+    if (e.decision !== 'picked' && e.reason === undefined) {
+      ctx.addIssue({ code: 'custom', path: ['reason'], message: `${e.decision} entries require reason` });
+    }
+  });
+export const SeenSchema = z.record(z.string(), SeenEntrySchema);
+export type SeenEntry = z.infer<typeof SeenEntrySchema>;
+export type Seen = z.infer<typeof SeenSchema>;
+
 export { RedirectsSchema, type Redirect } from './redirects';
 
 export type PostJson = z.infer<typeof PostJsonSchema>;

@@ -47,3 +47,5 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-26 M4/T3 /[locale]/search page (noindex, out of sitemap), header nav — 69ccdb2
 - 2026-10-26 M4/T4 check:search e2e; finish review fix → 2 rounds → ship; DESIGN.md search entry — 9f4e2f5
 - 2026-10-26 M4 final review fixes: per-locale Pagefind instance across client-side language switch, deep-link and shrink-query states, clean postbuild output, CI index check — 2f14363
+- 2026-10-26 M4 index rebuilt from content (Pagefind Node API in prebuild) after Vercel previews indexed 0 HTML files — f5f73b3, efd4a85
+- 2026-10-26 M4 merged (PR #5 squash b89bd7e); production: check:index 7/7 and check:search 7/7 PASS against https://engineering-reader.vercel.app, including the vi→en client-side switch

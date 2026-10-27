@@ -281,6 +281,31 @@ describe('zodIssuesToFindings', () => {
   });
 });
 
+describe('key-number-words', () => {
+  const setValue = (v: string) => {
+    const d = fresh();
+    editJson(d, (j) => (j.keyNumbers[2].value = v));
+    return run(d);
+  };
+  it.each(['9 days', '3 ngày', '177 nodes', 'p99 fast'])('rejects %s', (v) => {
+    const fs = setValue(v);
+    expect(rules(fs)).toContain('key-number-words');
+    const f = fs.find((x) => x.rule === 'key-number-words')!;
+    const word = v === '9 days' ? 'days' : v === '3 ngày' ? 'ngày' : v === '177 nodes' ? 'nodes' : 'fast';
+    expect(f.message).toContain(`"${word}"`);
+  });
+  it.each(['9 d', '≈41 h', '4 / 10 min', '≈10%', '177 → 72', 'p99 40–125 → 15 ms', '99.99% × 10 → ~99.9%', '30M req/s', '1T'])(
+    'accepts %s',
+    (v) => {
+      expect(rules(setValue(v))).not.toContain('key-number-words');
+    },
+  );
+  it('live posts have no key-number-words finding', () => {
+    const r = validateAll(path.resolve(import.meta.dirname, '../../content/posts'), vocab, { today: TODAY });
+    expect(r.findings.filter((f) => f.rule === 'key-number-words')).toEqual([]);
+  });
+});
+
 describe('validateAll', () => {
   it('aggregates, flags missing post.json, sorts, and ok reflects errors', () => {
     const root = path.join(tmp, 'all');
@@ -338,5 +363,57 @@ describe('validateAll', () => {
     expect(fs[0].message).toMatch(/series "s".*ghost/);
     const ok = validateAll(root, { ...vocab, series: { s: { slugs: ['good-post'], vi: 'S', en: 'S' } } }, { today: TODAY });
     expect(ok.findings.filter((f) => f.rule === 'enum')).toEqual([]);
+  });
+});
+
+describe('seen', () => {
+  const entry = { company: 'discord', seenAt: '2026-10-21', decision: 'picked', slug: 'good-post' };
+  const KEY = 'https://discord.com/blog/x';
+  // Own nested root per test: <tmp>/s<n>/posts with <tmp>/s<n>/seen.json beside it.
+  function seenRoot(seen: string | object | null): string {
+    const base = path.join(tmp, `s${n++}`);
+    const root = path.join(base, 'posts');
+    mkdirSync(root, { recursive: true });
+    cpSync(GOOD, path.join(root, 'good-post'), { recursive: true });
+    if (seen !== null) {
+      writeFileSync(path.join(base, 'seen.json'), typeof seen === 'string' ? seen : JSON.stringify(seen));
+    }
+    return root;
+  }
+  const seenFindings = (root: string) =>
+    validateAll(root, vocab, { today: TODAY }).findings.filter((f) => f.rule === 'seen');
+
+  it('unnormalized key is an error naming the normalized form', () => {
+    const fs = seenFindings(seenRoot({ 'https://Discord.com/blog/x/?utm_source=a': entry }));
+    expect(fs).toHaveLength(1);
+    expect(fs[0].level).toBe('error');
+    expect(fs[0].slug).toBe('seen');
+    expect(fs[0].file).toBe('seen.json');
+    expect(fs[0].message).toContain('https://discord.com/blog/x');
+  });
+  it('unknown company is an error', () => {
+    expect(seenFindings(seenRoot({ [KEY]: { ...entry, company: 'nope' } }))).toHaveLength(1);
+  });
+  it('picked slug with no post is an error', () => {
+    expect(seenFindings(seenRoot({ [KEY]: { ...entry, slug: 'missing-post' } }))).toHaveLength(1);
+  });
+  it('picked slug with a post and normalized key is clean', () => {
+    expect(seenFindings(seenRoot({ [KEY]: entry }))).toEqual([]);
+  });
+  it('non-URL key is a finding, not a crash', () => {
+    expect(seenFindings(seenRoot({ 'not a url': entry }))).not.toHaveLength(0);
+  });
+  it('malformed JSON is an error', () => {
+    expect(seenFindings(seenRoot('{ nope'))).toHaveLength(1);
+  });
+  it('schema violations are seen errors', () => {
+    expect(seenFindings(seenRoot({ [KEY]: { ...entry, decision: 'maybe' } }))).not.toHaveLength(0);
+  });
+  it('absent seen.json is no finding', () => {
+    expect(seenFindings(seenRoot(null))).toEqual([]);
+  });
+  it('live content/seen.json is clean', () => {
+    const live = path.resolve(import.meta.dirname, '../../content/posts');
+    expect(seenFindings(live)).toEqual([]);
   });
 });

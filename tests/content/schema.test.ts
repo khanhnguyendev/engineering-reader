@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { PostJsonSchema, LocaleFrontmatterSchema } from '@/lib/content/schema';
+import { PostJsonSchema, LocaleFrontmatterSchema, SeenEntrySchema, SeenSchema } from '@/lib/content/schema';
 import { loadVocab } from '@/lib/content/vocab';
 
 const base = () => ({
@@ -18,7 +18,7 @@ const base = () => ({
   keyNumbers: [
     { id: 'nodes', value: '177 → 72', ref: 'S1' },
     { id: 'latency', value: 'p99 40–125 → 15 ms', ref: 'S1' },
-    { id: 'migration', value: '9 days', ref: 'S1' },
+    { id: 'migration', value: '9 d', ref: 'S1' },
   ],
   sources: [
     { id: 'S1', type: 'blog', title: 'How Discord Stores Trillions of Messages', authors: ['Bo Ingram'], publishedAt: '2023-03-06', url: 'https://discord.com/blog/how-discord-stores-trillions-of-messages', accessedAt: '2026-10-20', locator: null },
@@ -124,5 +124,29 @@ describe('loadVocab', () => {
     expect(v.topics.map((t) => t.slug).sort()).toEqual(
       ['data', 'distributed-systems', 'infra', 'realtime', 'reliability'],
     );
+  });
+});
+
+describe('SeenEntrySchema', () => {
+  const picked = { company: 'discord', seenAt: '2026-10-21', decision: 'picked', slug: 'good-post' };
+  it('accepts valid picked, skipped, rejected', () => {
+    expect(SeenEntrySchema.safeParse(picked).success).toBe(true);
+    expect(SeenEntrySchema.safeParse({ company: 'x', seenAt: '2026-10-21', decision: 'skipped', reason: 'dup' }).success).toBe(true);
+    expect(SeenEntrySchema.safeParse({ company: 'x', seenAt: '2026-10-21', decision: 'rejected', reason: 'thin' }).success).toBe(true);
+  });
+  it('picked requires slug', () => {
+    expect(SeenEntrySchema.safeParse({ ...picked, slug: undefined }).success).toBe(false);
+  });
+  it('skipped and rejected require reason', () => {
+    expect(SeenEntrySchema.safeParse({ company: 'x', seenAt: '2026-10-21', decision: 'skipped' }).success).toBe(false);
+    expect(SeenEntrySchema.safeParse({ company: 'x', seenAt: '2026-10-21', decision: 'rejected' }).success).toBe(false);
+  });
+  it('rejects unknown decision and unknown keys', () => {
+    expect(SeenEntrySchema.safeParse({ ...picked, decision: 'maybe' }).success).toBe(false);
+    expect(SeenEntrySchema.safeParse({ ...picked, extra: 1 }).success).toBe(false);
+  });
+  it('SeenSchema is a record of entries', () => {
+    expect(SeenSchema.safeParse({ 'https://a.com/x': picked }).success).toBe(true);
+    expect(SeenSchema.safeParse({ 'https://a.com/x': { ...picked, decision: 'maybe' } }).success).toBe(false);
   });
 });
