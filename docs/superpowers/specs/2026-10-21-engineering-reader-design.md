@@ -199,6 +199,8 @@ Errors (fail the build):
 - Deep layer reading time 6 to 10 minutes; whole post 8 to 12 (words per minute: 200 for Vietnamese, 230 for English; both configurable in one place).
 - Summary at most 160 characters.
 - Both locales present unless one is marked draft.
+- Key-number values are language-neutral: letter tokens only from the unit allowlist in `lib/content/key-number-units.ts` (added M5; values are shared by both locales).
+- `seen.json` entries match their schema; keys are already normalized; `company` is known; a `picked` entry names an existing post (added M5).
 
 Warnings (printed, do not fail):
 - `publishedAt` more than 3 days before the build date.

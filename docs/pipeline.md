@@ -1,0 +1,166 @@
+# Content pipeline
+
+This document is the contract for anyone who adds posts to this repo without a person writing them: the scheduled Claude Code routine (M6), or a person who wants to do the same job by hand. It assumes no knowledge of the conversation that built the site. If this document and the spec disagree, the spec wins (`docs/superpowers/specs/2026-10-21-engineering-reader-design.md` §4, §5, §9) and this document is fixed.
+
+## What the site is
+
+A bilingual (Vietnamese first, English full equivalent) digest of engineering cases from large companies. Each post retells one real decision, incident, migration or scaling problem in our own words, with concrete numbers traced to primary sources, and says what a small team can do with it. The reader is a mid-level Vietnamese developer preparing for a design review or a system design interview.
+
+## What the pipeline does, once per run
+
+1. **Start clean.** Clone or fetch the repo, check out `main`, and install without a browser: `PUPPETEER_SKIP_DOWNLOAD=1 pnpm install --frozen-lockfile`. Nothing in the pipeline needs Chromium, Next.js or a build.
+2. **Exit if a pipeline PR is open.** `gh pr list --label pipeline --state open`. If anything is listed, stop. At most one pipeline PR is in flight.
+3. **Build the ledger.** Start from `content/seen.json` on `main`. Then, for every PR from a branch named `pipeline/*` (except `pipeline/dry-run-*`) that was closed without merging in the last 90 days (`gh pr list --label pipeline --state closed --search "is:unmerged closed:>=<date 90 days ago>"`), read its `content/seen.json` from the PR head, which survives branch deletion (`git fetch origin pull/<n>/head` then `git show FETCH_HEAD:content/seen.json`). Any key found there and not on `main` is added to this run's ledger with `"decision": "rejected"` and `"reason": "closed unmerged in PR #<n>"`. A rejected draft is never picked again unless a human deletes its entry.
+4. **Read feeds.** `content/companies.json` lists each company's `feedUrl`. Fetch each feed. For every item, normalize its URL with `pnpm -s normalize-url <url>` and skip it if the normalized URL is a key in the ledger.
+5. **Decide each unseen item: picked or skipped.** The selection bar is below. Every unseen item gets a ledger entry this run, picked or skipped, with a one-line reason for skips. Two or three picks per run is a ceiling, not a target; zero picks is a normal run.
+6. **Write each pick.** Create `content/posts/<slug>/post.json`, `vi.mdx` and `en.mdx` (formats below). Write Mermaid as fenced ` ```mermaid ` blocks only. Never write or edit `.svg` files: CI renders diagrams and commits them to the PR branch.
+7. **Validate.** `pnpm validate` must print `✔ N posts valid`. Fix every `✖` error. Warnings (`⚠`) are allowed.
+8. **Self-check.** Go through the review checklist below for each pick, honestly. Tick an item only if the post meets it. An unticked item is allowed and tells the reviewer where to look; a false tick is not allowed.
+9. **Open one PR.** Branch `pipeline/<YYYY-MM-DD>` (or `pipeline/ledger-<YYYY-MM-DD>` when there are no picks). Commit the posts and `content/seen.json` together. Generate the body with `pnpm -s pipeline:pr-body <slug...>` (no slugs for a ledger-only run), tick the checklist items you verified, and open the PR against `main` with the label `pipeline`. Never merge, never enable auto-merge, never push to `main`.
+
+A run with no picks still opens the ledger-only PR, so skip decisions reach `main`.
+
+## The selection bar
+
+Pick a source only if all of these hold:
+- It is a primary source: the company's own engineering blog, a talk by its engineers, or a paper. Its host is the company's blog host or in `content/source-hosts.json`.
+- It tells a real decision, incident, migration or scaling problem, not a product announcement, a tutorial, a tool release or a hiring post.
+- It has concrete numbers (two to four that matter), each one stated in the source.
+- A small team can learn something specific from it.
+
+One great post beats three average ones. When in doubt, skip with a reason.
+
+Secondary summaries (newsletters, Reddit, Hacker News) may inform you, but are never cited and never the source of a number. A number that cannot be traced to a source is not used.
+
+## File formats
+
+### `content/posts/<slug>/post.json`
+
+```json
+{
+  "slug": "discord-cassandra-to-scylladb",
+  "company": "discord",
+  "topic": "data",
+  "caseType": "migration",
+  "tags": ["cassandra", "scylladb", "storage"],
+  "series": null,
+  "publishedAt": "2026-10-27",
+  "updatedAt": null,
+  "sourcePublishedAt": "2023-03-06",
+  "featured": false,
+  "author": "pipeline",
+  "reviewedBy": "ryan",
+  "keyNumbers": [
+    { "id": "nodes", "value": "177 → 72", "ref": "S1" },
+    { "id": "migration", "value": "9 d", "ref": "S1" }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "type": "blog",
+      "title": "How Discord Stores Trillions of Messages",
+      "authors": ["Bo Ingram"],
+      "publishedAt": "2023-03-06",
+      "url": "https://discord.com/blog/how-discord-stores-trillions-of-messages",
+      "accessedAt": "2026-10-27",
+      "locator": null
+    }
+  ]
+}
+```
+
+- `slug`: English, kebab-case, company slug first, then the case in four to six words, no dates. It never changes after merge.
+- `company`: a `slug` in `content/companies.json`. `topic`: one of `distributed-systems`, `data`, `realtime`, `infra`, `reliability`. `caseType`: one of `migration`, `incident`, `design-decision`, `scaling`. `tags`: 2 to 5 slugs from `content/tags.json`. `series`: a key in `content/series.json` or `null`.
+- `author` is `pipeline`; `reviewedBy` is `ryan`; `publishedAt` is the run date.
+- `keyNumbers`: 2 to 4, prefer 3. `value` is shared by both languages, so it holds digits, symbols and units only (`9 d`, `30M req/s`, `p99 40–125 → 15 ms`), never words such as "days" or "ngày". The validator lists the allowed unit tokens. Labels go in each locale's frontmatter.
+- `sources`: primary only. `talk` and `paper` sources need a `locator` (a section like `§3` or a timestamp like `@12:40`).
+
+If the company is not in `companies.json`, the source is not a pick; skip it with the reason `company not in companies.json`. Adding a company is a human decision.
+
+### `vi.mdx` and `en.mdx`
+
+```yaml
+---
+title: "Discord chuyển kho tin nhắn từ Cassandra sang ScyllaDB"
+summary: "One line, at most 160 characters; it is also the meta description."
+tldr:
+  - "3 to 5 bullets: problem, what they did, outcome."
+keyNumberLabels:
+  nodes: "Số node database"
+  migration: "Thời gian chuyển dữ liệu"
+smallTeam:
+  - "2 to 4 bullets, second person: what you change next week, what does not transfer from their scale."
+lessons:
+  - "Optional, 2 to 3 bullets about them: what they would do differently, what the case proves."
+---
+```
+
+The body below the frontmatter is the deep layer: free `##` headings that follow the story (where they started, what broke, options, what they built, what it cost, what went wrong after), 6 to 10 minutes of reading; the whole post 8 to 12 minutes (200 words per minute in Vietnamese, 230 in English). Inline references look like `[S1]`, `[S2 §3]`, `[S3 @12:40]`; every source is referenced at least once. Both locales have the same structure, the same key-number ids and the same number of Mermaid blocks, with labels translated. No images from sources, not even redrawn; no external image URLs.
+
+Vietnamese is written with full diacritics and reads as written by a Vietnamese engineer, not translated. English is a full equivalent, not a summary.
+
+Subject rule: Lessons is about them; For a small team is about you. A bullet that fits both goes to For a small team.
+
+Never paraphrase so closely that the text reproduces the original. Retell in your own words.
+
+### `content/seen.json`
+
+Keyed by normalized source URL (`pnpm -s normalize-url <url>` prints it; the validator rejects keys that are not normalized):
+
+```json
+{
+  "https://discord.com/blog/how-discord-stores-trillions-of-messages": {
+    "company": "discord", "seenAt": "2026-10-27", "decision": "picked", "slug": "discord-cassandra-to-scylladb"
+  },
+  "https://netflixtechblog.com/some-post": {
+    "company": "netflix", "seenAt": "2026-10-27", "decision": "skipped", "reason": "tooling announcement, no numbers"
+  }
+}
+```
+
+`decision` is `picked` (needs `slug`, and the post must exist), `skipped` or `rejected` (both need `reason`). Entries are never removed by the pipeline. A human deleting an entry re-queues that URL.
+
+## Review checklist
+
+The PR body carries this list once per post (it comes from `lib/pipeline/checklist.ts`, the same list as `.github/pull_request_template.md`):
+
+- Functional and non-functional requirements stated.
+- Scale estimate present with numbers.
+- Bottleneck named explicitly.
+- At least one trade-off with both sides.
+- At least one failure mode or lesson from failure.
+- Every number has a source reference.
+- For a small team is specific, not a platitude.
+- Subject check: Lessons is about them, For a small team is about you.
+- Nothing paraphrased so closely it reproduces the original.
+- Same diagram count and shape across locales.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `PUPPETEER_SKIP_DOWNLOAD=1 pnpm install --frozen-lockfile` | install without Chromium |
+| `pnpm -s normalize-url <url>` | print the normalized ledger key for a URL |
+| `pnpm validate` | validate every post and `seen.json`; exit 1 on errors |
+| `pnpm -s pipeline:pr-body [slug...]` | print the PR body for this run's picks |
+| `pnpm pipeline:dry-run [--open-pr]` | maintainers only: prove the contract with a fixture post |
+
+## What CI does with a pipeline PR
+
+- The `label` workflow adds the `pipeline` label to any PR from a `pipeline/*` branch.
+- The `ci` workflow renders Mermaid diagrams, commits the SVGs back to the branch, then runs tests, validation and the build. Its status is the required check on `main`.
+- Vercel builds a preview of the PR.
+- Nothing merges automatically. Ryan reviews and merges.
+
+## Shadow mode
+
+Until the exit condition holds, Ryan reads every pipeline PR in full before merging. He labels a merged PR `clean` when it merged with zero edits to `post.json` and only minor prose edits in MDX; any edit to a number or a source resets the count. `scripts/shadow-status.ts` (M6) counts consecutive `clean` merges and the days since the first pipeline PR. Exit: 5 consecutive clean PRs and at least 3 weeks. After exit, review is by the printed checklist and the sources block.
+
+## Never
+
+- Merge, enable auto-merge, push to `main`, or force-push.
+- Open a second pipeline PR while one is open.
+- Edit an existing post, `companies.json`, `tags.json`, `topics.json`, `series.json`, `featured.json`, `redirects.json`, `source-hosts.json`, code, CI or this document. If a pick needs a new tag, use the closest existing tags and say so in the PR summary.
+- Write `.svg` files or run the Mermaid renderer.
+- Cite a secondary source, or use a number that is not in a cited source.
+- Remove or rewrite an existing `seen.json` entry.
