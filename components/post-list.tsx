@@ -4,7 +4,7 @@ import type { Vocab } from "@/lib/content/vocab";
 import type { Dictionary } from "@/lib/dictionaries";
 import type { Locale } from "@/lib/i18n";
 
-/** A two- or three-up (at `lg`) grid of PostCards for `locale`, or the empty label when none have that locale. */
+/** A two- or three-up (at `lg`) grid of PostCards for `locale`, or the empty label when none has that locale. Exactly one card sits in one column capped at 720px. */
 export function PostList({
   posts,
   locale,
@@ -22,8 +22,12 @@ export function PostList({
 }) {
   const shown = posts.filter((p) => hasLocale(p, locale));
   if (shown.length === 0) return <p className="text-muted">{emptyLabel}</p>;
+  const layout =
+    shown.length === 1
+      ? "max-w-[720px]"
+      : `sm:grid-cols-2 ${cols === 3 ? "lg:grid-cols-3" : "lg:grid-cols-2"}`;
   return (
-    <ul className={`grid gap-4 sm:grid-cols-2 ${cols === 3 ? "lg:grid-cols-3" : "lg:grid-cols-2"}`}>
+    <ul className={`grid gap-4 ${layout}`}>
       {shown.map((post) => (
         <PostCard
           key={post.slug}

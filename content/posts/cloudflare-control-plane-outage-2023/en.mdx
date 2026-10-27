@@ -39,15 +39,13 @@ The building was PDX-04, the biggest of the three Oregon sites, run by Flexentia
 
 The chain went roughly like this.
 
-```mermaid
-flowchart TD
-    A[Utility feed lost during maintenance] --> B[Generators started alongside the remaining feed]
-    B --> C[Ground fault at a transformer]
-    C --> D[Protection trips: utility and generators both offline]
-    D --> E[UPS lasts about 4 minutes, designed for 10]
-    E --> F[PDX-04 dark: services pinned there go down]
-    F --> G[High-availability services that depend on them fail too]
-```
+1. Utility feed lost during maintenance.
+2. Generators started alongside the remaining feed.
+3. Ground fault at a transformer.
+4. Protection trips: utility and generators both offline.
+5. UPS lasts about 4 minutes, designed for 10.
+6. PDX-04 dark: services pinned there go down.
+7. High-availability services that depend on them fail too.
 
 First the local utility, doing unplanned maintenance, knocked out one of the building's utility feeds. Flexential started its generators and ran them alongside the one live utility feed left, a combination Cloudflare calls unusual and has had no clear explanation for [S1 §Flexential Data Center Power Failure]. Flexential never mentioned the switch to generators. That silence cost the one window in which control-plane services could have been moved off the site; Cloudflare's monitoring watched servers, not where their power came from [S1 §Flexential Data Center Power Failure].
 

@@ -57,6 +57,7 @@ describe('about page', () => {
     expect(host.querySelector('h1')!.textContent).toBe('About');
     expect([...host.querySelectorAll('main section h2')].map((h) => h.textContent)).toEqual(['Sources', 'How']);
     expect(host.querySelector('footer')!.textContent).toContain('Ryan');
+    expect(host.querySelector('footer')!.className).not.toContain('lg:hidden');
     expect(host.innerHTML).not.toContain('Giới thiệu');
   });
 

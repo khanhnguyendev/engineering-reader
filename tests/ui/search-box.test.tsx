@@ -32,7 +32,6 @@ const COMPANIES = [{ slug: 'discord', name: 'Discord', brandColor: '#5865f2' }];
 const TOPICS = [
   { slug: 'databases', label: 'Cơ sở dữ liệu', count: 3 },
   { slug: 'incidents', label: 'Sự cố', count: 1 },
-  { slug: 'scaling', label: 'Mở rộng', count: 0 },
   { slug: 'ai', label: 'AI', count: 2 },
   { slug: 'infra', label: 'Hạ tầng', count: 5 },
 ];
@@ -128,7 +127,7 @@ describe('SearchBox', () => {
     expect(mono.style.color).toBe('');
   });
 
-  it('shows linked topic chips with counts, a muted non-link for zero, and hides them once searching', async () => {
+  it('shows linked topic chips with counts, and hides them once searching', async () => {
     mockLoad.mockResolvedValue(fake(ROWS));
     await mount();
     const browse = host.querySelector('[data-search-browse]')!;
@@ -141,9 +140,6 @@ describe('SearchBox', () => {
     expect(anchors[0].textContent).toContain('Cơ sở dữ liệu');
     expect(anchors[0].querySelector('[aria-hidden="true"]')!.textContent).toBe('3');
     expect(anchors[0].querySelector('.sr-only')!.textContent).toBe('3 bài');
-    const zero = [...browse.querySelectorAll('li')].find((li) => li.textContent!.includes('Mở rộng'))!;
-    expect(zero.querySelector('a')).toBeNull();
-    expect(zero.querySelector('span')!.className).toContain('text-muted');
     await type('du lieu');
     expect(host.querySelector('[data-search-browse]')).toBeNull();
   });
@@ -249,12 +245,34 @@ describe('SearchBox', () => {
     expect(host.querySelector('ol')).toBeNull();
   });
 
+  it('sets the empty sentence in 15px ink-2 Inter, not mono, and keeps the topic browse chips', async () => {
+    mockLoad.mockResolvedValue(fake([]));
+    await mount();
+    await type('zzqxv');
+    const live = host.querySelector('[aria-live="polite"]')!;
+    expect(live.className).not.toContain('mono-label');
+    for (const c of ['mt-4', 'text-[15px]', 'leading-[1.55]', 'text-ink-2']) expect(live.className.split(' ')).toContain(c);
+    expect(vi_dict.search.empty).toBe('Không có bài nào khớp. Thử từ khác.');
+    expect(en_dict.search.empty).toBe('No posts match. Try another word.');
+    expect(host.querySelector('[data-search-browse]')).not.toBeNull();
+  });
+
+  it('keeps mono only on the results count and the searching line', async () => {
+    mockLoad.mockResolvedValue(fake(ROWS));
+    await mount();
+    await type('du lieu');
+    expect(host.querySelector('[aria-live="polite"]')!.className).toContain('mono-label');
+    expect(host.querySelector('[data-search-browse]')).toBeNull();
+  });
+
   it('shows unavailable when the index cannot load', async () => {
     mockLoad.mockResolvedValue(null);
     await mount();
     await type('du lieu');
     expect(state()).toBe('unavailable');
     expect(host.querySelector('[aria-live="polite"]')!.textContent).toBe(vi_dict.search.unavailable);
+    expect(host.querySelector('[aria-live="polite"]')!.className).not.toContain('mono-label');
+    expect(host.querySelector('[data-search-browse]')).toBeNull();
   });
 
   it('shows error when search rejects', async () => {

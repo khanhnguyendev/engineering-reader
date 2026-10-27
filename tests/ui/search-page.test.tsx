@@ -23,13 +23,13 @@ describe('search page', () => {
     expect(main.querySelector('[data-search-state]')).not.toBeNull();
     expect(main.querySelector('input')).not.toBeNull();
   });
-  it('holds the intro and box in a 720px measure and lists every vocab topic, linking only non-empty ones', async () => {
+  it('holds the intro and box in a 720px measure and lists only non-empty topics, each linked', async () => {
     const { default: Page } = await mod();
     const { loadVocab } = await import('@/lib/content/vocab');
     const { listPosts } = await import('@/lib/content/load');
     const { topicsWithCounts } = await import('@/lib/content/index');
     const vocab = loadVocab();
-    const counts = topicsWithCounts(listPosts(), vocab, 'vi');
+    const counts = topicsWithCounts(listPosts(), vocab, 'vi').filter((c) => c.count > 0);
     const host = document.createElement('div');
     host.innerHTML = renderToStaticMarkup(await Page({ params: Promise.resolve({ locale: 'vi' }) }));
     const measure = host.querySelector('main#content > div')!;
@@ -37,11 +37,10 @@ describe('search page', () => {
     expect(measure.querySelector('h1')).not.toBeNull();
     expect(measure.querySelector('input')).not.toBeNull();
     const items = [...measure.querySelectorAll('[data-search-browse] li')];
-    expect(items).toHaveLength(vocab.topics.length);
-    counts.forEach(({ topic, count }, i) => {
-      const a = items[i].querySelector('a');
-      if (count > 0) expect(a!.getAttribute('href')).toBe(`/vi/topics/${topic.slug}`);
-      else expect(a).toBeNull();
+    expect(counts.length).toBeGreaterThan(0);
+    expect(items).toHaveLength(counts.length);
+    counts.forEach(({ topic }, i) => {
+      expect(items[i].querySelector('a')!.getAttribute('href')).toBe(`/vi/topics/${topic.slug}`);
       expect(items[i].textContent).toContain(topic.vi);
     });
     expect(measure.textContent).toContain('Hoặc duyệt theo chủ đề:');

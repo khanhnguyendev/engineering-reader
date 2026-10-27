@@ -1,5 +1,6 @@
 import { CHIP } from "@/components/chip";
 
+/** The plain chips between the breadcrumb and the title: company, topic, case type. */
 export function TagsRow({ pills }: { pills: string[] }) {
   return (
     <div className="mb-4 flex flex-wrap items-center gap-1.5">

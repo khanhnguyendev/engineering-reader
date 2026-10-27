@@ -74,7 +74,7 @@ export function llmsTxt(
   ].join('\n');
   const head = [
     `# ${dicts.vi.site.name}`,
-    `> ${dicts.vi.site.tagline} / ${dicts.en.site.tagline}`,
+    `> ${dicts.vi.site.tagline} / ${dicts.en.site.tagline.replace(/\u00a0/g, ' ')}`,
     `${dicts.vi.llms.intro} ${dicts.en.llms.intro}`,
   ].join('\n\n');
   return nfc(`${[head, ...sections, optional].join('\n\n')}\n`);

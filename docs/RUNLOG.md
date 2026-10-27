@@ -57,3 +57,5 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-27 M6/T1 `pnpm shadow-status`; fix round 1 (sort and earliest-PR tests) — 2746185, 82e9c0b
 - 2026-10-27 M6 routine `trig_01MokJR3KWo4a9w25ao2d2ig` created (Mon/Wed/Fri 08:00 ICT, Opus 5.5, no connectors); first run fired by hand
 - 2026-10-27 M6 first routine run (cse_01PgjPS2o6nvFT3257N8k7B4): contract followed, all three feeds refused by the environment egress proxy, no PR, as designed; routine prompt already includes the Tools section (created after that edit). PR #8
+- 2026-10-27 pipeline run by hand from the controller session (cloud routine blocked on egress): PR #10, 3 picks (discord-voice-outage-supervisor-bottleneck, discord-voice-migration-to-cloudflare-edge, netflix-timeseries-cold-tier-from-backups), 127 skips; contract feedback queued (deferred decision, mermaid refs, batch normalize-url)
+- 2026-10-27 M7 finish reviews (posts / listings / about-search-404): fix → 2 fix rounds → ship on all three groups; code reviews clean — 63cafea..9b789ed

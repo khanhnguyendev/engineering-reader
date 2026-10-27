@@ -81,41 +81,35 @@ const SITE: P[] = [
 ];
 
 describe('tags index', () => {
-  it('lists every vocab tag as a chip with its count, sorted by the vi label', async () => {
+  it('lists only tags with posts as chips with their count, sorted by the vi label', async () => {
     const host = await renderIndex(site(SITE));
     const main = host.querySelector('main#content')!;
     expect(main.getAttribute('tabindex')).toBe('-1');
     expect(main.querySelector('h1')!.textContent).toBe('Thẻ');
     expect(main.textContent).toContain('Mọi công nghệ và kỹ thuật');
     const chips = [...main.querySelectorAll('li > a, li > span')];
-    expect(chips.map((a) => a.getAttribute('href'))).toEqual(
-      [null, null, '/vi/tags/cassandra', '/vi/tags/a-zeta'],
-    );
-    expect(chips[2].textContent).toContain('Cassandra');
-    expect(chips[2].textContent).toContain('2');
-    expect(chips[2].querySelector('span[aria-hidden="true"]')!.textContent).toBe('2');
-    expect(chips[2].querySelector('.sr-only')!.textContent).toBe('2 bài');
-    expect(chips[0].textContent).toContain('0');
+    expect(chips.map((a) => a.getAttribute('href'))).toEqual(['/vi/tags/cassandra', '/vi/tags/a-zeta']);
+    expect(chips[0].textContent).toContain('Cassandra');
+    expect(chips[0].textContent).toContain('2');
+    expect(chips[0].querySelector('span[aria-hidden="true"]')!.textContent).toBe('2');
+    expect(chips[0].querySelector('.sr-only')!.textContent).toBe('2 bài');
     for (const c of ['border', 'border-hairline-strong', 'rounded-md']) {
       expect(chips[0].className.split(' ')).toContain(c);
     }
   });
 
-  it('does not link a tag no post uses; it is a muted span that keeps its count', async () => {
+  it('omits a tag no post uses: no chip, no muted span', async () => {
     const host = await renderIndex(site(SITE));
-    const unused = [...host.querySelectorAll('main li')].find((li) => li.textContent!.includes('Ă'))!;
-    expect(unused.querySelector('a')).toBeNull();
-    const chip = unused.querySelector('span')!;
-    expect(chip.className.split(' ')).toContain('text-muted');
-    expect(unused.querySelector('.sr-only')!.textContent).toBe('0 bài');
-    expect(host.querySelectorAll('main li > a')).toHaveLength(2);
+    expect([...host.querySelectorAll('main li')].some((li) => li.textContent!.includes('Ă'))).toBe(false);
+    expect(host.querySelectorAll('main li')).toHaveLength(2);
+    expect(host.querySelectorAll('main li > span.text-muted.border')).toHaveLength(0);
   });
 
   it('sorts by the en label on the en index', async () => {
     const host = await renderIndex(site(SITE), 'en');
     const chips = [...host.querySelectorAll('main li > a, main li > span')];
-    expect(chips.map((a) => a.getAttribute('href'))).toEqual([null, '/en/tags/cassandra', null, '/en/tags/a-zeta']);
-    expect(chips[0].textContent).toContain('Alpha');
+    expect(chips.map((a) => a.getAttribute('href'))).toEqual(['/en/tags/cassandra', '/en/tags/a-zeta']);
+    expect(chips[0].textContent).toContain('Cassandra');
   });
 
   it('exports metadata via buildMetadata', async () => {
@@ -143,24 +137,36 @@ describe('tag page', () => {
     const host = await renderTag(site(SITE), 'vi', 'cassandra');
     const main = host.querySelector('main#content')!;
     expect(main.querySelector('h1')!.textContent).toBe('Cassandra');
-    expect(main.querySelector('main header p')!.textContent).toBe('2 bài');
+    expect(main.querySelector('main header p')!.textContent).toBe('2 bài có nhắc đến Cassandra.');
     expect(main.querySelector('h2')!.textContent).toBe('Bài viết');
+    expect(main.querySelector('h2')!.className.split(' ')).toContain('sr-only');
     const hrefs = [...main.querySelectorAll('a[href^="/vi/posts/"]')].map((a) => a.getAttribute('href'));
     expect(hrefs).toEqual(['/vi/posts/p1', '/vi/posts/p2']);
   });
 
-  it('Review Focus 2: a vocab tag no post uses still has a page with the empty state', async () => {
+  it('a vocab tag no post uses has no page: not generated, and 404 if reached', async () => {
     const s = site(SITE);
-    const vi_ = await renderTag(s, 'vi', 'b-alpha');
-    expect(vi_.querySelector('h1')!.textContent).toBe('Ă');
-    expect(vi_.textContent).toContain('Chưa có bài nào gắn thẻ này.');
-    const en = await renderTag(s, 'en', 'b-alpha');
-    expect(en.querySelector('h1')!.textContent).toBe('Alpha');
-    expect(en.querySelector('main header p')!.textContent).toBe('0 posts');
-    expect(en.textContent).toContain('No posts with this tag yet.');
     stub(s);
     const mod = await import('@/app/[locale]/tags/[tag]/page');
-    expect(mod.generateStaticParams()).toContainEqual({ locale: 'en', tag: 'b-alpha' });
+    expect(mod.generateStaticParams()).not.toContainEqual({ locale: 'en', tag: 'b-alpha' });
+    expect(mod.generateStaticParams()).not.toContainEqual({ locale: 'vi', tag: 'b-alpha' });
+    await expect(mod.default({ params: Promise.resolve({ locale: 'en', tag: 'b-alpha' }) })).rejects.toMatchObject({
+      digest: expect.stringContaining('404'),
+    });
+  });
+
+  it('points the language switch at the en home when the tag has no en posts', async () => {
+    const s = site([{ slug: 'p1', tags: ['cassandra', 'a-zeta'] }]);
+    rmSync(path.join(s.postsDir, 'p1', 'en.mdx'));
+    const vi_ = await renderTag(s, 'vi', 'cassandra');
+    expect(vi_.querySelector('header a[hreflang="en"]')!.getAttribute('href')).toBe('/en');
+    const both = await renderTag(site(SITE), 'vi', 'cassandra');
+    expect(both.querySelector('header a[hreflang="en"]')!.getAttribute('href')).toBe('/en/tags'); // usePathname is mocked to /vi/tags: a real twin keeps the path switch
+  });
+
+  it('uses the en dek sentence', async () => {
+    const host = await renderTag(site(SITE), 'en', 'cassandra');
+    expect(host.querySelector('main header p')!.textContent).toBe('2 posts that name Cassandra.');
   });
 
   it('404s for an unknown tag or locale', async () => {
@@ -174,11 +180,11 @@ describe('tag page', () => {
     });
   });
 
-  it('is static: every vocab tag in both locales', async () => {
+  it('is static: only tags with a post in that locale, in both locales', async () => {
     stub(site(SITE));
     const mod = await import('@/app/[locale]/tags/[tag]/page');
     expect(mod.dynamicParams).toBe(false);
-    expect(mod.generateStaticParams()).toHaveLength(TAGS.length * 2);
+    expect(mod.generateStaticParams()).toHaveLength(2 * 2);
   });
 
   it('exports metadata via buildMetadata', async () => {

@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { PageIntro } from "@/components/page-intro";
 import { PostList } from "@/components/post-list";
-import { SectionHeading } from "@/components/section-heading";
 import { listPosts } from "@/lib/content/load";
 import { localesFor } from "@/lib/content/routes";
 import { loadVocab } from "@/lib/content/vocab";
@@ -56,7 +55,7 @@ export default async function Page({ params }: { params: Params }) {
           <PageIntro title={topic[locale]} dek={shelfDek(dict, topic.slug)} />
         </div>
         <section>
-          <SectionHeading title={dict.list.posts} />
+          <h2 className="sr-only">{dict.list.posts}</h2>
           <PostList posts={posts} locale={locale} vocab={vocab} dict={dict} emptyLabel={dict.topics.empty} />
         </section>
       </main>

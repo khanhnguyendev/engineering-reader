@@ -53,7 +53,7 @@ Lý do chúng tồn tại là request coalescing. Database chỉ trả lời m�
 
 Request trùng chỉ gộp được nếu chúng rơi vào cùng một process. Vì thế request được chia giữa các instance bằng consistent hashing trên channel ID, nghĩa là một kênh luôn nói chuyện với đúng một instance [S1 §Data Services Serving Data].
 
-```mermaid
+```mermaid caption="Luồng đọc tin nhắn khi data service nằm giữa API và ScyllaDB."
 flowchart LR
     A[API monolith] --> B[Data service viết bằng Rust]
     B --> C[(Cụm ScyllaDB)]

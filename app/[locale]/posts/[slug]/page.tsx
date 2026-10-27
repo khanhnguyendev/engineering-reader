@@ -18,6 +18,7 @@ import { Related } from "@/components/post/related";
 import { SeriesNav } from "@/components/post/series-nav";
 import { SmallTeam } from "@/components/post/small-team";
 import { Sources } from "@/components/post/sources";
+import { PostTags } from "@/components/post/post-tags";
 import { TagsRow } from "@/components/post/tags-row";
 import { Tldr } from "@/components/post/tldr";
 import { relatedPosts, seriesNav } from "@/lib/content/index";
@@ -148,7 +149,7 @@ export default async function Page({ params }: { params: Params }) {
 
           {fm.lessons && <Lessons heading={dict.post.lessons} items={fm.lessons} />}
           <Sources dict={dict} locale={locale} sources={meta.sources} />
-          <Byline text={dict.post.byline} />
+          <Byline text={dict.post.byline} className="lg:hidden" />
           {nav.series && nav.index >= 0 && (
             <SeriesNav
               locale={locale}
@@ -161,6 +162,14 @@ export default async function Page({ params }: { params: Params }) {
               next={nav.next}
             />
           )}
+          <PostTags
+            heading={dict.post.tags}
+            locale={locale}
+            tags={meta.tags.map((slug) => ({
+              slug,
+              label: vocab.tags.find((t) => t.slug === slug)?.[locale] ?? slug,
+            }))}
+          />
           <Related posts={related} locale={locale} vocab={vocab} dict={dict} />
         </article>
 

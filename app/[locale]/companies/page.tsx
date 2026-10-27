@@ -73,6 +73,7 @@ export default async function Page({ params }: { params: Params }) {
                   className="mono-label relative z-10 text-muted underline decoration-hairline-strong underline-offset-4 transition-colors duration-150 hover:text-ink hover:decoration-accent"
                 >
                   {dict.companies.blog}
+                  <span className="sr-only">{dict.list.newTab}</span>
                 </a>
               </div>
             </li>

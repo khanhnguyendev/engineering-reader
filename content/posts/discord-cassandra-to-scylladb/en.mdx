@@ -53,7 +53,7 @@ What they exist for is request coalescing. The database answers once per row, no
 
 Duplicates can only be merged if they land in the same process. So requests are spread across instances by consistent hashing on the channel ID, which means one channel always talks to one instance [S1 §Data Services Serving Data].
 
-```mermaid
+```mermaid caption="How a message read flows once the data service sits between the API and ScyllaDB."
 flowchart LR
     A[API monolith] --> B[Data service in Rust]
     B --> C[(ScyllaDB cluster)]

@@ -67,7 +67,7 @@ EVCache works well enough to be taken for granted [S1 @30:46]. It handles about 
 
 That success hid a dependency. The subscriber service, which answers questions about a member, is something nearly every other service calls [S1 @31:30]. Its EVCache cluster served both batch jobs, such as recommendation runs, and the real-time request path [S1 @31:40]. Inside a single request, the same application might read it several times, as if each read were free [S1 @31:54]. At peak, that pattern meant 800,000 to a million requests per second against the subscriber tier [S1 @32:05].
 
-```mermaid
+```mermaid caption="How reads reach the subscriber data, and where the fallback path overloads the subscriber service."
 flowchart TD
     A[Almost every service] --> B[EVCache cluster for subscriber data]
     C[Batch jobs] --> B

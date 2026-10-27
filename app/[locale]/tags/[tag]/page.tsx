@@ -3,13 +3,12 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { PageIntro } from "@/components/page-intro";
 import { PostList } from "@/components/post-list";
-import { SectionHeading } from "@/components/section-heading";
 import { tagsWithCounts } from "@/lib/content/index";
 import { listPosts } from "@/lib/content/load";
 import { localesFor } from "@/lib/content/routes";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
-import { isLocale, LOCALES, plural } from "@/lib/i18n";
+import { fmt, isLocale, LOCALES, otherLocale, plural } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 
 type Params = Promise<{ locale: string; tag: string }>;
@@ -17,7 +16,13 @@ type Params = Promise<{ locale: string; tag: string }>;
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return loadVocab().tags.flatMap((t) => LOCALES.map((locale) => ({ locale, tag: t.slug })));
+  const posts = listPosts();
+  const vocab = loadVocab();
+  return LOCALES.flatMap((locale) =>
+    tagsWithCounts(posts, vocab, locale)
+      .filter((t) => t.count > 0)
+      .map((t) => ({ locale, tag: t.tag.slug })),
+  );
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -42,15 +47,16 @@ export default async function Page({ params }: { params: Params }) {
   const vocab = loadVocab();
   const allPosts = listPosts();
   const entry = tagsWithCounts(allPosts, vocab, locale).find((e) => e.tag.slug === slug);
-  if (!entry) notFound();
+  if (!entry || entry.count === 0) notFound();
   const { tag, count } = entry;
 
   const dict = getDictionary(locale);
   const posts = allPosts.filter((p) => p.meta.tags.includes(tag.slug));
+  const twin = localesFor(`/tags/${tag.slug}`, allPosts, vocab).includes(otherLocale(locale));
 
   return (
     <>
-      <Header locale={locale} />
+      <Header locale={locale} twinMissing={!twin} />
       <main
         id="content"
         tabIndex={-1}
@@ -59,11 +65,14 @@ export default async function Page({ params }: { params: Params }) {
         <div className="max-w-[720px]">
           <PageIntro
             title={tag[locale]}
-            dek={plural(locale, count, dict.list.postsOne, dict.list.postsOther)}
+            dek={fmt(dict.tags.pageDek, {
+              count: plural(locale, count, dict.list.postsOne, dict.list.postsOther),
+              tag: tag[locale],
+            })}
           />
         </div>
         <section>
-          <SectionHeading title={dict.list.posts} />
+          <h2 className="sr-only">{dict.list.posts}</h2>
           <PostList posts={posts} locale={locale} vocab={vocab} dict={dict} emptyLabel={dict.tags.empty} />
         </section>
       </main>

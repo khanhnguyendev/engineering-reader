@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CHIP_LINK, CHIP_MUTED } from "@/components/chip";
+import { CHIP_LINK } from "@/components/chip";
 import { Header } from "@/components/header";
 import { PageIntro } from "@/components/page-intro";
 import { tagsWithCounts } from "@/lib/content/index";
@@ -30,9 +30,9 @@ export default async function Page({ params }: { params: Params }) {
   if (!isLocale(locale)) notFound();
 
   const dict = getDictionary(locale);
-  const tags = tagsWithCounts(listPosts(), loadVocab(), locale).sort((a, b) =>
-    a.tag[locale].localeCompare(b.tag[locale], locale),
-  );
+  const tags = tagsWithCounts(listPosts(), loadVocab(), locale)
+    .filter((t) => t.count > 0)
+    .sort((a, b) => a.tag[locale].localeCompare(b.tag[locale], locale));
 
   return (
     <>
@@ -48,23 +48,13 @@ export default async function Page({ params }: { params: Params }) {
         <ul className="flex max-w-[960px] flex-wrap gap-2">
           {tags.map(({ tag, count }) => (
             <li key={tag.slug}>
-              {count > 0 ? (
-                <Link href={`/${locale}/tags/${tag.slug}`} className={CHIP_LINK}>
-                  {tag[locale]}
-                  <span className="font-mono text-xs text-muted">
-                    <span aria-hidden="true">{count}</span>
-                    <span className="sr-only">{plural(locale, count, dict.list.postsOne, dict.list.postsOther)}</span>
-                  </span>
-                </Link>
-              ) : (
-                <span className={CHIP_MUTED}>
-                  {tag[locale]}
-                  <span className="font-mono text-xs">
-                    <span aria-hidden="true">{count}</span>
-                    <span className="sr-only">{plural(locale, count, dict.list.postsOne, dict.list.postsOther)}</span>
-                  </span>
+              <Link href={`/${locale}/tags/${tag.slug}`} className={CHIP_LINK}>
+                {tag[locale]}
+                <span className="font-mono text-xs text-muted">
+                  <span aria-hidden="true">{count}</span>
+                  <span className="sr-only">{plural(locale, count, dict.list.postsOne, dict.list.postsOther)}</span>
                 </span>
-              )}
+              </Link>
             </li>
           ))}
         </ul>

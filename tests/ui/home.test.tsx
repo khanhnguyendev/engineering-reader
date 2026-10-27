@@ -88,6 +88,7 @@ describe('home (vi)', () => {
       at('>Mới nhất</h2>'),
       at('>Theo công ty</h2>'),
       at('>Theo chủ đề</h2>'),
+      at('>Theo thẻ</h2>'),
     ];
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(html).toContain('aria-label="Chuyển sang tiếng Anh (EN)"');
@@ -121,7 +122,7 @@ describe('home (vi)', () => {
   it('links companies with posts in an ink-letter row with counts, skipping empty ones', async () => {
     const { host } = await render(site(TEN));
     const row = section(host, 'Theo công ty')!;
-    const links = [...row.querySelectorAll('a')];
+    const links = [...row.querySelectorAll('li a')];
     expect(links.map((a) => a.getAttribute('href'))).toEqual([
       '/vi/companies/discord',
       '/vi/companies/cloudflare',
@@ -140,7 +141,7 @@ describe('home (vi)', () => {
     const sec = section(host, 'Theo chủ đề')!;
     const all = [...sec.querySelectorAll('li > *')] as HTMLElement[];
     expect(all).toHaveLength(5);
-    const chips = [...sec.querySelectorAll('a')];
+    const chips = [...sec.querySelectorAll('li a')];
     expect(chips.map((a) => a.getAttribute('href'))).toEqual(
       ['data', 'reliability'].map((t) => `/vi/topics/${t}`),
     );
@@ -149,6 +150,47 @@ describe('home (vi)', () => {
     for (const c of ['border', 'border-hairline-strong', 'rounded-md']) {
       expect(chips[0].className.split(' ')).toContain(c);
     }
+  });
+
+  it('gives By company, By topic and By tag an all-link in the heading row, no arrow glyph', async () => {
+    const { host } = await render(site(TEN));
+    for (const [h, href, label] of [
+      ['Theo công ty', '/vi/companies', 'Tất cả công ty'],
+      ['Theo chủ đề', '/vi/topics', 'Tất cả chủ đề'],
+      ['Theo thẻ', '/vi/tags', 'Tất cả thẻ'],
+    ]) {
+      const a = section(host, h)!.querySelector(`a[href="${href}"]`)!;
+      expect(a.textContent).toBe(label);
+      expect(a.closest('div')!.querySelector('h2')!.textContent).toBe(h);
+    }
+    expect(host.querySelector('main h2 + a')!.textContent).not.toContain('→');
+  });
+
+  it('renders a By tag section of non-zero tags as chip links, count desc then label order', async () => {
+    const { host } = await render(site(TEN));
+    const sec = section(host, 'Theo thẻ')!;
+    const chips = [...sec.querySelectorAll('li a')];
+    expect(chips.map((a) => a.getAttribute('href'))).toEqual(
+      ['cassandra', 'request-coalescing', 'hot-partition', 'rust', 'scylladb'].map((t) => `/vi/tags/${t}`),
+    );
+    expect(chips[0].className).toContain('hover:bg-panel-2');
+    expect(chips[0].querySelector('span[aria-hidden="true"]')!.textContent).toBe('10');
+    expect(chips[0].querySelector('.sr-only')!.textContent).toBe('10 bài');
+    expect(sec.querySelectorAll('li')).toHaveLength(5);
+  });
+
+  it('orders tags by count first', async () => {
+    const posts = TEN.map((p, i) => (i < 3 ? { ...p, tags: ['rust', 'scylladb'] } : { ...p, tags: ['cassandra', 'rust'] }));
+    const { host } = await render(site(posts));
+    const hrefs = [...section(host, 'Theo thẻ')!.querySelectorAll('li a')].map((a) => a.getAttribute('href'));
+    expect(hrefs).toEqual(['rust', 'cassandra', 'scylladb'].map((t) => `/vi/tags/${t}`));
+  });
+
+  it('renders the en By tag section', async () => {
+    const { host } = await render(site(TEN.slice(0, 1)), 'en');
+    const sec = section(host, 'By tag')!;
+    expect(sec.querySelector('a[href="/en/tags"]')!.textContent).toBe('All tags');
+    expect(sec.querySelector('li a[href="/en/tags/cassandra"]')).not.toBeNull();
   });
 
   it('renders zero-count topics as muted non-link chips', async () => {
@@ -184,7 +226,7 @@ describe('home (vi)', () => {
 
   it('gives bare counts sr-only plural text, hiding the digit from readers', async () => {
     const vi_ = (await render(site(TEN))).host;
-    const company = section(vi_, 'Theo công ty')!.querySelector('a')!;
+    const company = section(vi_, 'Theo công ty')!.querySelector('li a')!;
     expect([...company.querySelectorAll('span[aria-hidden="true"]')].map((s) => s.textContent)).toContain('6');
     expect(company.querySelector('.sr-only')!.textContent).toBe('6 bài');
     const topic = section(vi_, 'Theo chủ đề')!.querySelector('a[href="/vi/topics/data"]')!;
@@ -197,7 +239,7 @@ describe('home (vi)', () => {
   it('uses the one shared chip class string for topic chips', async () => {
     const { CHIP } = await import('@/components/chip');
     const { host } = await render(site(TEN));
-    const chip = section(host, 'Theo chủ đề')!.querySelector('a')!;
+    const chip = section(host, 'Theo chủ đề')!.querySelector('li a')!;
     expect(chip.className).toContain(CHIP);
     expect(chip.className).toContain('px-2 py-[3px] text-xs');
   });
@@ -206,9 +248,9 @@ describe('home (vi)', () => {
     const { host, html } = await render(site(TEN), 'en');
     expect(postHrefs(section(host, 'Start here'), 'en')).toHaveLength(3);
     expect(section(host, 'Latest')).not.toBeNull();
-    expect(section(host, 'By company')!.querySelector('a')!.getAttribute('href')).toBe('/en/companies/discord');
+    expect(section(host, 'By company')!.querySelector('li a')!.getAttribute('href')).toBe('/en/companies/discord');
     expect(section(host, 'By topic')!.textContent).toContain('Data');
-    expect(html).toContain('Lessons from big systems, for small teams');
+    expect(html).toContain('Lessons from big\u00a0systems, for small teams');
   });
 
   it('exports metadata via buildMetadata', async () => {
