@@ -3,6 +3,15 @@ import path from 'node:path';
 import { SeenSchema, type Seen } from '@/lib/content/schema';
 import { normalizeSourceUrl } from '@/lib/content/normalize-url';
 
+export const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const isValidSlug = (s: unknown): s is string => typeof s === 'string' && SLUG_RE.test(s);
+
+export function dryRunUrl(url: string, slug: string): string {
+  const u = new URL(url);
+  u.searchParams.set('dry-run', slug);
+  return u.toString();
+}
+
 export function prepareDryRun(o: {
   fixtureDir: string;
   contentRoot: string;
@@ -18,7 +27,7 @@ export function prepareDryRun(o: {
   post.reviewedBy = 'ryan';
   post.publishedAt = o.today;
   post.featured = false;
-  post.sources[0].url = `${post.sources[0].url}?dry-run=${o.slug}`;
+  post.sources[0].url = dryRunUrl(post.sources[0].url, o.slug);
   const seenKey = normalizeSourceUrl(post.sources[0].url);
 
   const seenPath = path.join(o.contentRoot, 'seen.json');

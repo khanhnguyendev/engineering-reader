@@ -4,7 +4,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { validateAll } from '@/lib/content/validate';
 import { loadVocab } from '@/lib/content/vocab';
-import { prepareDryRun } from '@/lib/pipeline/dry-run';
+import { dryRunUrl, isValidSlug, prepareDryRun } from '@/lib/pipeline/dry-run';
 
 const FIXTURE = 'tests/fixtures/posts/good-post';
 const KEY = 'https://discord.com/blog/how-discord-stores-trillions-of-messages?dry-run=dry-run-x';
@@ -69,5 +69,21 @@ describe('prepareDryRun', () => {
       [KEY]: { company: 'discord', seenAt: TODAY, decision: 'picked', slug: 'dry-run-x' },
     });
     expect(() => run(root)).toThrow('already has');
+  });
+});
+
+describe('isValidSlug', () => {
+  it('accepts kebab-case and rejects the rest', () => {
+    for (const ok of ['dry-run-x', 'a', 'dry-run-2026-10-27']) expect(isValidSlug(ok)).toBe(true);
+    for (const bad of ['', 'Dry', '../x', 'a/b', 'a--b', '-a', 'a-', 'a b', undefined])
+      expect(isValidSlug(bad)).toBe(false);
+  });
+});
+
+describe('dryRunUrl', () => {
+  it('sets the dry-run param, keeping existing ones', () => {
+    expect(dryRunUrl('https://a.example/p', 's')).toBe('https://a.example/p?dry-run=s');
+    expect(dryRunUrl('https://a.example/p?x=1', 's')).toBe('https://a.example/p?x=1&dry-run=s');
+    expect(dryRunUrl('https://a.example/p?dry-run=old', 's')).toBe('https://a.example/p?dry-run=s');
   });
 });
