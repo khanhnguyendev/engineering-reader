@@ -1,24 +1,21 @@
-# HANDOFF (2026-10-27, after M5 and M6 build)
+# HANDOFF (2026-10-27, after M7 and M8a)
 
-Not a gate. The run continues with M7.
+Not a gate. Everything the run can do without Ryan is done; what is left needs his decisions or his review.
 
 ## State
-- `main`: M0–M4 as before; M5 (PR #6) merged and verified; M6 (PR #8) merged, routine scheduled but blocked on the environment allowlist (below).
-- M5 delivered: `docs/pipeline.md` (the contract), `docs/pipeline-prompt.md` (the routine prompt), validator rules (language-neutral key numbers, `seen.json` checks), `pnpm normalize-url`, `pnpm pipeline:pr-body`, `pnpm pipeline:dry-run`, and the `label` workflow. Done-when verified: dry-run PR #7 passed `ci` and Vercel with no human commit and got its label from CI; closed unmerged.
-- M6 delivered: `pnpm shadow-status`; the routine "engineering-reader content pipeline (shadow mode)" at https://claude.ai/code/routines (Mon/Wed/Fri 08:00 ICT, Opus 5.5, no connectors). Its first run followed the contract but could not read any feed (see below).
+- `main`: M0–M7 merged and verified on https://engineering-reader.vercel.app; M8a (pipeline contract v1.1, PR #11) merged.
+- M7: finish review returned ship on every surface group (posts; home and listings; about, search, 404) in both themes at 390 and 1440. Lighthouse mobile on production (median of 3): see `docs/RUNLOG.md`.
+- Pipeline: contract `docs/pipeline.md` v1.1 (adds `deferred`), prompt `docs/pipeline-prompt.md`, routine "engineering-reader content pipeline (shadow mode)" (Mon/Wed/Fri 08:00 ICT) with the v1.1 prompt.
+- The first real pipeline run was done by hand from the build session: PR #10, three posts (Discord voice outage, Discord voice to the edge, Netflix TimeSeries cold tier), green on `ci`, Vercel and label. Not merged: it is yours to review.
 - Run ledgers: `docs/runs/`. Rulings: `docs/decisions.md`.
 
 ## For Ryan
 
-**Needed to start the pipeline (blocks M6):** the routine's cloud environment ("Default") refuses outbound connections to the feed hosts. In the environment's network settings on claude.ai, allow `discord.com`, `blog.cloudflare.com`, `netflixtechblog.com` and the hosts in `content/source-hosts.json` (or choose full network access). Then run the routine once from https://claude.ai/code/routines and check that it opens a `pipeline/...` PR.
-
-**Per pipeline PR (shadow mode):** read the whole post in both languages and the sources; edit on the branch if needed; merge; if the merge needed zero `post.json` edits and only minor prose edits, add the label `clean`. Any edit to a number or source means no label. A merged pipeline PR without `clean` resets the streak, so label or don't, deliberately. `pnpm shadow-status` says when shadow mode can end (5 consecutive clean merges, at least 3 weeks). Close a bad PR unmerged: its picks become `rejected` and are never picked again unless you delete their `seen.json` entries.
-
-**Earlier items, still open:**
-- About page copy (`content/pages/about.*.mdx`) is the run's draft.
-- Key-number values are language-neutral by rule now ("9 d", "99.99% × 10 → ~99.9%").
-- Site name "Hệ thống lớn" is still a placeholder (M8).
-- A no-JS visitor on an `/en/...` 404 sees Vietnamese (static root not-found).
+1. **Review PR #10** (shadow mode): read both languages and the sources; edit on the branch if needed; merge; add the label `clean` only if `post.json` needed no edits and the MDX only minor prose edits. A merged pipeline PR without `clean` resets the streak. `pnpm shadow-status` tracks the exit condition (5 consecutive clean, 3 weeks).
+   - In PR #10's `content/seen.json`, four items were marked `skipped` only because of the three-pick ceiling (the contract had no `deferred` yet). Change them to `"decision": "deferred"` before merging so a later run can pick them: "How Discord Indexes Trillions of Messages", "Tracing Discord's Elixir Systems", Cloudflare "Cross-request KV cache exposure in the GLM-5.3 Workers AI model", Netflix "Ads Event Pipeline for Live, Part II". Their reasons say "over the cap".
+2. **Unblock the routine:** in the cloud environment ("Default") network settings on claude.ai, allow `discord.com`, `blog.cloudflare.com`, `netflixtechblog.com` and the hosts in `content/source-hosts.json` (or full network access). Then run it once from https://claude.ai/code/routines. It exits without doing anything while PR #10 is open, by design.
+3. **M8 decisions only you can make:** the site name (placeholder "Hệ thống lớn": `site.name` and the feed titles in `dictionaries/vi.json` and `en.json`), the domain (a purchase; the stack is free-tier only), then the redirect from vercel.app. M8's "first ten posts" needs three to four more merged pipeline PRs at one in flight.
+4. **Earlier items, still open:** About page copy is the run's draft; a no-JS visitor on an `/en/...` 404 sees Vietnamese; the en byline is "Ryan" per the spec (a finish review suggested "Edited by Ryan").
 
 ## Next
-M7 Craft pass (spec §10): Impeccable finish review on every surface, DESIGN.md from the built world, Lighthouse on phone, both themes audited against the craft references. Plan to be written at the start of M7.
+M8 Domain and launch, once the name and domain are chosen. M6 exits shadow mode when `pnpm shadow-status` says so.

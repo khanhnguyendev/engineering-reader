@@ -12,7 +12,7 @@ export type PrPost = {
   lessonsOmitted: Locale[];
   mermaidBlocks: number;
 };
-export type LedgerCounts = { picked: number; skipped: number; rejected: number };
+export type LedgerCounts = { picked: number; skipped: number; deferred: number; rejected: number };
 
 export function postToPrPost(raw: RawPost): PrPost {
   const meta = (raw.meta ?? {}) as { company?: string; sources?: Source[] };
@@ -35,9 +35,10 @@ export function postToPrPost(raw: RawPost): PrPost {
 }
 
 export function ledgerCounts(current: Seen, base: Seen): LedgerCounts {
-  const out: LedgerCounts = { picked: 0, skipped: 0, rejected: 0 };
+  const out: LedgerCounts = { picked: 0, skipped: 0, deferred: 0, rejected: 0 };
   for (const [key, e] of Object.entries(current)) {
-    if (key in base) continue;
+    const b = base[key];
+    if (b && b.decision === e.decision) continue;
     out[e.decision] += 1;
   }
   return out;
@@ -50,7 +51,7 @@ export function prBody(posts: PrPost[], ledger: LedgerCounts, note?: string): st
     for (const p of posts)
       s.push(`\`${p.slug}\` (${p.company}): ${p.titles.vi} / ${p.titles.en}`, '');
   if (posts.length === 0) s.push('');
-  s.push(`Ledger: ${ledger.picked} picked, ${ledger.skipped} skipped, ${ledger.rejected} rejected.`, '');
+  s.push(`Ledger: ${ledger.picked} picked, ${ledger.skipped} skipped, ${ledger.deferred} deferred, ${ledger.rejected} rejected.`, '');
   if (note) s.push(note, '');
   if (posts.length > 0) {
     s.push('## Review checklist', '');

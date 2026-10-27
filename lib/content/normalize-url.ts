@@ -13,3 +13,20 @@ export function normalizeSourceUrl(url: string): string {
 export function hostOf(url: string): string {
   return new URL(url).hostname.toLowerCase();
 }
+
+/** Normalize many URLs (one per input line). Blank lines are skipped; invalid ones become `ERROR <input>`. */
+export function normalizeMany(lines: string[]): { out: string[]; ok: boolean } {
+  const out: string[] = [];
+  let ok = true;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (line === '') continue;
+    try {
+      out.push(normalizeSourceUrl(line));
+    } catch {
+      out.push(`ERROR ${line}`);
+      ok = false;
+    }
+  }
+  return { out, ok };
+}

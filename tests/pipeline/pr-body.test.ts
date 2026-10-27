@@ -22,13 +22,13 @@ describe('CHECKLIST', () => {
 
 describe('prBody', () => {
   it('renders a good post', () => {
-    const body = prBody([postToPrPost(readRawPost(GOOD))], { picked: 1, skipped: 0, rejected: 0 });
+    const body = prBody([postToPrPost(readRawPost(GOOD))], { picked: 1, skipped: 0, deferred: 0, rejected: 0 });
     expect(body).toContain('### good-post');
     expect(body.split('\n').filter((l) => l.startsWith('- [ ] ')).length).toBe(10);
     expect(body).toContain(
       '- `S1` (blog): How Discord Stores Trillions of Messages, https://discord.com/blog/how-discord-stores-trillions-of-messages, locator: —',
     );
-    expect(body).toContain('Ledger: 1 picked, 0 skipped, 0 rejected.');
+    expect(body).toContain('Ledger: 1 picked, 0 skipped, 0 deferred, 0 rejected.');
     const idx = ['## Summary', '## Review checklist', '## Sources', '## Lessons omitted?', '## Mermaid'].map((h) =>
       body.indexOf(h),
     );
@@ -36,9 +36,9 @@ describe('prBody', () => {
     expect([...idx].sort((a, b) => a - b)).toEqual(idx);
   });
   it('handles no posts', () => {
-    const body = prBody([], { picked: 0, skipped: 4, rejected: 0 });
+    const body = prBody([], { picked: 0, skipped: 4, deferred: 2, rejected: 0 });
     expect(body).toContain('No picks this run.');
-    expect(body).toContain('Ledger: 0 picked, 4 skipped, 0 rejected.');
+    expect(body).toContain('Ledger: 0 picked, 4 skipped, 2 deferred, 0 rejected.');
     expect(body).not.toContain('## Review checklist');
   });
   it('flags omitted lessons', () => {
@@ -47,7 +47,7 @@ describe('prBody', () => {
     const f = path.join(dir, 'en.mdx');
     const src = readFileSync(f, 'utf8');
     writeFileSync(f, src.replace(/^lessons:\n(?:  - .*\n)+/m, ''));
-    const body = prBody([postToPrPost(readRawPost(dir))], { picked: 1, skipped: 0, rejected: 0 });
+    const body = prBody([postToPrPost(readRawPost(dir))], { picked: 1, skipped: 0, deferred: 0, rejected: 0 });
     expect(body).toContain('omitted in en');
   });
 });
@@ -56,6 +56,16 @@ describe('ledgerCounts', () => {
   it('counts additions only', () => {
     const a = { company: 'a', seenAt: '2026-10-01', decision: 'picked' as const, slug: 'a' };
     const sk = (c: string) => ({ company: c, seenAt: '2026-10-01', decision: 'skipped' as const, reason: 'r' });
-    expect(ledgerCounts({ a, b: sk('b'), c: sk('c') }, { a })).toEqual({ picked: 0, skipped: 2, rejected: 0 });
+    expect(ledgerCounts({ a, b: sk('b'), c: sk('c') }, { a })).toEqual({ picked: 0, skipped: 2, deferred: 0, rejected: 0 });
+  });
+  it('counts a changed decision on an existing key, not an unchanged one', () => {
+    const df = { company: 'x', seenAt: '2026-10-01', decision: 'deferred' as const, reason: 'cap' };
+    const pk = { company: 'x', seenAt: '2026-10-02', decision: 'picked' as const, slug: 's' };
+    expect(ledgerCounts({ x: pk }, { x: df })).toEqual({ picked: 1, skipped: 0, deferred: 0, rejected: 0 });
+    expect(ledgerCounts({ x: { ...df, seenAt: '2026-10-02' } }, { x: df })).toEqual({ picked: 0, skipped: 0, deferred: 0, rejected: 0 });
+  });
+  it('reports deferred separately', () => {
+    const df = { company: 'd', seenAt: '2026-10-01', decision: 'deferred' as const, reason: 'cap' };
+    expect(ledgerCounts({ x: df, y: df }, {})).toEqual({ picked: 0, skipped: 0, deferred: 2, rejected: 0 });
   });
 });
