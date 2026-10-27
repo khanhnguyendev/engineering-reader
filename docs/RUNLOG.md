@@ -56,3 +56,4 @@ One line per completed task: date, milestone/task, commit or PR.
 - 2026-10-27 M5 merged (PR #6 squash 6879de1); done-when: dry-run PR #7 from main passed `ci` (bot SHA 0fb9c6b) and Vercel with no human commit, label from the workflow; closed unmerged
 - 2026-10-27 M6/T1 `pnpm shadow-status`; fix round 1 (sort and earliest-PR tests) — 2746185, 82e9c0b
 - 2026-10-27 M6 routine `trig_01MokJR3KWo4a9w25ao2d2ig` created (Mon/Wed/Fri 08:00 ICT, Opus 5.5, no connectors); first run fired by hand
+- 2026-10-27 M6 first routine run (cse_01PgjPS2o6nvFT3257N8k7B4): contract followed, all three feeds refused by the environment egress proxy, no PR, as designed; routine prompt already includes the Tools section (created after that edit). PR #8
