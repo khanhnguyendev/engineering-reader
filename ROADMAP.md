@@ -10,5 +10,5 @@ Spec: docs/superpowers/specs/2026-10-21-engineering-reader-design.md §10.
 | M4 Search | done 2026-10-26: "du lieu" and "dữ liệu" return the Discord post on production; per-locale index, no cross-locale leak ([PR #5](https://github.com/khanhnguyendev/engineering-reader/pull/5)) | Vietnamese diacritic query returns the right post |
 | M5 Pipeline contract | done 2026-10-27: `docs/pipeline.md`, validator rules, dry-run fixture PR #7 passed `ci` and Vercel with no human commit, label from CI ([PR #6](https://github.com/khanhnguyendev/engineering-reader/pull/6)) | fixture PR passes CI unchanged |
 | M6 Pipeline | built 2026-10-27; routine scheduled (Mon/Wed/Fri 08:00 ICT), blocked until the cloud environment allows the feed hosts (needs Ryan, see HANDOFF); then shadow mode, `pnpm shadow-status` | shadow-status reports exit condition met |
-| M7 Craft pass | next | finish review ships on every surface |
-| M8 Domain and launch | planned | every v1 item ships |
+| M7 Craft pass | done 2026-10-27: finish review ship on every surface group (posts, listings, about/search/404), both themes, 390 and 1440; Lighthouse mobile a11y 100 ([PR #9](https://github.com/khanhnguyendev/engineering-reader/pull/9)) | finish review ships on every surface |
+| M8 Domain and launch | next | every v1 item ships |
