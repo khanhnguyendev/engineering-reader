@@ -45,16 +45,26 @@ export default async function Page({ params }: { params: Params }) {
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {topics.map(({ topic, count }) => (
             <li key={topic.slug} className="flex">
-              <Link
-                href={`/${locale}/topics/${topic.slug}`}
-                className="panel flex w-full flex-col gap-2 p-4 transition-colors duration-150 hover:border-hairline-strong hover:bg-panel-2 lg:p-6"
-              >
-                <h2 className="text-[17px] leading-[1.35] text-ink lg:text-[19px]">{topic[locale]}</h2>
-                <p className="text-[15px] leading-[1.6] text-ink-2">{shelfDek(dict, topic.slug)}</p>
-                <span className="mt-auto pt-2 font-mono text-xs text-muted">
-                  {plural(locale, count, dict.list.postsOne, dict.list.postsOther)}
-                </span>
-              </Link>
+              {count > 0 ? (
+                <Link
+                  href={`/${locale}/topics/${topic.slug}`}
+                  className="panel flex w-full flex-col gap-2 p-4 transition-colors duration-150 hover:border-hairline-strong hover:bg-panel-2 lg:p-6"
+                >
+                  <h2 className="text-[17px] leading-[1.35] text-ink lg:text-[19px]">{topic[locale]}</h2>
+                  <p className="text-[15px] leading-[1.6] text-ink-2">{shelfDek(dict, topic.slug)}</p>
+                  <span className="mt-auto pt-2 font-mono text-xs text-muted">
+                    {plural(locale, count, dict.list.postsOne, dict.list.postsOther)}
+                  </span>
+                </Link>
+              ) : (
+                <div className="panel flex w-full flex-col gap-2 p-4 lg:p-6">
+                  <h2 className="text-[17px] leading-[1.35] text-muted lg:text-[19px]">{topic[locale]}</h2>
+                  <p className="text-[15px] leading-[1.6] text-ink-2">{shelfDek(dict, topic.slug)}</p>
+                  <span className="mt-auto pt-2 font-mono text-xs text-muted">
+                    {plural(locale, count, dict.list.postsOne, dict.list.postsOther)}
+                  </span>
+                </div>
+              )}
             </li>
           ))}
         </ul>

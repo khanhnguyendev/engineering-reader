@@ -129,7 +129,8 @@ describe('llmsTxt', () => {
 
   it('has the header, tagline in both languages and the intro', () => {
     expect(txt.startsWith(`# ${dicts.vi.site.name}\n`)).toBe(true);
-    expect(txt).toContain(`> ${dicts.vi.site.tagline} / ${dicts.en.site.tagline}`);
+    expect(txt).toContain(`> ${dicts.vi.site.tagline} / ${dicts.en.site.tagline.replace(/\u00a0/g, ' ')}`);
+    expect(txt).not.toContain('\u00a0');
     expect(txt).toContain(dicts.vi.llms.intro);
     expect(txt).toContain(dicts.en.llms.intro);
   });

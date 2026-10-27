@@ -1,7 +1,7 @@
 {
   "site": {
     "name": "Hệ thống lớn",
-    "tagline": "Lessons from big systems, for small teams"
+    "tagline": "Lessons from big systems, for small teams"
   },
   "nav": {
     "companies": "Companies",
@@ -58,13 +58,18 @@
     "latest": "Latest",
     "byCompany": "By company",
     "byTopic": "By topic",
-    "all": "All →"
+    "all": "All →",
+    "byTag": "By tag",
+    "allCompanies": "All companies",
+    "allTopics": "All topics",
+    "allTags": "All tags"
   },
   "companies": {
     "title": "Companies",
     "dek": "The engineering teams whose write-ups we retell, and how many cases each has so far.",
     "empty": "No posts from this company yet.",
-    "blog": "Engineering blog"
+    "blog": "Engineering blog",
+    "pageDek": "{count} retold from {name}'s engineering blog."
   },
   "topics": {
     "title": "Topics",
@@ -81,12 +86,14 @@
   "tags": {
     "title": "Tags",
     "dek": "Every technology and technique named across the cases.",
-    "empty": "No posts with this tag yet."
+    "empty": "No posts with this tag yet.",
+    "pageDek": "{count} that name {tag}."
   },
   "list": {
     "postsOne": "{n} post",
     "postsOther": "{n} posts",
-    "posts": "Posts"
+    "posts": "Posts",
+    "newTab": " (opens in a new tab)"
   },
   "series": {
     "title": "Series",
@@ -108,7 +115,8 @@
   "notFound": {
     "title": "Page not found",
     "body": "This page does not exist or has moved.",
-    "home": "Back to the home page"
+    "home": "Back to the home page",
+    "search": "Search the posts"
   },
   "feed": {
     "title": "Hệ thống lớn: new posts",
@@ -127,7 +135,7 @@
     "searching": "Searching…",
     "countOne": "{n} result",
     "countOther": "{n} results",
-    "empty": "No posts match.",
+    "empty": "No posts match. Try another word, or browse by topic below.",
     "unavailable": "Search is available on the built site only.",
     "error": "Search failed to load. Try reloading the page.",
     "browse": "Or browse by topic:"

@@ -118,7 +118,8 @@ describe('companies index', () => {
     expect(html).not.toMatch(/<a\b[^>]*>(?:(?!<\/a>)[\s\S])*<a\b/);
     const li = host.querySelector('main li')!;
     const blog = li.querySelector('a[href="https://discord.com/blog"]')!;
-    expect(blog.textContent).toBe('Blog kỹ thuật');
+    expect(blog.textContent).toBe('Blog kỹ thuật (mở tab mới)');
+    expect(blog.querySelector('span.sr-only')!.textContent).toBe(' (mở tab mới)');
     expect(blog.getAttribute('rel')).toBe('noopener noreferrer');
     expect(blog.getAttribute('target')).toBe('_blank');
     expect(blog.className.split(' ')).toEqual(expect.arrayContaining(['relative', 'z-10']));
@@ -159,11 +160,13 @@ describe('company page', () => {
     const { host } = await renderCompany(site(SITE), 'vi', 'discord');
     const main = host.querySelector('main#content')!;
     expect(main.querySelector('h1')!.textContent).toBe('Discord');
-    expect(main.querySelector('main header p')!.textContent).toBe('2 bài');
+    expect(main.querySelector('main header p')!.textContent).toBe('2 bài kể lại từ blog kỹ thuật của Discord.');
     const blog = main.querySelector('a[href="https://discord.com/blog"]')!;
     expect(blog.getAttribute('rel')).toBe('noopener noreferrer');
     const h2 = main.querySelector('h2')!;
     expect(h2.textContent).toBe('Bài viết');
+    expect(h2.className.split(' ')).toContain('sr-only');
+    expect(blog.querySelector('span.sr-only')!.textContent).toBe(' (mở tab mới)');
     const hrefs = [...main.querySelectorAll('a[href^="/vi/posts/"]')].map((a) => a.getAttribute('href'));
     expect(hrefs).toEqual(['/vi/posts/d1', '/vi/posts/d2']);
     expect(host.querySelector('h1')!.outerHTML).not.toMatch(/style=/);
@@ -175,7 +178,7 @@ describe('company page', () => {
     expect(en.host.querySelector('h1')!.textContent).toBe('Netflix');
     expect(en.html).toContain('No posts from this company yet.');
     expect(en.host.querySelectorAll('a[href^="/en/posts/"]')).toHaveLength(0);
-    expect(en.host.querySelector('main header p')!.textContent).toBe('0 posts');
+    expect(en.host.querySelector('main header p')!.textContent).toBe("0 posts retold from Netflix's engineering blog.");
     const vi_ = await renderCompany(s, 'vi', 'netflix');
     expect(vi_.host.querySelectorAll('a[href="/vi/posts/n1"]')).toHaveLength(1);
     expect(vi_.html).not.toContain('Chưa có bài nào về công ty này.');

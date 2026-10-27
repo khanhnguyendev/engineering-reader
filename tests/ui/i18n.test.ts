@@ -46,6 +46,23 @@ describe("dictionaries", () => {
     expect(getDictionary("en").home.all).toBe("All →");
     expect(getDictionary("vi").home.all).toBe("Tất cả →");
   });
+
+  it("carry the M7 keys with the given strings", () => {
+    const en = getDictionary("en");
+    const vi_ = getDictionary("vi");
+    expect([vi_.home.byTag, en.home.byTag]).toEqual(["Theo thẻ", "By tag"]);
+    expect([vi_.home.allCompanies, en.home.allCompanies]).toEqual(["Tất cả công ty", "All companies"]);
+    expect([vi_.home.allTopics, en.home.allTopics]).toEqual(["Tất cả chủ đề", "All topics"]);
+    expect([vi_.home.allTags, en.home.allTags]).toEqual(["Tất cả thẻ", "All tags"]);
+    expect(vi_.companies.pageDek).toBe("{count} kể lại từ blog kỹ thuật của {name}.");
+    expect(en.companies.pageDek).toBe("{count} retold from {name}'s engineering blog.");
+    expect(vi_.tags.pageDek).toBe("{count} có nhắc đến {tag}.");
+    expect(en.tags.pageDek).toBe("{count} that name {tag}.");
+    expect([vi_.list.newTab, en.list.newTab]).toEqual([" (mở tab mới)", " (opens in a new tab)"]);
+    expect([vi_.notFound.search, en.notFound.search]).toEqual(["Tìm bài viết", "Search the posts"]);
+    expect(en.site.tagline).toBe("Lessons from big\u00a0systems, for small teams");
+    for (const d of [en, vi_]) for (const k of [d.home.allCompanies, d.home.allTopics, d.home.allTags]) expect(k).not.toContain("→");
+  });
 });
 
 describe("plural", () => {

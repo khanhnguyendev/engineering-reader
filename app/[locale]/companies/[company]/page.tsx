@@ -3,13 +3,12 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { PageIntro } from "@/components/page-intro";
 import { PostList } from "@/components/post-list";
-import { SectionHeading } from "@/components/section-heading";
 import { companiesWithCounts } from "@/lib/content/index";
 import { listPosts } from "@/lib/content/load";
 import { localesFor } from "@/lib/content/routes";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
-import { isLocale, LOCALES, plural } from "@/lib/i18n";
+import { fmt, isLocale, LOCALES, plural } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
 
 type Params = Promise<{ locale: string; company: string }>;
@@ -62,7 +61,10 @@ export default async function Page({ params }: { params: Params }) {
         <div className="max-w-[720px]">
           <PageIntro
             title={company.name}
-            dek={plural(locale, count, dict.list.postsOne, dict.list.postsOther)}
+            dek={fmt(dict.companies.pageDek, {
+              count: plural(locale, count, dict.list.postsOne, dict.list.postsOther),
+              name: company.name,
+            })}
           >
             <a
               href={company.blogUrl}
@@ -71,11 +73,12 @@ export default async function Page({ params }: { params: Params }) {
               className="mono-label mt-3 inline-block text-muted underline decoration-hairline-strong underline-offset-4 transition-colors duration-150 hover:text-ink hover:decoration-accent"
             >
               {dict.companies.blog}
+              <span className="sr-only">{dict.list.newTab}</span>
             </a>
           </PageIntro>
         </div>
         <section>
-          <SectionHeading title={dict.list.posts} />
+          <h2 className="sr-only">{dict.list.posts}</h2>
           <PostList posts={posts} locale={locale} vocab={vocab} dict={dict} emptyLabel={dict.companies.empty} />
         </section>
       </main>

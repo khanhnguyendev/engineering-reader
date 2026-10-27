@@ -58,13 +58,18 @@
     "latest": "Mới nhất",
     "byCompany": "Theo công ty",
     "byTopic": "Theo chủ đề",
-    "all": "Tất cả →"
+    "all": "Tất cả →",
+    "byTag": "Theo thẻ",
+    "allCompanies": "Tất cả công ty",
+    "allTopics": "Tất cả chủ đề",
+    "allTags": "Tất cả thẻ"
   },
   "companies": {
     "title": "Công ty",
     "dek": "Những đội kỹ thuật có bài viết được kể lại ở đây, và số bài của từng nơi.",
     "empty": "Chưa có bài nào về công ty này.",
-    "blog": "Blog kỹ thuật"
+    "blog": "Blog kỹ thuật",
+    "pageDek": "{count} kể lại từ blog kỹ thuật của {name}."
   },
   "topics": {
     "title": "Chủ đề",
@@ -81,12 +86,14 @@
   "tags": {
     "title": "Thẻ",
     "dek": "Mọi công nghệ và kỹ thuật được nhắc đến trong các bài.",
-    "empty": "Chưa có bài nào gắn thẻ này."
+    "empty": "Chưa có bài nào gắn thẻ này.",
+    "pageDek": "{count} có nhắc đến {tag}."
   },
   "list": {
     "postsOne": "{n} bài",
     "postsOther": "{n} bài",
-    "posts": "Bài viết"
+    "posts": "Bài viết",
+    "newTab": " (mở tab mới)"
   },
   "series": {
     "title": "Loạt bài",
@@ -108,7 +115,8 @@
   "notFound": {
     "title": "Không tìm thấy trang",
     "body": "Trang này không tồn tại hoặc đã được chuyển đi.",
-    "home": "Về trang chủ"
+    "home": "Về trang chủ",
+    "search": "Tìm bài viết"
   },
   "feed": {
     "title": "Hệ thống lớn: bài mới",
@@ -127,7 +135,7 @@
     "searching": "Đang tìm…",
     "countOne": "{n} kết quả",
     "countOther": "{n} kết quả",
-    "empty": "Không có bài nào khớp.",
+    "empty": "Không có bài nào khớp. Thử từ khác, hoặc duyệt theo chủ đề bên dưới.",
     "unavailable": "Tìm kiếm chỉ có trên bản build.",
     "error": "Không tải được tìm kiếm. Thử tải lại trang.",
     "browse": "Hoặc duyệt theo chủ đề:"

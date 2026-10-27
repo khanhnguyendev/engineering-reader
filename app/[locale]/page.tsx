@@ -7,7 +7,7 @@ import { Monogram } from "@/components/monogram";
 import { PageIntro } from "@/components/page-intro";
 import { PostList } from "@/components/post-list";
 import { SectionHeading } from "@/components/section-heading";
-import { companiesWithCounts, featuredPosts, topicsWithCounts } from "@/lib/content/index";
+import { companiesWithCounts, featuredPosts, tagsWithCounts, topicsWithCounts } from "@/lib/content/index";
 import { hasLocale, listPosts } from "@/lib/content/load";
 import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
@@ -40,6 +40,9 @@ export default async function Page({ params }: { params: Params }) {
     .slice(0, LATEST);
   const companies = companiesWithCounts(posts, vocab, locale).filter((c) => c.count > 0);
   const topics = topicsWithCounts(posts, vocab, locale);
+  const tags = tagsWithCounts(posts, vocab, locale)
+    .filter((t) => t.count > 0)
+    .sort((a, b) => b.count - a.count || a.tag[locale].localeCompare(b.tag[locale], locale));
 
   return (
     <>
@@ -69,7 +72,7 @@ export default async function Page({ params }: { params: Params }) {
 
         {companies.length > 0 && (
           <section className="mt-12 lg:mt-16">
-            <SectionHeading title={dict.home.byCompany} />
+            <SectionHeading title={dict.home.byCompany} href={`/${locale}/companies`} hrefLabel={dict.home.allCompanies} />
             <ul className="flex flex-wrap gap-x-8 gap-y-4">
               {companies.map(({ company, count }) => (
                 <li key={company.slug}>
@@ -94,7 +97,7 @@ export default async function Page({ params }: { params: Params }) {
 
         {topics.length > 0 && (
           <section className="mt-12 lg:mt-16">
-            <SectionHeading title={dict.home.byTopic} />
+            <SectionHeading title={dict.home.byTopic} href={`/${locale}/topics`} hrefLabel={dict.home.allTopics} />
             <ul className="flex flex-wrap gap-2">
               {topics.map(({ topic, count }) => (
                 <li key={topic.slug}>
@@ -115,6 +118,25 @@ export default async function Page({ params }: { params: Params }) {
                       </span>
                     </span>
                   )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {tags.length > 0 && (
+          <section className="mt-12 lg:mt-16">
+            <SectionHeading title={dict.home.byTag} href={`/${locale}/tags`} hrefLabel={dict.home.allTags} />
+            <ul className="flex flex-wrap gap-2">
+              {tags.map(({ tag, count }) => (
+                <li key={tag.slug}>
+                  <Link href={`/${locale}/tags/${tag.slug}`} className={CHIP_LINK}>
+                    {tag[locale]}
+                    <span className="font-mono text-xs text-muted">
+                      <span aria-hidden="true">{count}</span>
+                      <span className="sr-only">{plural(locale, count, dict.list.postsOne, dict.list.postsOther)}</span>
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>

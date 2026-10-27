@@ -77,19 +77,33 @@ describe('topics index', () => {
     expect(main.getAttribute('tabindex')).toBe('-1');
     expect(main.querySelector('h1')!.textContent).toBe('Chủ đề');
     expect(main.textContent).toContain('Năm kệ sách cho cùng một câu hỏi');
-    const shelves = [...main.querySelectorAll('li > a')];
-    expect(shelves.map((a) => a.getAttribute('href'))).toEqual(SLUGS.map((s) => `/vi/topics/${s}`));
+    const shelves = [...main.querySelectorAll('main li > *')];
+    expect(shelves).toHaveLength(SLUGS.length);
+    expect(shelves.map((a) => a.getAttribute('href'))).toEqual(
+      SLUGS.map((s) => (s === 'data' || s === 'reliability' ? `/vi/topics/${s}` : null)),
+    );
     const data = shelves[1];
     expect(data.className.split(' ')).toContain('panel');
     expect(data.querySelector('h2')!.textContent).toBe('Dữ liệu');
     expect(data.textContent).toContain('Lưu trữ, sharding, migration');
     expect(data.textContent).toContain('2 bài');
-    expect(shelves[2].textContent).toContain('0 bài');
+  });
+
+  it('renders a topic with no posts as a muted non-link panel that keeps its count line', async () => {
+    const host = await renderIndex(site(SITE));
+    const empty = [...host.querySelectorAll('main li > *')][2] as HTMLElement;
+    expect(empty.tagName).toBe('DIV');
+    expect(empty.querySelector('a')).toBeNull();
+    expect(empty.className.split(' ')).toContain('panel');
+    expect(empty.className).not.toContain('hover:');
+    expect(empty.querySelector('h2')!.className.split(' ')).toContain('text-muted');
+    expect(empty.querySelector('p')!.className.split(' ')).toContain('text-ink-2');
+    expect(empty.textContent).toContain('0 bài');
   });
 
   it('renders the en index with English labels and plural counts', async () => {
     const host = await renderIndex(site(SITE), 'en');
-    const shelves = [...host.querySelectorAll('main li > a')];
+    const shelves = [...host.querySelectorAll('main li > *')];
     expect(shelves[1].getAttribute('href')).toBe('/en/topics/data');
     expect(shelves[1].querySelector('h2')!.textContent).toBe('Data');
     expect(shelves[1].textContent).toContain('2 posts');
