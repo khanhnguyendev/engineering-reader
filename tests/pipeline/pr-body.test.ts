@@ -58,6 +58,12 @@ describe('ledgerCounts', () => {
     const sk = (c: string) => ({ company: c, seenAt: '2026-10-01', decision: 'skipped' as const, reason: 'r' });
     expect(ledgerCounts({ a, b: sk('b'), c: sk('c') }, { a })).toEqual({ picked: 0, skipped: 2, deferred: 0, rejected: 0 });
   });
+  it('counts a changed decision on an existing key, not an unchanged one', () => {
+    const df = { company: 'x', seenAt: '2026-10-01', decision: 'deferred' as const, reason: 'cap' };
+    const pk = { company: 'x', seenAt: '2026-10-02', decision: 'picked' as const, slug: 's' };
+    expect(ledgerCounts({ x: pk }, { x: df })).toEqual({ picked: 1, skipped: 0, deferred: 0, rejected: 0 });
+    expect(ledgerCounts({ x: { ...df, seenAt: '2026-10-02' } }, { x: df })).toEqual({ picked: 0, skipped: 0, deferred: 0, rejected: 0 });
+  });
   it('reports deferred separately', () => {
     const df = { company: 'd', seenAt: '2026-10-01', decision: 'deferred' as const, reason: 'cap' };
     expect(ledgerCounts({ x: df, y: df }, {})).toEqual({ picked: 0, skipped: 0, deferred: 2, rejected: 0 });

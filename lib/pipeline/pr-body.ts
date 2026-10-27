@@ -37,7 +37,8 @@ export function postToPrPost(raw: RawPost): PrPost {
 export function ledgerCounts(current: Seen, base: Seen): LedgerCounts {
   const out: LedgerCounts = { picked: 0, skipped: 0, deferred: 0, rejected: 0 };
   for (const [key, e] of Object.entries(current)) {
-    if (key in base) continue;
+    const b = base[key];
+    if (b && b.decision === e.decision) continue;
     out[e.decision] += 1;
   }
   return out;

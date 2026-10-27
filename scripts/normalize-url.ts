@@ -10,9 +10,9 @@ try {
     const lines = args.flatMap((a) => (a === '-' ? readFileSync(0, 'utf8').split(/\r?\n/) : [a]));
     const { out, ok } = normalizeMany(lines);
     if (out.length > 0) console.log(out.join('\n'));
-    if (!ok) process.exit(1);
+    if (!ok) process.exitCode = 1;
   }
 } catch (e) {
   console.error((e as Error).message);
-  process.exit(1);
+  process.exitCode = 1;
 }

@@ -155,6 +155,11 @@ describe('validatePost', () => {
     for (const l of ['vi', 'en']) editMdx(d, l, (s) => s + '\n\n```text\n[S9]\n```\n');
     expect(run(d).filter((x) => x.rule === 'refs')).toEqual([]);
   });
+  it('refs: an unknown [S9] inside a ~~~ fence is ignored', () => {
+    const d = fresh();
+    for (const l of ['vi', 'en']) editMdx(d, l, (s) => s + '\n\n~~~text\n[S9]\n~~~\n\n````md\n```\n[S9]\n```\n````\n');
+    expect(run(d).filter((x) => x.rule === 'refs')).toEqual([]);
+  });
   it('refs: unreferenced source id', () => {
     const d = fresh();
     editJson(d, (j) => {

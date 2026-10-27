@@ -147,7 +147,7 @@ describe('SeenEntrySchema', () => {
     expect(SeenEntrySchema.safeParse({ ...d, reason: undefined }).success).toBe(false);
     expect(SeenEntrySchema.safeParse({ ...d, slug: 'good-post' }).success).toBe(false);
   });
-  it('a deferred entry may be rewritten to picked or skipped (no check forbids it)', () => {
+  it('deferred, picked and skipped entries all parse', () => {
     const key = 'https://a.com/x';
     const before = { [key]: { company: 'x', seenAt: '2026-10-20', decision: 'deferred', reason: 'cap' } };
     const toPicked = { [key]: picked };

@@ -56,7 +56,7 @@ function parseErrorOf(v: unknown): string | undefined {
 }
 
 function stripFences(body: string): string {
-  return body.replace(/```[\s\S]*?```/g, ' ');
+  return body.replace(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?^ {0,3}\1[`~]*[ \t]*$/gm, ' ');
 }
 
 function isExternal(src: string): boolean {
