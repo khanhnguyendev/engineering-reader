@@ -11,14 +11,20 @@ A bilingual (Vietnamese first, English full equivalent) digest of engineering ca
 1. **Start clean.** Clone or fetch the repo, check out `main`, and install without a browser: `PUPPETEER_SKIP_DOWNLOAD=1 pnpm install --frozen-lockfile`. Nothing in the pipeline needs Chromium, Next.js or a build.
 2. **Exit if a pipeline PR is open.** (Every `gh` command in this document has an equivalent in the GitHub tools a cloud session provides; use those when `gh` is unauthenticated.) `gh pr list --label pipeline --state open`. If anything is listed, stop. At most one pipeline PR is in flight.
 3. **Build the ledger.** Start from `content/seen.json` on `main`. Then, for every PR from a branch named `pipeline/*` (except `pipeline/dry-run-*`) that was closed without merging in the last 90 days (`gh pr list --label pipeline --state closed --search "is:unmerged closed:>=<date 90 days ago>" --limit 200 --json number,headRefName`, dropping any `headRefName` that starts with `pipeline/dry-run-`), read its `content/seen.json` from the PR head, which survives branch deletion (`git fetch origin pull/<n>/head` then `git show FETCH_HEAD:content/seen.json`). Any key found there and not on `main` is added to this run's ledger once (the first PR found wins) as `{ "company": <copied from that entry>, "seenAt": <today>, "decision": "rejected", "reason": "closed unmerged in PR #<n>" }`, with no `slug`. A rejected draft is never picked again unless a human deletes its entry.
-4. **Read feeds.** `content/companies.json` lists each company's `feedUrl`. Fetch each feed. For every item, normalize its link with `pnpm -s normalize-url <item link>` and skip it if the result is a key in the ledger. That normalized feed link is the item's ledger key for this whole run, picks included, even when the post later cites a cleaner URL for the same article (Medium feeds, for example, add a `source` parameter). Using any other key would let the next run see the item as new.
-5. **Decide each unseen item: picked or skipped.** The selection bar is below. Every unseen item gets a ledger entry this run, picked or skipped, with a one-line reason for skips. Two or three picks per run is a ceiling, not a target; zero picks is a normal run.
+4. **Read feeds.** `content/companies.json` lists each company's `feedUrl`. Fetch each feed. For every item, normalize its link with `pnpm -s normalize-url <item link>` (for a whole feed at once: one link per line into `pnpm -s normalize-url -`, which prints one key per line in order) and skip it if the result is a key in the ledger, unless that entry's decision is `deferred` (see step 5). That normalized feed link is the item's ledger key for this whole run, picks included, even when the post later cites a cleaner URL for the same article (Medium feeds, for example, add a `source` parameter). Using any other key would let the next run see the item as new.
+5. **Decide each unseen item: picked, skipped or deferred.** The selection bar is below. Every unseen item gets a ledger entry this run, with a one-line reason for anything not picked. At most three picks per run; that is a ceiling, not a target, and zero picks is a normal run. An item that meets the bar but does not fit under this run's ceiling is `deferred` (reason: why it meets the bar), not skipped. Each run first re-decides every `deferred` entry in the ledger, before new items: it may rewrite a `deferred` entry to `picked` or `skipped` (the only rewrite a run may make) or leave it deferred.
 6. **Write each pick.** Create `content/posts/<slug>/post.json`, `vi.mdx` and `en.mdx` (formats below). Write Mermaid as fenced ` ```mermaid ` blocks only. Never write or edit `.svg` files: CI renders diagrams and commits them to the PR branch.
 7. **Validate.** `pnpm validate` must exit 0 (`0 error(s)`; or `✔ N posts valid` when there are no warnings either). Fix every `✖` error. Warnings (`⚠`), such as an old `publishedAt` on an existing post, are allowed.
 8. **Self-check.** Go through the review checklist below for each pick, honestly. Tick an item only if the post meets it. An unticked item is allowed and tells the reviewer where to look; a false tick is not allowed.
 9. **Open one PR.** If `content/seen.json` gained no keys this run, open no PR and report `nothing new`. Otherwise branch `pipeline/<YYYY-MM-DD>` (or `pipeline/ledger-<YYYY-MM-DD>` when there are no picks); if that branch already exists on `origin`, append `-2`, `-3`, and so on. Commit the posts and `content/seen.json` together and push. Write the body to a file with `pnpm -s pipeline:pr-body <slug...> > "$TMPDIR/body.md"` (no slugs for a ledger-only run; it reads the base ledger from `origin/main`, so fetch first). Tick verified items only inside each post's own `### <slug>` block (the ten lines repeat per post). Then `gh pr create --base main --body-file "$TMPDIR/body.md" --title "content: <slugs or ledger> <YYYY-MM-DD>"`. The `label` workflow adds the `pipeline` label. Never merge, never enable auto-merge, never push to `main`.
 
 A run with no picks but new skip decisions still opens the ledger-only PR, so those decisions reach `main`.
+
+## Reading sources
+
+Read the whole source before writing. Some sites make that harder:
+- Medium-hosted blogs (Netflix) answer 403 to plain HTTP clients. The feed item's `content:encoded` field carries the full article text and is an acceptable full-text source; cite the article URL.
+- Discord's blog pages put only the intro inside `<article>`; the rest of the text sits outside it. Read the whole page text, not just that element.
 
 ## The selection bar
 
@@ -95,7 +101,7 @@ lessons:
 ---
 ```
 
-The body below the frontmatter is the deep layer: free `##` headings that follow the story (where they started, what broke, options, what they built, what it cost, what went wrong after), 6 to 10 minutes of reading; the whole post 8 to 12 minutes (200 words per minute in Vietnamese, 230 in English). Inline references look like `[S1]`, `[S2 §3]`, `[S3 @12:40]`; every source is referenced at least once. Both locales have the same structure, the same key-number ids and the same number of Mermaid blocks, with labels translated. No images from sources, not even redrawn; no external image URLs.
+The body below the frontmatter is the deep layer: free `##` headings that follow the story (where they started, what broke, options, what they built, what it cost, what went wrong after), 6 to 10 minutes of reading; the whole post 8 to 12 minutes (200 words per minute in Vietnamese, 230 in English). Inline references look like `[S1]`, `[S2 §3]`, `[S3 @12:40]`; every source is referenced at least once in prose. References inside fenced code blocks, Mermaid labels included, do not count, so cite in the prose next to a diagram. Both locales have the same structure, the same key-number ids and the same number of Mermaid blocks, with labels translated. No images from sources, not even redrawn; no external image URLs.
 
 Vietnamese is written with full diacritics and reads as written by a Vietnamese engineer, not translated. English is a full equivalent, not a summary.
 
@@ -118,7 +124,7 @@ Keyed by the normalized feed item link (`pnpm -s normalize-url <item link>` prin
 }
 ```
 
-`decision` is `picked` (needs `slug`, and the post must exist), `skipped` or `rejected` (both need `reason`). Entries are never removed by the pipeline. A human deleting an entry re-queues that URL.
+`decision` is `picked` (needs `slug`, and the post must exist), `skipped`, `deferred` or `rejected` (each needs `reason`; `deferred` has no `slug`). Entries are never removed by the pipeline, and only `deferred` entries are ever rewritten (to `picked` or `skipped`). A human deleting an entry re-queues that URL.
 
 ## Review checklist
 
@@ -141,6 +147,7 @@ The PR body carries this list once per post (it comes from `lib/pipeline/checkli
 |---|---|
 | `PUPPETEER_SKIP_DOWNLOAD=1 pnpm install --frozen-lockfile` | install without Chromium |
 | `pnpm -s normalize-url <url>` | print the normalized ledger key for a URL |
+| `pnpm -s normalize-url - < links.txt` | normalize many links, one per line; invalid lines print `ERROR <input>` and the exit code is 1 |
 | `pnpm validate` | validate every post and `seen.json`; exit 1 on errors |
 | `pnpm -s pipeline:pr-body [slug...]` | print the PR body for this run's picks |
 | `pnpm pipeline:dry-run [--open-pr]` | maintainers only: prove the contract with a fixture post |
@@ -169,5 +176,5 @@ Until the exit condition holds, Ryan reads every pipeline PR in full before merg
 - Edit an existing post, `companies.json`, `tags.json`, `topics.json`, `series.json`, `featured.json`, `redirects.json`, `source-hosts.json`, code, CI or this document. If a pick needs a new tag, use the closest existing tags and say so in the PR summary.
 - Write `.svg` files or run the Mermaid renderer.
 - Cite a secondary source, or use a number that is not in a cited source.
-- Remove or rewrite an existing `seen.json` entry.
+- Remove an existing `seen.json` entry, or rewrite one that is not `deferred`.
 - Push to the PR branch after opening the PR: CI may commit rendered diagrams to it, and a later push is then rejected, and force-push is forbidden.

@@ -182,7 +182,7 @@ Keyed by normalized source URL (scheme and host lowercased, fragment stripped, `
 }
 ```
 
-Skipped entries are kept so the pipeline never re-evaluates; deleting an entry re-queues it.
+Skipped entries are kept so the pipeline never re-evaluates; deleting an entry re-queues it. Added in M8a: `deferred` marks an item that met the bar but was over a run's cap; each later run re-decides deferred entries first.
 
 `featured.json` (ordered slugs) is the single source of truth for the home page's "Start here" picks; the `featured` boolean in `post.json` is ignored (kept in the schema for now).
 
@@ -192,7 +192,7 @@ Errors (fail the build):
 - post.json and locale frontmatter match their zod schemas; the same schemas feed the site loader.
 - Enum membership for company, topic, caseType, tags, series.
 - `keyNumberLabels` keys equal keyNumbers ids exactly, in every locale.
-- Every `[S\d+...]` reference in a body resolves to a source id; every source id is referenced at least once in at least one locale.
+- Every `[S\d+...]` reference in a body (outside fenced code blocks, M8a) resolves to a source id; every source id is referenced at least once in at least one locale.
 - Sources are primary: host is the company's blog host from companies.json or on the explicit allowlist in `content/source-hosts.json` (youtube.com, usenix.org, acm.org, dl.acm.org, arxiv.org, infoq.com, and named conference sites). `talk` and `paper` sources must carry a locator.
 - No external image URL in any body. Asset size limits. Alt text present on every image in both locales.
 - Same count of Mermaid blocks across locales.
