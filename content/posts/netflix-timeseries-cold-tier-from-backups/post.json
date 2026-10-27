@@ -1,0 +1,31 @@
+{
+  "slug": "netflix-timeseries-cold-tier-from-backups",
+  "company": "netflix",
+  "topic": "data",
+  "caseType": "design-decision",
+  "tags": ["cassandra", "storage", "kafka", "latency"],
+  "series": null,
+  "publishedAt": "2026-10-27",
+  "updatedAt": null,
+  "sourcePublishedAt": "2026-10-14",
+  "featured": false,
+  "author": "pipeline",
+  "reviewedBy": "ryan",
+  "keyNumbers": [
+    { "id": "cold", "value": ">15 PB", "ref": "S1" },
+    { "id": "disk", "value": "80% → 7%", "ref": "S1" },
+    { "id": "latency", "value": "p90 ≈−30%", "ref": "S1" }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "type": "blog",
+      "title": "TimeSeries Tiered Storage Journey: Kafka/Flink Streams to Native Cassandra Cold Reads",
+      "authors": ["Oleksii Tkachuk", "Rajiv Shringi", "Chris Lohfink", "Abe Ratnofsky", "Kartik Sathyanarayanan"],
+      "publishedAt": "2026-10-14",
+      "url": "https://netflixtechblog.com/timeseries-tiered-storage-journey-kafka-flink-streams-to-native-cassandra-cold-reads-e59d597c9d60",
+      "accessedAt": "2026-10-27",
+      "locator": null
+    }
+  ]
+}
