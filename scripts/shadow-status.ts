@@ -25,7 +25,14 @@ try {
   process.exit(1);
 }
 
-const raw = JSON.parse(out) as Array<Omit<PipelinePr, 'labels'> & { labels: { name: string }[] }>;
+type RawPr = Omit<PipelinePr, 'labels'> & { labels: { name: string }[] };
+let raw: RawPr[];
+try {
+  raw = JSON.parse(out) as RawPr[];
+} catch {
+  console.error('shadow-status: could not parse gh output as JSON');
+  process.exit(1);
+}
 const prs: PipelinePr[] = raw.map((p) => ({ ...p, labels: p.labels.map((l) => l.name) }));
 const today = new Date().toISOString().slice(0, 10);
 console.log(formatShadowStatus(shadowStatus(prs, today)));

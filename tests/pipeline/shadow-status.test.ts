@@ -59,6 +59,33 @@ describe('shadowStatus', () => {
     const s = shadowStatus(prs, '2026-10-22');
     expect(s.firstPr).toBe(prs[1].number);
     expect(s.days).toBe(21);
+    expect(s.consecutiveClean).toBe(5);
+  });
+  it('sorts by mergedAt descending regardless of array order', () => {
+    const prs = [
+      pr({ mergedAt: '2026-10-02T00:00:00Z' }),
+      pr({ mergedAt: '2026-10-03T00:00:00Z' }),
+      pr({ mergedAt: '2026-10-09T00:00:00Z', labels: ['pipeline'] }),
+      pr({ mergedAt: '2026-10-01T00:00:00Z' }),
+    ];
+    expect(shadowStatus(prs, '2026-10-22').consecutiveClean).toBe(0);
+    const prs2 = [
+      pr({ mergedAt: '2026-10-09T00:00:00Z' }),
+      pr({ mergedAt: '2026-10-05T00:00:00Z', labels: ['pipeline'] }),
+      pr({ mergedAt: '2026-10-08T00:00:00Z' }),
+      pr({ mergedAt: '2026-10-01T00:00:00Z' }),
+    ];
+    expect(shadowStatus(prs2, '2026-10-22').consecutiveClean).toBe(2);
+  });
+  it('picks the earliest createdAt even when not first in the array', () => {
+    const prs = [
+      pr({ createdAt: '2026-10-10T00:00:00Z' }),
+      pr({ createdAt: '2026-10-03T00:00:00Z' }),
+      pr({ createdAt: '2026-10-07T00:00:00Z' }),
+    ];
+    const s = shadowStatus(prs, '2026-10-13');
+    expect(s.firstPr).toBe(prs[1].number);
+    expect(s.days).toBe(10);
   });
   it('merged ledger PR does not reset the streak', () => {
     const prs = [
