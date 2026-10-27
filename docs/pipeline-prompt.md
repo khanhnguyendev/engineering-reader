@@ -27,7 +27,7 @@ Follow the steps in `docs/pipeline.md` "What the pipeline does, once per run", i
 - For each pick, read the full source (the article, or the talk's transcript or slides with timestamps; see `docs/pipeline.md` "Reading sources" for Medium and Discord), then write the post in both languages per the file formats. Every number in key numbers, TL;DR, body or small-team bullets must appear in a cited source; put the reference next to it.
 - Run `pnpm validate` until it exits 0 with no `✖` errors.
 - Self-check each post against the review checklist. Tick only what is true, inside that post's `### <slug>` block.
-- If `content/seen.json` gained no keys, open no PR and report "nothing new".
+- If `content/seen.json` is unchanged from `main` (no new keys, no re-decided deferred entry), open no PR and report "nothing new".
 - Commit posts and `content/seen.json` on a branch `pipeline/<YYYY-MM-DD>` (or `pipeline/ledger-<YYYY-MM-DD>` with no picks; add `-2`, `-3` if the branch exists on origin), push, and open the PR against `main` with `--body-file` from `pnpm -s pipeline:pr-body <slugs>`, checklist ticked as verified. The label comes from CI. Do not merge, and do not push again after the PR is open.
 
 ## Writing quality
@@ -45,4 +45,4 @@ Skip, with a reason in the ledger. A skipped good post costs nothing; a wrong nu
 
 ## Finish
 
-Report: the PR URL (or why there is none), picks with slugs, the count of skips, and any feed that failed.
+Report: the PR URL (or why there is none), picks with slugs, the counts of skips and deferred items, and any feed that failed.
