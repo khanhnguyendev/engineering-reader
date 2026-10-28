@@ -7,6 +7,7 @@ import { loadPagefind } from "@/components/search/load-pagefind";
 import type { Dictionary } from "@/lib/dictionaries";
 import { toSitePath } from "@/lib/fold";
 import { plural, type Locale } from "@/lib/i18n";
+import { MIN_CHARS } from "@/lib/search-preload";
 
 type State = "idle" | "loading" | "results" | "empty" | "unavailable" | "error";
 type Row = {
@@ -23,7 +24,6 @@ type TopicRef = { slug: string; label: string; count: number };
 
 const DEBOUNCE_MS = 200;
 const MAX_ROWS = 10;
-const MIN_CHARS = 2;
 
 /** Search over the static Pagefind index. Rows come from result metadata, never from excerpts. */
 export function SearchBox({

@@ -1,4 +1,5 @@
 import { ThemeScript } from "@/components/theme-script";
+import { earlyStartScript } from "@/lib/search-preload";
 import { Analytics } from "@vercel/analytics/next";
 import { fontVariables } from "../fonts";
 import "../globals.css";
@@ -25,6 +26,7 @@ export default async function LocaleLayout({
     >
       <head>
         <ThemeScript />
+        <script dangerouslySetInnerHTML={{ __html: earlyStartScript() }} />
       </head>
       <body>
         {children}
