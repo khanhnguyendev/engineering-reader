@@ -16,5 +16,785 @@
     "seenAt": "2026-10-21",
     "decision": "picked",
     "slug": "netflix-microservices-mastering-chaos"
+  },
+  "https://discord.com/blog/discord-update-october-22-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-october-6-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/halloween-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "community or marketing post, not an engineering case"
+  },
+  "https://discord.com/blog/discord-update-september-25-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/safer-for-teens-same-discord-for-adults": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "policy and product post on age assurance, not an engineering case"
+  },
+  "https://discord.com/blog/adding-the-discord-updates-you-want-to-see": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-september-8-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/a-letter-to-the-discord-community-in-brazil": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "company letter, not an engineering case"
+  },
+  "https://discord.com/blog/link-world-of-warcraft-with-discord": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-update-august-11-2026-changelog": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-august-4-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/mobile-platform-support-arrives-in-discord-social-sdk": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "SDK product announcement, not an engineering case"
+  },
+  "https://discord.com/blog/improving-mobile-with-squircles-styles-and-spacing": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "app design changes from user feedback, no system decision or numbers"
+  },
+  "https://discord.com/blog/introducing-profile-frames-decorative-borders-to-make-your-discord-profile-museum-worthy": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-july-7-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/discord-is-now-on-meta-quest-reach-out-to-your-servers-while-in-vr": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/cost-attribution-in-discords-api": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "real design story (per-endpoint cost attribution with profiling) but almost no outcome numbers in the source"
+  },
+  "https://discord.com/blog/discord-update-june-25-2026-changelog": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/how-to-manage-your-discord-desktop-notifications": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "user how-to guide, not an engineering case"
+  },
+  "https://discord.com/blog/updated-requirements-to-how-apps-access-data-in-servers": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "developer policy change, not an engineering case"
+  },
+  "https://discord.com/blog/game-on-discord-is-backing-the-next-generation-of-dutch-gaming-founders": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/how-we-moved-discord-voice-to-the-edge": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "picked",
+    "slug": "discord-voice-migration-to-cloudflare-edge"
+  },
+  "https://discord.com/blog/you-bar": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-june-4-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/official-discord-integrations-for-steal-a-brainrot-grow-a-garden-brookhaven-rp-and-more": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/making-it-easier-than-ever-to-connect-with-friends-in-league-val": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/every-voice-and-video-call-on-discord-is-now-end-to-end-encrypted": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product announcement of E2EE coverage, no system numbers"
+  },
+  "https://discord.com/blog/celebrate-discords-11th-birthday-with-an-exclusive-set-of-emoji-and-wallpapers": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "community or marketing post, not an engineering case"
+  },
+  "https://discord.com/blog/nitro-rewards": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/beginners-guide-to-nitro": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "user how-to guide, not an engineering case"
+  },
+  "https://discord.com/blog/how-discord-automates-scylladb-clusters-at-scale": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "operations tooling walkthrough for ScyllaDB automation; almost no outcome numbers"
+  },
+  "https://discord.com/blog/rust-shop-on-discord-launch-sale": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-may-4-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/behind-the-scenes-of-the-3-25-26-voice-outage": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "picked",
+    "slug": "discord-voice-outage-supervisor-bottleneck"
+  },
+  "https://discord.com/blog/measure-less-to-learn-more-using-fewer-higher-quality-metrics-to-capture-what-matters": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "experiment-statistics methodology (metric count cut ~50 to ~15), not a systems decision, incident or migration"
+  },
+  "https://discord.com/blog/making-discord-on-desktop-look-just-right-display-settings-to-ease-the-eyes": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-april-6-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/last-meadow-online-announcement": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/keeping-discord-safe-and-sound": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-update-march-24-2026-changelog": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/how-roost-is-advancing-online-safety": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "partner organization post, not an engineering case"
+  },
+  "https://discord.com/blog/claim-your-game": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/building-on-the-social-layer-of-games-whats-new-from-gdc-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-march-6-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/tracing-discords-elixir-systems-without-melting-everything": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "Elixir distributed tracing rollout with sampling and performance fixes, has numbers; meets the bar but not picked: three-pick ceiling reached this run; delete this entry to re-queue"
+  },
+  "https://discord.com/blog/getting-global-age-assurance-right-what-we-got-wrong-and-whats-changing": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "policy post on age assurance, not an engineering case"
+  },
+  "https://discord.com/blog/osprey-open-sourcing-our-rule-engine": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "open-source tool release"
+  },
+  "https://discord.com/blog/bring-your-vibe-to-discord-with-new-themes-in-nitro": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "user how-to guide, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-february-4-2026": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/how-to-customize-your-discord-profile": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "user how-to guide, not an engineering case"
+  },
+  "https://discord.com/blog/beginners-guide-to-custom-emojis": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "user how-to guide, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-december-8-2025": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/gift-ideas-for-the-discord-user": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/checkpoint-2025-discord-year-in-review": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/save-and-display-your-faves-add-discord-shop-marvel-rivals-items-to-your-profiles-wishlist": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/bringing-in-game-commerce-to-discord-communities": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/how-to-link-discord-to-popular-multiplayer-games": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "user how-to guide, not an engineering case"
+  },
+  "https://discord.com/blog/how-to-share-what-youre-playing-listening-to-or-watching-as-your-status-on-discord": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "user how-to guide, not an engineering case"
+  },
+  "https://discord.com/blog/discord-update-november-6-2025-changelog": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/a-cornucopia-of-updates-make-discord-on-desktop-fresher-than-a-crisp-fall-breeze": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-november-4-2025": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/from-single-node-to-multi-gpu-clusters-how-discord-made-distributed-compute-easy-for-ml-engineers": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "ML platform build story; only a business-metric number (+200%), no system numbers"
+  },
+  "https://discord.com/blog/during-october-treat-a-friend-to-nitro-and-trick-out-your-profile-for-halloween": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "community or marketing post, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-october-7-2025": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/discord-update-september-25-2025-changelog": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/new-looks-for-nitro-new-looks-for-you-get-yourself-a-nitro-exclusive-profile-bundle": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/staff-picks-september-2025-welcome-to-our-video-game-museum": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "community or marketing post, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-september-3-2025": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/bringing-dave-to-all-discord-platforms": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "E2EE client rollout; numbers are crypto micro-benchmarks, weak systems case"
+  },
+  "https://discord.com/blog/starting-your-first-discord-server": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "user how-to guide, not an engineering case"
+  },
+  "https://discord.com/blog/transforming-game-discovery-with-instant-play-experiences-on-discord": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discords-powerful-cross-platform-chat-ready-for-your-game": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/introducing-the-community-server-cleanup-report-for-august-2025": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-august-4-2025": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/roost-announces-coop-and-osprey-free-open-source-trust-and-safety-infrastructure-for-the-ai-era": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "open-source trust and safety announcement"
+  },
+  "https://discord.com/blog/discord-for-business-cannes-worthy-ad-product-updates": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-orbs": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/summer-special-join-nitro-get-an-extra-month-on-us": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-july-7-2025": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/discord-update-june-30-2025-changelog": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/authenticity-matters-pride-month-2025": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "community or marketing post, not an engineering case"
+  },
+  "https://discord.com/blog/staff-picks-june-2025-summer-of-showcases": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "community or marketing post, not an engineering case"
+  },
+  "https://discord.com/blog/how-to-set-up-your-servers-roles-for-members-mods-admins": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "user how-to guide, not an engineering case"
+  },
+  "https://discord.com/blog/get-more-from-your-boosts-with-new-server-perks": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/gift-nitro-and-earn-a-flavorful-splash-for-your-avatar": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-social-sdk-updates-integrations": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-june-3-2025": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/how-to-use-the-discord-soundboard-add-more-sounds": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "user how-to guide, not an engineering case"
+  },
+  "https://discord.com/blog/checkpoint-3-leveling-up-discord-quests-with-orbs-and-advanced-measurement": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "ads product update, not an engineering case"
+  },
+  "https://discord.com/blog/go-beyond-plus-ultra-with-the-my-hero-academia-collection": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-for-business-newsletter-vol-1": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "community or marketing post, not an engineering case"
+  },
+  "https://discord.com/blog/thank-you-for-ten-years": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "community or marketing post, not an engineering case"
+  },
+  "https://discord.com/blog/staff-picks-may-2025-the-games-that-brought-us-to-discord": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "community or marketing post, not an engineering case"
+  },
+  "https://discord.com/blog/star-wars-makes-its-way-to-discord": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/discord-patch-notes-may-1-2025": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "release notes or changelog, not an engineering case"
+  },
+  "https://discord.com/blog/how-discord-indexes-trillions-of-messages": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "Elasticsearch search re-architecture for trillions of messages, has numbers; meets the bar but not picked: three-pick ceiling reached this run; delete this entry to re-queue"
+  },
+  "https://discord.com/blog/discord-appoints-new-ceo-humam-sakhnini": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "executive appointment announcement"
+  },
+  "https://discord.com/blog/passing-the-torch": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "company leadership post"
+  },
+  "https://discord.com/blog/nameplates-land-in-the-shop": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://discord.com/blog/nitro-members-keep-quest-rewards-longer": {
+    "company": "discord",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product, feature or marketing announcement, not an engineering case"
+  },
+  "https://blog.cloudflare.com/php-ctf": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "event announcement (capture the flag challenge)"
+  },
+  "https://blog.cloudflare.com/q3-2026-internet-disruption-summary": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "Radar report on third-party Internet disruptions, not a Cloudflare engineering decision"
+  },
+  "https://blog.cloudflare.com/kv-cache-exposure-remediation": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "security incident (cross-request KV cache exposure in LLM serving) with remediation; meets the bar but not picked: three-pick ceiling reached this run; delete this entry to re-queue"
+  },
+  "https://blog.cloudflare.com/origin-range-requests": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "cache feature launch framed as a product announcement; few numbers (p99 TTFB about halved, ~6% traffic)"
+  },
+  "https://blog.cloudflare.com/post-quantum-geo-key-manager": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product and cryptography feature announcement"
+  },
+  "https://blog.cloudflare.com/k-isms": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "compliance certification post"
+  },
+  "https://blog.cloudflare.com/full-transaction-waf": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "WAF product announcement"
+  },
+  "https://blog.cloudflare.com/php-vulnerabilities-waf-protection": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "security advisory and WAF rule deployment, not an engineering case"
+  },
+  "https://blog.cloudflare.com/webmcp-commerce": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "partnership and product post"
+  },
+  "https://blog.cloudflare.com/emudhra-certificate-compromise": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "security advisory on third-party certificates"
+  },
+  "https://blog.cloudflare.com/typescript-rust-port": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "tool announcement (TypeScript port to Rust) with benchmarks, not a decision/incident/migration case"
+  },
+  "https://blog.cloudflare.com/obsessive-inference-optimization": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "cost tuning of an internal LLM code reviewer (tokens, models, caching); numbers present but weak fit for a system-design reader"
+  },
+  "https://blog.cloudflare.com/clairic-extraction-model": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "ML model release"
+  },
+  "https://blog.cloudflare.com/protect-your-netscaler-gateway": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "security guidance for a third-party product"
+  },
+  "https://blog.cloudflare.com/verified-bots-accountability": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "bot verification policy and product post"
+  },
+  "https://blog.cloudflare.com/programmable-gateway-dlp": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "secure web gateway product announcement"
+  },
+  "https://blog.cloudflare.com/deploy-with-void": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "product announcement"
+  },
+  "https://blog.cloudflare.com/cloudflare-openai-discovery-agentic-web": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "partnership announcement"
+  },
+  "https://blog.cloudflare.com/yandex-outage": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "Radar analysis of a third party's data center outage, not a Cloudflare engineering decision"
+  },
+  "https://blog.cloudflare.com/hyperdrive-mysql": {
+    "company": "cloudflare",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "debugging story behind MySQL GA for Hyperdrive; few concrete numbers (99.99% target only)"
+  },
+  "https://netflixtechblog.com/making-failure-diagnosis-reliable-with-pensive-ai-6b0811a1c015?source=rss----2615bd06b42e---4": {
+    "company": "netflix",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "LLM-based failure diagnosis tooling; numbers are adoption and productivity metrics, weaker fit than this run's picks"
+  },
+  "https://netflixtechblog.com/multi-ratio-video-resizing-for-mobile-feed-and-marketing-2e6b42810f49?source=rss----2615bd06b42e---4": {
+    "company": "netflix",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "ML media feature (video resizing), no system numbers"
+  },
+  "https://netflixtechblog.com/beyond-api-compatibility-building-a-tool-to-measure-the-blast-radius-of-library-changes-9474f2fd4f90?source=rss----2615bd06b42e---4": {
+    "company": "netflix",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "internal tooling for library change impact, no numbers"
+  },
+  "https://netflixtechblog.com/single-tenant-titus-vm-level-isolation-on-a-multi-tenant-container-platform-6d8b1909d163?source=rss----2615bd06b42e---4": {
+    "company": "netflix",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "VM-level isolation design on Titus, but few concrete outcome numbers in the source"
+  },
+  "https://netflixtechblog.com/ontology-driven-observability-building-an-end-to-end-knowledge-graph-at-netflix-scale-421392cf5adf?source=rss----2615bd06b42e---4": {
+    "company": "netflix",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "knowledge-graph observability architecture, few outcome numbers"
+  },
+  "https://netflixtechblog.com/integrating-netflixs-foundation-model-into-personalization-applications-cf176b5860eb?source=rss----2615bd06b42e---4": {
+    "company": "netflix",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "ML personalization integration, not a systems decision with numbers"
+  },
+  "https://netflixtechblog.com/datajunction-as-netflixs-answer-to-the-missing-piece-of-the-modern-data-stack-92af926b40a5?source=rss----2615bd06b42e---4": {
+    "company": "netflix",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "data tooling (semantic layer) post, no numbers"
+  },
+  "https://netflixtechblog.com/measuring-the-impact-of-personalized-recommendations-4c26be3a4d96?source=rss----2615bd06b42e---4": {
+    "company": "netflix",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "recommendation impact measurement methodology, not a systems case"
+  },
+  "https://netflixtechblog.com/timeseries-tiered-storage-journey-kafka-flink-streams-to-native-cassandra-cold-reads-e59d597c9d60?source=rss----2615bd06b42e---4": {
+    "company": "netflix",
+    "seenAt": "2026-10-27",
+    "decision": "picked",
+    "slug": "netflix-timeseries-cold-tier-from-backups"
+  },
+  "https://netflixtechblog.com/behind-the-scenes-evolving-netflixs-ads-event-pipeline-for-live-part-ii-826ebf9ad9fb?source=rss----2615bd06b42e---4": {
+    "company": "netflix",
+    "seenAt": "2026-10-27",
+    "decision": "skipped",
+    "reason": "live ads event pipeline redesign (Flink join window, regional cutover), has numbers; meets the bar but not picked: three-pick ceiling reached this run; delete this entry to re-queue"
   }
 }

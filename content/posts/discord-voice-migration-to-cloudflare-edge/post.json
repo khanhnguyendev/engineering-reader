@@ -1,0 +1,31 @@
+{
+  "slug": "discord-voice-migration-to-cloudflare-edge",
+  "company": "discord",
+  "topic": "infra",
+  "caseType": "migration",
+  "tags": ["edge-computing", "latency", "service-discovery", "performance"],
+  "series": null,
+  "publishedAt": "2026-10-27",
+  "updatedAt": null,
+  "sourcePublishedAt": "2026-06-09",
+  "featured": false,
+  "author": "pipeline",
+  "reviewedBy": "ryan",
+  "keyNumbers": [
+    { "id": "cities", "value": "≈30 → 300+", "ref": "S1" },
+    { "id": "traffic", "value": ">80%", "ref": "S1" },
+    { "id": "frankfurt", "value": "−34% / −42%", "ref": "S1" }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "type": "blog",
+      "title": "How We Moved Discord Voice to the Edge",
+      "authors": ["David Chen"],
+      "publishedAt": "2026-06-09",
+      "url": "https://discord.com/blog/how-we-moved-discord-voice-to-the-edge",
+      "accessedAt": "2026-10-27",
+      "locator": null
+    }
+  ]
+}

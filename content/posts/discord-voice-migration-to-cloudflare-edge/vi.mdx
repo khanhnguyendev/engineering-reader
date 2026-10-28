@@ -1,0 +1,94 @@
+---
+title: "Discord chuyển voice và video sang edge của Cloudflare"
+summary: "Discord đưa hơn 80% traffic voice sang mạng hơn 300 thành phố của Cloudflare, và học ra rằng PoP gần nhất chưa chắc là nơi tốt nhất để đặt cuộc gọi."
+tldr:
+  - "Server voice của Discord từng chỉ đặt được ở khoảng 30 thành phố có data center của các cloud lớn. Cloudflare có PoP ở hơn 300 thành phố, nên Discord bắt đầu chuyển voice và video sang đó từ năm 2025."
+  - "Hai đợt thử đầu đều ngược kỳ vọng: PoP ở Iceland làm ping của người ngoài Iceland trong cùng cuộc gọi tăng 2,7 lần, còn chuyển Rotterdam sang Amsterdam đụng một đường transit đã bão hòa và phải rollback sau khoảng mười ngày."
+  - "Hạ tầng của Cloudflare buộc Discord xây lại discovery, deploy và mật độ worker: host tự đăng ký với TTL mười phút, deploy là tạo lại container, và số worker mỗi host đi từ 4 xuống 2 rồi lên 8."
+  - "Những lỗi khó nhất nằm sâu dưới ứng dụng: treo I/O hơn hai mươi lăm giây, và ping ở châu Âu vọt quá nửa giây do event loop Rust bỏ đói việc gửi gói cộng với softirq tranh CPU."
+  - "Một năm sau, hơn 80% traffic chạy trên Cloudflare; Frankfurt giảm 34% ping trung bình và 42% packet loss so với nhà cung cấp cũ."
+keyNumberLabels:
+  cities: "Số thành phố có thể đặt server voice, trước và sau khi chuyển"
+  traffic: "Tỷ lệ traffic voice và video của Discord đã chạy trên Cloudflare"
+  frankfurt: "Frankfurt: thay đổi ping trung bình / packet loss so với nhà cung cấp cũ"
+smallTeam:
+  - "Nếu bạn chuyển traffic thời gian thực sang một nhà cung cấp mới, đừng chọn region theo năng lực sẵn sàng. Trước khi đổ traffic thật vào một region, hãy kiểm tra đường mạng từ các ISP lớn nhất của người dùng tới đó, và giữ sẵn đường rollback."
+  - "Tuần này, xem lại event loop của service nhận và gửi nhiều gói (UDP, websocket). Nếu nhánh đọc luôn sẵn sàng, nó có thể bỏ đói nhánh gửi. Đặt một ngân sách thời gian cho việc flush và thêm metric đo gói nằm chờ trong hàng đợi gửi bao lâu."
+  - "Phần không chuyển được: bạn không có PoP ở 300 thành phố, cũng không có đội kernel của nhà cung cấp ngồi debug cùng. Thứ bạn mang về được là thói quen tăng traffic chậm với metric chất lượng theo dõi liên tục, và một lớp discovery mà host tự đăng ký, tự hết hạn."
+lessons:
+  - "Giả định ban đầu, PoP gần hơn thì cuộc gọi tốt hơn, chỉ đúng khi mọi người trong cuộc gọi ở cùng một nơi. Với cuộc gọi trộn nhiều vùng, việc chọn host quan trọng hơn độ phủ."
+  - "Discord tự nhận lẽ ra phải đi từng region kèm kiểm tra peering ngay từ đầu; kế hoạch xong trong một năm đã phải nhường chỗ cho một lộ trình chậm hơn."
+---
+
+## Vì sao khoảng cách lại quan trọng
+
+Với cuộc gọi voice, mỗi mili giây khoảng cách mạng cộng thêm vào từng gói tin. Suốt phần lớn lịch sử Discord, server voice gần nhất chỉ nằm ở một trong khoảng 30 thành phố trên thế giới, tức những nơi các cloud lớn có data center [S1]. Ở Bay Area hay Frankfurt thì ổn. Ở Reykjavik hay Auckland thì cuộc gọi phải đi một quãng xa.
+
+Cloudflare đi ngược mô hình cloud thông thường: thay vì ít data center lớn, họ có các PoP (point of presence) nhỏ ở hơn 300 thành phố, và đề nghị chạy phần mềm voice của Discord ở tất cả những nơi đó [S1 §A Different Shape of Network]. Để so sánh, các cloud lớn khác có khoảng 30 đến 40 region [S1 §A Different Shape of Network]. Vấn đề là mạng của Cloudflare lớn lên từ CDN, vốn được thiết kế để cache nội dung tĩnh, còn voice là các gói UDP độ trễ thấp chạy liên tục giữa mọi người trong cuộc gọi [S1 §A Different Shape of Network].
+
+Viết thành yêu cầu cho design review: chức năng thì không đổi, mỗi cuộc gọi vẫn được đặt lên một SFU (Selective Forwarding Unit) và mọi người nối vào đó. Phi chức năng thì nặng: ping thấp hơn, packet loss không được tệ hơn nhà cung cấp cũ, cuộc gọi không được rớt khi hạ tầng bên dưới thay đổi, và di chuyển không được làm người dùng nhận ra.
+
+## Iceland: PoP gần nhất làm cuộc gọi tệ hơn
+
+Cuối tháng 2 năm 2025, Iceland là nơi thử đầu tiên. Nhà cung cấp cũ không có mặt ở đó nên người dùng Iceland phải đi qua Rotterdam; Cloudflare có PoP ở Reykjavik [S1 §Phase 0: Iceland]. Với cuộc gọi chỉ có người Iceland, kết quả đúng như mong đợi: ping giảm 9%, packet loss giảm 11% [S1 §Phase 0: Iceland].
+
+Cuộc gọi trộn thì ngược lại. Người không ở Iceland trong một cuộc gọi đặt ở Reykjavik có ping tăng 2,7 lần, packet loss tăng 9% [S1 §Phase 0: Iceland]. Nguyên nhân nằm ở thiết kế: Discord đặt cả cuộc gọi lên đúng một SFU, và mọi người nối vào host đó suốt cuộc gọi [S1 §Phase 0: Iceland]. Một người Iceland mở cuộc gọi với ba người Đức thì cuộc gọi có thể rơi vào Reykjavik, và ba người Đức phải gửi gói sang Iceland rồi quay về.
+
+Bài học là PoP mới chỉ có ích nếu cuộc gọi đặt ở đó vẫn là cuộc gọi nội vùng. Discord đổi chiến lược: thay vì lấp các vùng trống, họ thay từng region đang có của nhà cung cấp cũ, còn những nơi như Reykjavik được đưa vào lộ trình dài hạn, đi kèm logic chọn host thông minh hơn [S1 §Phase 0: Iceland].
+
+## Rotterdam: một đường transit đã đầy
+
+Cuối tháng 4 năm 2025, traffic Rotterdam được chuyển sang PoP Amsterdam của Cloudflare [S1 §Phase 1: Rotterdam]. Phần lớn ISP trông ổn. Nhưng chỉ sau vài giờ, người dùng Orange, một trong những ISP lớn nhất nước Pháp, có độ trễ cuộc gọi trên một giây vào giờ cao điểm, và freeze ratio của họ xấu đi 30% [S1 §Phase 1: Rotterdam].
+
+Lỗi không nằm ở Cloudflare hay ở Discord mà ở con đường giữa hai bên. Traffic từ Orange vào Cloudflare đi qua backbone transit của Telia, và điểm nối Telia sang Orange vốn đã bão hòa lúc cao điểm. Mỗi megabit Discord chuyển thêm sang Cloudflare lại làm nó tệ hơn [S1 §Phase 1: Rotterdam]. Khoảng mười ngày sau, Discord rollback: rút các instance Rotterdam trên Cloudflare và để nhà cung cấp cũ gánh phần traffic đi Orange. Cloudflare bắt đầu đàm phán peering trực tiếp với Orange và khuyên Discord đặt SFU ở PoP Paris và London để Orange có đường ngắn hơn [S1 §Phase 1: Rotterdam].
+
+Thay đổi quan trọng nhất là cách quyết định tiến độ. Trước Rotterdam, region nào có đủ năng lực thì được chuyển. Sau Rotterdam, không region nào nhận traffic đáng kể trước khi đội kiểm tra peering giữa Cloudflare và các ISP chính ở đó còn dư địa [S1 §Phase 1: Rotterdam]. Kế hoạch ban đầu, region lớn trong vài tháng và xong toàn bộ trong năm, nhường chỗ cho lộ trình từng region một [S1 §What Changed].
+
+## Khi host tự xuất hiện và tự biến mất
+
+Phần lớn những tháng đầu dành cho việc làm cho deploy và vòng đời host chạy được [S1 §What Changed], vì Cloudflare vận hành theo cách rất khác.
+
+Trên hạ tầng cũ, Discord tạo host rồi đăng ký nó vào discovery. Trên Cloudflare, scheduler của họ tự bật và thu hồi máy theo lịch riêng, nên host xuất hiện không báo trước và phải tự giới thiệu [S1 §Discovery: Hosts Dial In]. Discord xây một discovery service mới: host gọi vào để đăng ký, gia hạn định kỳ, hủy đăng ký khi tắt. Bản ghi nằm trong Valkey với TTL mười phút, nên host nào im lặng sẽ tự rơi ra [S1 §Discovery: Hosts Dial In]. Lý do còn lại là etcd: hệ discovery cũ dựng cho một fleet nhỏ hơn nhiều, và ở mức 25.000 host voice trên Cloudflare thì độ trễ discovery đã tăng dần. Đội chuyển luôn bản ghi SFU cũ sang Valkey, ghi song song qua giai đoạn cutover rồi bỏ etcd [S1 §Discovery: Hosts Dial In].
+
+Host trên Cloudflare cũng giống spot instance hơn là máy cố định. Scheduler có thể thu hồi một host đang chạy khi cần tài nguyên, và container còn bị reboot ít nhất mỗi tháng một lần để bảo trì [S1 §Hosts as Spot Instances]. Với voice, đó là vấn đề, vì mỗi cuộc gọi sống trên một host giữ cả control plane có state lẫn đường media UDP; tắt host giữa chừng là rớt cuộc gọi [S1 §Hosts as Spot Instances].
+
+Deploy vì thế là tạo lại container từ image mới, không phải restart. Discord viết một deployer yêu cầu Cloudflare tạo lại mọi host đang chạy image cũ rồi chờ từng host quay lại. Một lần tạo lại đồng loạt có thể làm số instance ở một PoP về 0, nên supervisor trong container bắt tín hiệu tắt và trì hoãn việc thoát thêm năm phút. Trong khoảng đó host thay thế lên, và cuộc gọi reconnect rơi vào host mới cùng vùng [S1 §Recreate, Not Restart].
+
+## Mật độ worker: 4, rồi 2, rồi 8
+
+Container đầu tiên chạy bốn worker mỗi host, mức trung bình vẫn ổn ở nơi khác [S1 §Two Workers, Then Four, Then Eight]. Đầu tháng 5 năm 2025, US East có packet loss 1,5–2%, trong khi baseline ở nhà cung cấp cũ dưới 0,5% [S1 §Two Workers, Then Four, Then Eight]. Nguyên nhân là tranh chấp hàng đợi NIC: trên bare metal mỗi worker có hàng đợi truyền riêng, còn runtime container của Cloudflare khi đó chỉ cho một hàng đợi, nên bốn worker dùng chung và kernel bắt đầu bỏ gói UDP lúc cao điểm [S1 §Two Workers, Then Four, Then Eight].
+
+Cách sửa ngắn hạn là giảm mật độ xuống hai worker; packet loss về ngang nhà cung cấp cũ, đổi lại hiệu quả trên mỗi host kém đi. Đầu tháng 6, Cloudflare có bản sửa buffer UDP và Amsterdam thử lại bốn worker; đến cuối tháng 9, tám worker thành cấu hình mặc định toàn cầu [S1 §Two Workers, Then Four, Then Eight]. Đây là đánh đổi điển hình khi chạy trên hạ tầng người khác: lùi một bước về hiệu quả để giữ chất lượng, chờ bên kia sửa tầng dưới.
+
+## Hai lỗi nằm dưới đáy
+
+Đầu năm 2026, phần cơ chế di chuyển đã gần xong, nhưng còn hai vấn đề kéo đội xuống sâu hơn cả bản thân đợt chuyển [S1 §Two Workers, Then Four, Then Eight].
+
+Vấn đề thứ nhất là các instance voice ở vài PoP, nhiều nhất là Los Angeles, đơ hơn hai mươi lăm giây mà không để lại log gì [S1 §The Twenty-five-second(!) Hangs]. Đội kernel của Cloudflare tìm ra nguyên nhân: workload ghi nhiều của Discord làm đầy page cache trên ổ đĩa mới, rồi kernel flush nhiều gigabyte một lần, và mọi tiến trình khác ghi vào cùng thiết bị đều bị chặn tới khi flush xong. Cloudflare sửa ở phía họ, đầu tiên bằng cách flush thường xuyên hơn [S1 §The Twenty-five-second(!) Hangs]. Phần của Discord là báo triệu chứng với đủ telemetry để bên kia đối chiếu.
+
+Vấn đề thứ hai khó hơn. Cuối năm 2025, Bucharest và Stockholm chuyển sang SFU mới viết bằng Rust trên Cloudflare, và đến tháng 2, ping phía client có lúc vọt quá nửa giây [S1 §The European Ping Spikes]. Discord chuyển một phần traffic châu Âu ra khỏi Cloudflare trong lúc điều tra; các giả thuyết quen thuộc như lỗi định tuyến, peering hay DDoS đều không đứng vững [S1 §The European Ping Spikes].
+
+Bước ngoặt là một probe thụ động do đội hiệu năng của Cloudflare viết. Health check của Discord có chữ ký payload cố định, nên một chương trình eBPF trong network stack của host có thể đóng dấu thời gian mỗi health check khi vào và ra khỏi NIC. Đoạn từ NIC vật lý sang NIC ảo và chiều ngược lại đều sạch; thời gian bị mất nằm bên trong VM, tức trong ứng dụng của chính Discord [S1 §The Probe]. Khi được vào thẳng một container, đội Cloudflare thấy futex stall tới 860 ms, và lấy mẫu CPU cho thấy một thread chạy 100% một core trong mỗi lần ping vọt [S1 §The Probe].
+
+## Event loop bỏ đói việc gửi
+
+SFU Rust có tám worker thread, mỗi thread có socket UDP riêng, một runtime Tokio đơn luồng và một vòng `select!`. Trong vòng đó có hai nhánh quan trọng: future `recv` lấy gói từ socket, và timer flush đẩy gói ra [S1 §Write Starvation in Our App]. Khi buffer nhận còn dữ liệu, `recv` luôn sẵn sàng và được poll mãi; timer flush không tới lượt, và gói gửi đi nằm chờ.
+
+```mermaid
+flowchart LR
+    S[Socket UDP đầy gói] --> R[Nhánh recv luôn sẵn sàng]
+    R --> L[Vòng select! chọn recv]
+    L --> R
+    L -. timer flush không tới lượt .-> F[Gói gửi đi nằm chờ]
+    B[Ngân sách 9 ms từ lần flush cuối] --> L
+```
+
+Tokio có ngân sách 128 lần poll để chống chuyện này, nhưng lúc cao điểm 128 lần poll trôi qua trong vài micro giây và `recv` vẫn sẵn sàng khi ngân sách hết [S1 §Write Starvation in Our App]. Metric thời gian gói nằm trong hàng đợi gửi vọt lên hàng trăm mili giây, so với baseline khoảng 1 ms [S1 §Write Starvation in Our App]. Cách sửa là một ngân sách 9 ms: quá 9 ms kể từ lần flush cuối thì nhánh `recv` bị tắt trong lượt poll đó, buộc timer flush chạy. Bản sửa ra đầu tháng 3 và p99 giảm ngay, nhưng các đỉnh vẫn còn vào giờ cao điểm [S1 §Write Starvation in Our App].
+
+Phần còn lại nằm ở hạ tầng. Mỗi VM của Cloudflare khi đó chỉ có một hàng đợi virtio-net, nên mọi xử lý softirq nhận gói dồn vào một vCPU; worker nào bị xếp lên đúng vCPU đó sẽ bị ngắt giữa chừng [S1 §Softirq noisy neighbor]. Discord dùng `taskset` để ghim worker tránh vCPU đó, và bật Receive Packet Steering để rải softirq sang các core khác. Giờ cao điểm đầu tiên sau hai bản sửa không còn đỉnh ping, và traffic châu Âu quay lại Cloudflare [S1 §Softirq noisy neighbor].
+
+## Kết quả và những gì còn dang dở
+
+Một năm sau, hơn 80% traffic voice và video của Discord chạy trên Cloudflare, và hơn 70% region đã chuyển có chất lượng tốt hơn so với cùng kỳ năm trước. Châu Âu và Mỹ Latin cải thiện mạnh nhất, packet loss giảm 20–60% ở nhiều region [S1 §Softirq noisy neighbor]. Frankfurt dẫn đầu với ping trung bình giảm 34% và packet loss giảm 42% [S1].
+
+Điều trớ trêu là những nơi được nhắc ngay từ đầu, Reykjavik và Auckland, vẫn chưa xong; chúng cần logic đặt cuộc gọi mà bài học Iceland đòi hỏi [S1 §Softirq noisy neighbor]. Cách làm từ giờ là tăng traffic chậm với metric trong vòng lặp, kiểm tra peering trước khi bật region, và debug chung với Cloudflare khi có bất ngờ. Đó cũng là tóm tắt trung thực nhất của case này: gần hơn đúng là tốt hơn, nhưng chỉ sau khi bạn đã sửa xong mọi thứ nằm giữa người dùng và server.

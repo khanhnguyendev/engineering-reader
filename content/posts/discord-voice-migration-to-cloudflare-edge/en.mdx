@@ -1,0 +1,94 @@
+---
+title: "Discord moved voice and video onto Cloudflare's edge"
+summary: "Discord moved over 80% of its voice traffic onto Cloudflare's 300+ city network and learned that the nearest PoP is not always the right place for a call."
+tldr:
+  - "Discord's voice servers could only live in about 30 cities, wherever the big clouds had data centers. Cloudflare runs PoPs in more than 300 cities, so in 2025 Discord began moving voice and video there."
+  - "The first two trials went the wrong way: an Iceland PoP made ping 2.7x worse for non-Icelandic users on the same call, and moving Rotterdam to Amsterdam hit a saturated transit path and was rolled back after about ten days."
+  - "Cloudflare's platform forced Discord to rebuild discovery, deploys and worker density: hosts register themselves with a ten-minute TTL, a deploy means recreating containers, and workers per host went from 4 to 2 and then to 8."
+  - "The hardest bugs sat below the application: I/O hangs of over twenty-five seconds, and European ping above half a second caused by a Rust event loop starving its sends plus softirq contention for CPU."
+  - "A year in, over 80% of traffic runs on Cloudflare; Frankfurt saw average ping fall 34% and packet loss fall 42% against the previous vendor."
+keyNumberLabels:
+  cities: "Cities where a voice server can run, before and after the move"
+  traffic: "Share of Discord voice and video traffic running on Cloudflare"
+  frankfurt: "Frankfurt: change in average ping / packet loss against the previous vendor"
+smallTeam:
+  - "If you move real-time traffic to a new provider, do not pick regions by capacity readiness. Before a region takes real traffic, check the network path from your users' largest ISPs to it, and keep a rollback path ready."
+  - "This week, look at the event loop of any service that both receives and sends many packets (UDP, websockets). If the read branch is always ready, it can starve the write branch. Put a time budget on flushing and add a metric for how long packets wait in the send queue."
+  - "What does not transfer: you do not have PoPs in 300 cities or a provider's kernel team debugging with you. What does transfer is ramping traffic slowly with quality metrics watched the whole time, and a discovery layer where hosts register themselves and expire on their own."
+lessons:
+  - "The starting assumption, a closer PoP makes a better call, only held when everyone on the call was in one place. For mixed-region calls, host placement mattered more than coverage."
+  - "Discord admits it should have gone region by region with peering checks from the start; the plan to finish within the year gave way to a slower route."
+---
+
+## Why distance matters
+
+On a voice call, every millisecond of network distance is added to every packet. For most of Discord's history, the nearest voice server sat in one of about 30 cities worldwide, the places where the big clouds have data centers [S1]. Fine in the Bay Area or Frankfurt. In Reykjavik or Auckland, calls travelled a long way.
+
+Cloudflare inverts the usual cloud model: instead of a few large data centers it runs small PoPs (points of presence) in more than 300 cities, and it offered to run Discord's voice software in all of them [S1 §A Different Shape of Network]. For comparison, other large clouds have roughly 30 to 40 regions [S1 §A Different Shape of Network]. The catch is that Cloudflare's network grew out of a CDN, built to cache static content, while voice is a continuous stream of low-latency UDP packets between everyone on a call [S1 §A Different Shape of Network].
+
+As design-review requirements: functionally nothing changes, each call still lands on one SFU (Selective Forwarding Unit) and everyone connects to it. The non-functional side is heavy: lower ping, packet loss no worse than the old provider, no dropped calls while the infrastructure underneath shifts, and a move users never notice.
+
+## Iceland: the nearest PoP made calls worse
+
+In late February 2025, Iceland was the first trial. The previous provider had no presence there, so Icelandic users went through Rotterdam; Cloudflare has a PoP in Reykjavik [S1 §Phase 0: Iceland]. For calls with only Icelandic users, the result was as hoped: ping down 9%, packet loss down 11% [S1 §Phase 0: Iceland].
+
+Mixed calls went the other way. Non-Icelandic users on a call hosted in Reykjavik saw ping rise 2.7x and packet loss rise 9% [S1 §Phase 0: Iceland]. The cause is the design: Discord places a whole call on a single SFU, and everyone stays connected to that host for the call's lifetime [S1 §Phase 0: Iceland]. One Icelandic user calling three people in Germany could land the call in Reykjavik, and the three Germans would send every packet to Iceland and back.
+
+The lesson was that a new PoP only helps if the calls it hosts stay local. Discord changed strategy: instead of filling coverage gaps, it replaced the old provider's existing regions one at a time, and places like Reykjavik moved to the long-term roadmap, paired with smarter host placement [S1 §Phase 0: Iceland].
+
+## Rotterdam: a transit path already full
+
+In late April 2025, Rotterdam traffic moved to Cloudflare's Amsterdam PoP [S1 §Phase 1: Rotterdam]. Most ISPs looked fine. But within hours, users on Orange, one of France's largest ISPs, had call latency above one second at peak, and their freeze ratio got 30% worse [S1 §Phase 1: Rotterdam].
+
+The fault was neither Cloudflare's nor Discord's but the road between them. Orange traffic into Cloudflare rode Telia's transit backbone, and the Telia-to-Orange handoff was already saturated at peak. Every extra megabit Discord moved to Cloudflare made it worse [S1 §Phase 1: Rotterdam]. About ten days in, Discord rolled back: it drained the Rotterdam instances on Cloudflare and let the old provider carry Orange-bound traffic. Cloudflare opened direct peering talks with Orange and advised Discord to put SFUs in its Paris and London PoPs so Orange had shorter paths [S1 §Phase 1: Rotterdam].
+
+The most important change was how pace was decided. Before Rotterdam, a region moved when capacity was ready. After it, no region took meaningful traffic until the team had checked that Cloudflare's peering with that region's main ISPs had headroom [S1 §Phase 1: Rotterdam]. The original plan, big regions within months and everything by year-end, gave way to region-by-region progress [S1 §What Changed].
+
+## When hosts appear and disappear on their own
+
+Most of the first months went into making deploys and host lifecycle work at all [S1 §What Changed], because Cloudflare operates very differently.
+
+On the old infrastructure, Discord created a host and then registered it in discovery. On Cloudflare, the scheduler brings machines up and reclaims them on its own timeline, so hosts appear without warning and must introduce themselves [S1 §Discovery: Hosts Dial In]. Discord built a new discovery service: a host calls in to register, refreshes periodically and unregisters on shutdown. Records live in Valkey with a ten-minute TTL, so a host that goes quiet drops out by itself [S1 §Discovery: Hosts Dial In]. etcd was the other reason: the old discovery system was built for a much smaller fleet, and at 25,000 voice hosts on Cloudflare its latency was climbing. The team moved the legacy SFU records to Valkey too, double-writing through the cutover before retiring etcd [S1 §Discovery: Hosts Dial In].
+
+Hosts on Cloudflare also behave more like spot instances than fixed machines. The scheduler can reclaim a running host when it needs the resources, and containers are rebooted at least once a month for maintenance [S1 §Hosts as Spot Instances]. For voice that hurts, because each call lives on one host that holds both a stateful control plane and the UDP media path; stopping the host mid-call drops the call [S1 §Hosts as Spot Instances].
+
+So a deploy means recreating containers from a new image, not restarting them. Discord wrote a deployer that asks Cloudflare to recreate every host on the old image and waits for each one to return. A simultaneous recreate could take a PoP down to zero instances, so the supervisor inside the container catches the stop signal and delays its exit by five minutes. Replacements come up during that window, and reconnecting calls land on new hosts in the same region [S1 §Recreate, Not Restart].
+
+## Worker density: 4, then 2, then 8
+
+The first container ran four workers per host, the average that worked elsewhere [S1 §Two Workers, Then Four, Then Eight]. In early May 2025, US East showed packet loss of 1.5–2%, against a baseline under 0.5% on the old provider [S1 §Two Workers, Then Four, Then Eight]. The cause was NIC queue contention: on bare metal each worker had its own transmit queue, but Cloudflare's container runtime then exposed only one, so four workers shared it and the kernel started dropping UDP packets at peak [S1 §Two Workers, Then Four, Then Eight].
+
+The short-term fix was halving density to two workers; packet loss returned to parity with the old provider, at the cost of worse efficiency per host. In early June Cloudflare shipped a UDP buffer fix and Amsterdam piloted four workers again; by late September, eight workers was the global default [S1 §Two Workers, Then Four, Then Eight]. That is the classic trade-off of running on someone else's infrastructure: give up some efficiency to keep quality, and wait for the other side to fix the layer underneath.
+
+## Two bugs at the bottom
+
+By early 2026 the migration mechanics were mostly done, but two problems took the team deeper than the move itself ever had [S1 §Two Workers, Then Four, Then Eight].
+
+The first was voice instances in some PoPs, Los Angeles most often, freezing for over twenty-five seconds and leaving nothing in the logs [S1 §The Twenty-five-second(!) Hangs]. Cloudflare's kernel team found the cause: Discord's write-heavy workload filled the page cache on newer disks, the kernel then flushed several gigabytes at once, and every other writer on the same device blocked until the flush finished. Cloudflare fixed it on its side, first by flushing more often [S1 §The Twenty-five-second(!) Hangs]. Discord's part was reporting the symptom with enough telemetry for the other side to correlate.
+
+The second was harder. In late 2025, Bucharest and Stockholm moved to the new Rust SFU on Cloudflare, and by February client-side ping sometimes jumped above half a second [S1 §The European Ping Spikes]. Discord moved some European traffic off Cloudflare while it investigated; the usual suspects, a routing anomaly, peering or DDoS, all failed to hold up [S1 §The European Ping Spikes].
+
+The turning point was a passive probe written by Cloudflare's performance team. Discord's health checks carry a fixed payload signature, so an eBPF program in the host's network stack could timestamp each health check entering and leaving the NIC. The hops from physical NIC to virtual NIC and back were clean; the lost time was inside the VM, which meant inside Discord's own application [S1 §The Probe]. Given direct access to a container, Cloudflare's team saw futex stalls of up to 860 ms, and CPU sampling showed one thread pinned at 100% of a core during every spike [S1 §The Probe].
+
+## An event loop that starved its sends
+
+The Rust SFU runs eight worker threads, each with its own UDP socket, a single-threaded Tokio runtime and a `select!` loop. Two branches of that loop matter: a `recv` future that pulls packets from the socket, and a flush timer that pushes packets out [S1 §Write Starvation in Our App]. While the receive buffer holds data, `recv` is always ready and keeps getting polled; the flush timer never gets its turn, and outgoing packets wait.
+
+```mermaid
+flowchart LR
+    S[UDP socket full of packets] --> R[recv branch always ready]
+    R --> L[select! loop picks recv]
+    L --> R
+    L -. flush timer never gets a turn .-> F[Outgoing packets wait]
+    B[9 ms budget since last flush] --> L
+```
+
+Tokio has a 128-poll budget to prevent this, but at peak 128 polls pass in microseconds and `recv` is still ready when the budget runs out [S1 §Write Starvation in Our App]. The metric for how long a packet sits in the send queue climbed to hundreds of milliseconds, against a baseline of about 1 ms [S1 §Write Starvation in Our App]. The fix was a 9 ms budget: if 9 ms have passed since the last flush, the `recv` branch is disabled for that poll, forcing the flush timer to run. It shipped in early March and p99 dropped at once, but spikes still appeared at peak [S1 §Write Starvation in Our App].
+
+The rest was infrastructure. Each Cloudflare VM then had a single virtio-net queue, so all receive softirq work landed on one vCPU; any worker scheduled on that vCPU got interrupted mid-run [S1 §Softirq noisy neighbor]. Discord used `taskset` to pin workers away from that vCPU and enabled Receive Packet Steering to spread softirq work over other cores. The first peak after both fixes showed no ping spikes, and European traffic moved back onto Cloudflare [S1 §Softirq noisy neighbor].
+
+## Results, and what is still open
+
+A year in, more than 80% of Discord's voice and video traffic runs on Cloudflare, and more than 70% of the migrated regions show better quality year over year. Europe and Latin America gained the most, with packet loss down 20–60% across several regions [S1 §Softirq noisy neighbor]. Frankfurt leads, with average ping down 34% and packet loss down 42% [S1].
+
+The irony is that the places named at the very start, Reykjavik and Auckland, are not done yet; they need the call placement logic the Iceland lesson called for [S1 §Softirq noisy neighbor]. The method from here is slow ramps with metrics in the loop, peering checks before a region goes live, and joint debugging with Cloudflare when something surprises them. That is also the most honest summary of the case: closer really is better, but only once you have fixed everything between the user and the server.
