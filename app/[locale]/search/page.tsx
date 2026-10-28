@@ -9,6 +9,7 @@ import { loadVocab } from "@/lib/content/vocab";
 import { getDictionary } from "@/lib/dictionaries";
 import { isLocale, LOCALES } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/metadata";
+import { earlyStartScript } from "@/lib/search-preload";
 
 type Params = Promise<{ locale: string }>;
 
@@ -40,6 +41,7 @@ export default async function Page({ params }: { params: Params }) {
 
   return (
     <>
+      <script dangerouslySetInnerHTML={{ __html: earlyStartScript(2) }} />
       <Header locale={locale} />
       <main
         id="content"

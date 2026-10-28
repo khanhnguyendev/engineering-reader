@@ -1,4 +1,5 @@
 import type { Locale } from "@/lib/i18n";
+import { EARLY_KEY } from "@/lib/search-preload";
 
 export type Pagefind = {
   init?(): Promise<void>;
@@ -13,6 +14,14 @@ export type Pagefind = {
 
 // A variable specifier: the file exists only after `prebuild` (`pnpm search-index`), so no bundler or type check may resolve it.
 const SRC = "/pagefind/pagefind.js";
+
+/** The runtime the search page started from its inline script, taken once; undefined when there is none. */
+export function takeEarlyPagefind(): Promise<Pagefind | null> | undefined {
+  const w = globalThis as unknown as Record<string, Promise<Pagefind | null> | undefined>;
+  const early = w[EARLY_KEY];
+  delete w[EARLY_KEY];
+  return early;
+}
 
 let memo: { locale: Locale; promise: Promise<Pagefind | null>; token: object } | undefined;
 
@@ -35,6 +44,8 @@ export function loadPagefind(locale: Locale): Promise<Pagefind | null> {
         await loaded.init?.();
         return loaded;
       }
+      const early = await takeEarlyPagefind();
+      if (early) return early;
       const pf: Pagefind = await import(/* webpackIgnore: true */ /* @vite-ignore */ SRC);
       await pf.init?.();
       return pf;
