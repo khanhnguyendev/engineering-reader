@@ -284,8 +284,8 @@
   "https://discord.com/blog/tracing-discords-elixir-systems-without-melting-everything": {
     "company": "discord",
     "seenAt": "2026-10-27",
-    "decision": "skipped",
-    "reason": "Elixir distributed tracing rollout with sampling and performance fixes, has numbers; meets the bar but not picked: three-pick ceiling reached this run; delete this entry to re-queue"
+    "decision": "deferred",
+    "reason": "Elixir distributed tracing rollout with sampling and performance fixes, has numbers; meets the bar, over the three-pick cap on 2026-10-27"
   },
   "https://discord.com/blog/getting-global-age-assurance-right-what-we-got-wrong-and-whats-changing": {
     "company": "discord",
@@ -590,8 +590,8 @@
   "https://discord.com/blog/how-discord-indexes-trillions-of-messages": {
     "company": "discord",
     "seenAt": "2026-10-27",
-    "decision": "skipped",
-    "reason": "Elasticsearch search re-architecture for trillions of messages, has numbers; meets the bar but not picked: three-pick ceiling reached this run; delete this entry to re-queue"
+    "decision": "deferred",
+    "reason": "Elasticsearch search re-architecture for trillions of messages, has numbers; meets the bar, over the three-pick cap on 2026-10-27"
   },
   "https://discord.com/blog/discord-appoints-new-ceo-humam-sakhnini": {
     "company": "discord",
@@ -632,8 +632,8 @@
   "https://blog.cloudflare.com/kv-cache-exposure-remediation": {
     "company": "cloudflare",
     "seenAt": "2026-10-27",
-    "decision": "skipped",
-    "reason": "security incident (cross-request KV cache exposure in LLM serving) with remediation; meets the bar but not picked: three-pick ceiling reached this run; delete this entry to re-queue"
+    "decision": "deferred",
+    "reason": "security incident (cross-request KV cache exposure in LLM serving) with remediation; meets the bar, over the three-pick cap on 2026-10-27"
   },
   "https://blog.cloudflare.com/origin-range-requests": {
     "company": "cloudflare",
@@ -794,7 +794,7 @@
   "https://netflixtechblog.com/behind-the-scenes-evolving-netflixs-ads-event-pipeline-for-live-part-ii-826ebf9ad9fb?source=rss----2615bd06b42e---4": {
     "company": "netflix",
     "seenAt": "2026-10-27",
-    "decision": "skipped",
-    "reason": "live ads event pipeline redesign (Flink join window, regional cutover), has numbers; meets the bar but not picked: three-pick ceiling reached this run; delete this entry to re-queue"
+    "decision": "deferred",
+    "reason": "live ads event pipeline redesign (Flink join window, regional cutover), has numbers; meets the bar, over the three-pick cap on 2026-10-27"
   }
 }
