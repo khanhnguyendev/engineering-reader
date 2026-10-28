@@ -71,6 +71,35 @@ afterEach(async () => {
   vi.useRealTimers();
 });
 
+describe('SearchBox deep link', () => {
+  it('searches the seeded query at once, then debounces typing', async () => {
+    const search = vi.fn();
+    mockLoad.mockResolvedValue(fake(ROWS, search));
+    window.history.replaceState(null, '', '/vi/search?q=du%20lieu');
+    await mount();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(search).toHaveBeenLastCalledWith('du lieu');
+
+    const input = host.querySelector('input')!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, 'kafka');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(199);
+    });
+    expect(search).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(search).toHaveBeenCalledTimes(2);
+    expect(search).toHaveBeenLastCalledWith('kafka');
+  });
+});
+
 describe('SearchBox', () => {
   it('renders result rows from meta, never the excerpt', async () => {
     mockLoad.mockResolvedValue(fake(ROWS));

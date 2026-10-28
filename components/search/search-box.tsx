@@ -7,6 +7,7 @@ import { loadPagefind } from "@/components/search/load-pagefind";
 import type { Dictionary } from "@/lib/dictionaries";
 import { toSitePath } from "@/lib/fold";
 import { plural, type Locale } from "@/lib/i18n";
+import { MIN_CHARS } from "@/lib/search-preload";
 
 type State = "idle" | "loading" | "results" | "empty" | "unavailable" | "error";
 type Row = {
@@ -23,7 +24,6 @@ type TopicRef = { slug: string; label: string; count: number };
 
 const DEBOUNCE_MS = 200;
 const MAX_ROWS = 10;
-const MIN_CHARS = 2;
 
 /** Search over the static Pagefind index. Rows come from result metadata, never from excerpts. */
 export function SearchBox({
@@ -45,6 +45,7 @@ export function SearchBox({
   const [rows, setRows] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const run = useRef(0);
+  const seeded = useRef(false);
 
   // The ?q= value seeds the box once, after hydration.
   useEffect(() => {
@@ -53,7 +54,10 @@ export function SearchBox({
       // eslint-disable-next-line react-hooks/set-state-in-effect -- reading the URL is only possible after mount
       setQ(initial);
       // A deep link searches right away, so the idle browse block must never render for it.
-      if (initial.trim().length >= MIN_CHARS) setState("loading");
+      if (initial.trim().length >= MIN_CHARS) {
+        setState("loading");
+        seeded.current = true;
+      }
     }
   }, []);
 
@@ -61,6 +65,9 @@ export function SearchBox({
     const term = q.trim();
     const mine = ++run.current;
     if (term.length < MIN_CHARS) return;
+    // The seeded deep-link query is not typing, so it skips the debounce.
+    const delay = seeded.current ? 0 : DEBOUNCE_MS;
+    seeded.current = false;
     const timer = setTimeout(async () => {
       setState("loading");
       try {
@@ -89,7 +96,7 @@ export function SearchBox({
       } catch {
         if (run.current === mine) setState("error");
       }
-    }, DEBOUNCE_MS);
+    }, delay);
     return () => clearTimeout(timer);
   }, [q, locale]);
 
